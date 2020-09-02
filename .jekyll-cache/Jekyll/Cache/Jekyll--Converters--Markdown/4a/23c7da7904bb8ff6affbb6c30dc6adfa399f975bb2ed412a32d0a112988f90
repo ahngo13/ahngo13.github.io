@@ -1,0 +1,136 @@
+I"�<h1 id="jekyll">Jekyll</h1>
+
+<p>Jekyll은 정적 사이트 생성기이다. 마크업 언어로 작성된 텍스트를 Jekyll에 넘겨주면 정적 웹사이트를 생성해준다고 보면 되는데 GithubPages와 함께 사용하면 무료로 사용할 수 있으니 개발자 스멜을 풍기고 싶다면 한번 만들어보길 바란다.</p>
+
+<h2 id="윈도우10-리눅스-환경에서-설치하기">윈도우10 리눅스 환경에서 설치하기</h2>
+
+<p>필자는 리눅스 환경에서 사용해보기 위해 Window10 MS store에서 설치할 수 있는 Ubuntu WSL을 설치하였다.</p>
+
+<p><a href="https://ubuntu.com/wsl">https://ubuntu.com/wsl</a></p>
+
+<p>linux 환경 설정 및 루비 설치</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt update <span class="o">&amp;&amp;</span> <span class="nb">sudo </span>apt upgrade <span class="nt">-y</span>
+
+<span class="nb">sudo </span>apt-get <span class="nb">install</span> <span class="nt">-y</span> ruby-full build-essential zlib1g-dev
+
+<span class="nb">echo</span> <span class="s1">'# Install Ruby Gems to ~/gems'</span> <span class="o">&gt;&gt;</span> ~/.bashrc
+<span class="nb">echo</span> <span class="s1">'export GEM_HOME="$HOME/gems"'</span> <span class="o">&gt;&gt;</span> ~/.bashrc
+<span class="nb">echo</span> <span class="s1">'export PATH="$HOME/gems/bin:$PATH"'</span> <span class="o">&gt;&gt;</span> ~/.bashrc
+<span class="nb">source</span> ~/.bashrc
+</code></pre></div></div>
+
+<p>bundler 및 jekyll 설치</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem <span class="nb">install </span>bundler
+
+gem <span class="nb">install </span>jekyll <span class="nt">--version</span> 3.8.5
+
+jekyll <span class="nt">--version</span>
+
+gem list
+</code></pre></div></div>
+
+<p>jekyll 프로젝트 생성</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll new my-blog
+</code></pre></div></div>
+
+<p>jekyll 프로젝트 실행</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll serve
+</code></pre></div></div>
+
+<p><img src="/assets/img/2020-09-02_15h27_04.png" alt="/assets/img/2020-09-02_15h27_04.png" /></p>
+
+<p>jekyll 공식 플러그인 설치</p>
+
+<p>공식 플러그인을 사용하기 위해서는 프로젝트 폴더 안에있는 Gemfile이라는 녀석을 건드려야 된다고 한다.</p>
+
+<p>gedit을 사용하려고 했으나 gedit을 설치하여도 wsl의 경우에는 GUI 툴이 사용이 되지 않는 것 같으니 vi를 사용하여 수정하도록 한다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apt-get <span class="nb">install </span>gedit
+</code></pre></div></div>
+
+<p>아래와 같은 한줄을 비슷한 문장들이 있는 곳에 추가 해준다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem <span class="s1">'jekyll-admin'</span>, group: :jekyll_plugins
+</code></pre></div></div>
+
+<p>아래의 명령어를 통해 jekyll-admin을 설치해준다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle <span class="nb">install</span>
+</code></pre></div></div>
+
+<p><a href="http://localhost:4000/admin">http://localhost:4000/admin</a> 을 접속해보면 아래와 같은 관리자 플러그인이 설치됨을 확인할 수 있다.</p>
+
+<p><img src="/assets/img/2020-09-02_15h26_20.png" alt="/assets/img/2020-09-02_15h26_20.png" /></p>
+
+<h2 id="윈도우10에서-jekyll-설치하기">윈도우10에서 Jekyll 설치하기</h2>
+
+<p>설치 방법은 Jkeyll 공식 사이트에도 나와있지만 번역된 사이트이기 때문에 직접 해보고 잘되는지 보도록 하겠다.</p>
+
+<p><a href="https://jekyllrb-ko.github.io/docs/installation/windows/">https://jekyllrb-ko.github.io/docs/installation/windows/</a></p>
+
+<p>리눅스 기반에서 Jkeyll로 블로그를 만들어보려고 했으나 개발 효율이 떨어진다고 생각해서 다시 윈도우로 작업하는 것으로 우회했다.</p>
+
+<p>RubyInstaller for Windows를 설치하는 것이 가장 간편한 듯 하고 아래의 사이트에서 다운로드 버튼을 눌러 사양에 맞는 것으로 설치하면 된다.</p>
+
+<p>필자는 Ruby+Devkit 2.6.6-1 (x64)를 설치하였다.</p>
+
+<p><img src="/assets/img/2020-09-02_15h35_25.png" alt="/assets/img/2020-09-02_15h35_25.png" /></p>
+
+<p>설치가 완료되면 아래와 같은 명령프롬프트 창이 뜬다.</p>
+
+<p>3번을 입력하고 설치하고 창을 닫아준다.</p>
+
+<p><img src="/assets/img/2020-09-02_15h34_46.png" alt="/assets/img/2020-09-02_15h34_46.png" /></p>
+
+<p>윈도우 + R을 눌러 실행창을 띄운 뒤 cmd를 입력하고 엔터를 친다. 그러면 명령 프롬프트 창이 뜨는데 아래와 같은 명령어로 jekyll과 bundler를 설치해준다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem <span class="nb">install </span>jekyll bundler
+</code></pre></div></div>
+
+<p>설치가 완료 되었다면 아래의 명령어를 입력해 jekyll이 잘 설치되어 있는지 버전을 확인한다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll <span class="nt">-v</span>
+</code></pre></div></div>
+
+<p><img src="/assets/img/2020-09-02_15h41_57.png" alt="/assets/img/2020-09-02_15h41_57.png" /></p>
+
+<p>설치가 잘 되었다면 프로젝트를 생성하기 위해 아래의 명령어를 입력한다.</p>
+
+<p>(본인이 설치하고 싶은 루트에서 해당 명령어를 입력해야 한다)</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll new 프로젝트명
+</code></pre></div></div>
+
+<p>프로젝트가 잘 동작하는지 해당 프로젝트 폴더로 들어가서 실행해본다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd </span>프로젝트명 //프로젝트 폴더로 이동
+jekyll serve //프로젝트 실행
+</code></pre></div></div>
+
+<p><img src="/assets/img/2020-09-02_15h49_54.png" alt="/assets/img/2020-09-02_15h49_54.png" /></p>
+
+<p>이번에는 jekyll의 공식 플러그인을 설치해보도록 하겠다.</p>
+
+<p>프로젝트 폴더에서 Gemfile라는 파일을 메모장으로 열어준다.</p>
+
+<p>아래와 같은 한줄을 추가해준다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gem <span class="s1">'jekyll-admin'</span>, group: :jekyll_plugins
+</code></pre></div></div>
+
+<p><img src="/assets/img/2020-09-02_15h51_17.png" alt="/assets/img/2020-09-02_15h51_17.png" /></p>
+
+<p>메모장을 저장해주고 명령 프롬프트 창으로 이동해 아래의 명령어를 입력하여 실행해준다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bundle <span class="nb">install</span>
+</code></pre></div></div>
+
+<p>설치가 완료되었으면 <a href="http://localhost:4000/admin">http://localhost:4000/admin</a> 접속하여 관리자 페이지가 잘 들어가는지 확인해본다. 물론 아래의 명령어를 입력해서 서버를 실행시켜주어야 한다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll server
+</code></pre></div></div>
+:ET
