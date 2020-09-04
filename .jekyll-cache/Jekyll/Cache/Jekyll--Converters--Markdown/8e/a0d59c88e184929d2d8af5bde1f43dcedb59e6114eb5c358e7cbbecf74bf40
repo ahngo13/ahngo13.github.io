@@ -1,0 +1,111 @@
+I"�<h1 id="vagrant">Vagrant</h1>
+
+<ul>
+  <li>Vagrantfiles은 Ruby로 되어 있음 (하지만 간단한 변수할당 정도이므로 Ruby를 몰라도 됨)</li>
+  <li>포터블 가상화 소프트웨어 개발 환경의 생성 및 유지보수 제품 (간단하게 말하면 Virtual Box, Hyper-V, Docker Container, VM ware, AWS의 생성 및 유지보수를 위한 오픈 소스 제품 중 하나)</li>
+  <li>Vagrant용 이미지들은 Vagrant Cloud에서 접속해서 다운로드 받을 수 있다.
+    <ul>
+      <li><a href="https://app.vagrantup.com/boxes/search">https://app.vagrantup.com/boxes/search</a></li>
+    </ul>
+  </li>
+  <li>Vagrant 다운로드 페이지에서 호스트 머신의 시스템에 따라 Debian Linux, Centos Linux, Windows, Mac OS X 중 하나를 선택해서 설치</li>
+</ul>
+
+<h1 id="기본-명령어">기본 명령어</h1>
+
+<h2 id="vagrant-init-name-url">vagrant init [name [url]]</h2>
+
+<p>현재 디렉터리룰 Vagrant 환경으로 초기화한다.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> vagrant init centos/7
+</code></pre></div></div>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># "centos/7" 로 바꾸면 centos/7 가상머신을 자동으로 받음</span>
+<span class="n">config</span><span class="p">.</span><span class="nf">vm</span><span class="p">.</span><span class="nf">box</span> <span class="o">=</span> <span class="s2">"base"</span>
+
+</code></pre></div></div>
+
+<h2 id="vagrant-up-nameid">vagrant up [name|id]</h2>
+
+<p>이 명령은 Vagrant 파일에 따라 가상머신을 생성 및 구성한다</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># SSL로 인해 되지 않을 경우 추가한 뒤 다시 vagrant up 한다.</span>
+<span class="n">vagrant</span> <span class="n">box</span> <span class="n">add</span> <span class="n">centos</span><span class="o">/</span><span class="mi">7</span>
+</code></pre></div></div>
+
+<h2 id="vagrant-ssh-nameid-extra_ssh_args">vagrant ssh [name|id][– extra_ssh_args]</h2>
+
+<p>해당 가상머신으로 ssh 접속을 한다.</p>
+
+<p>(window cmd창이나 putty, poderosa와 같은 별도 클라이언트에서도 가능)</p>
+
+<p>기본적으로 SSH 클라이언트를 사용할 아래의 접속 정보와 같다.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="no">Host</span> <span class="p">:</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span>
+<span class="no">Port</span> <span class="p">:</span> <span class="mi">2222</span>
+<span class="no">Username</span> <span class="p">:</span> <span class="n">vagrant</span>
+<span class="no">Password</span> <span class="p">:</span> <span class="n">vagrant</span>
+<span class="no">Private</span> <span class="n">key</span> <span class="p">:</span> <span class="n">c</span><span class="ss">:/</span><span class="n">vagrant</span><span class="o">/</span><span class="p">.</span><span class="nf">vagrant</span><span class="o">/</span><span class="n">machines</span><span class="o">/</span><span class="n">default</span><span class="o">/</span><span class="n">virtualbox</span><span class="o">/</span><span class="n">private_key</span>
+</code></pre></div></div>
+
+<h2 id="vagrant-snapshot-list">vagrant snapshot list</h2>
+
+<p>현재 스냅샷 목록을 불려온다</p>
+
+<h2 id="vagrant-snapshot-save-name">vagrant snapshot save [name]</h2>
+
+<p>해당 스냅샷 이름으로 저장한다</p>
+
+<h2 id="vagrant-snapshot-resotere-name">vagrant snapshot resotere [name]</h2>
+
+<p>해당 스냅샷 이름으로 복구한다</p>
+
+<h2 id="vagrant-reload-nameid">vagrant reload [name|id]</h2>
+
+<p>해당 가상머신을 종료하고 다시 실행한다</p>
+
+<h2 id="vagrant-halt-nameid">vagrant halt [name|id]</h2>
+
+<p>해당 가상머신을 종료한다</p>
+
+<h2 id="vagrant-suspend-nameid">vagrant suspend [name|id]</h2>
+
+<p>해당 가상머신을 일시중지 한다</p>
+
+<h2 id="vagrant-status-nameid">vagrant status [name|id]</h2>
+
+<p>현재 가상머신들의 상태를 표시한다</p>
+
+<h2 id="vagrant-destroy-nameid">vagrant destroy [name|id]</h2>
+
+<p>해당 가상머신을 삭제한다.</p>
+
+<h2 id="웹서버를-사용하기-위한-설정">웹서버를 사용하기 위한 설정</h2>
+
+<p>가상머신의 웹서버에 접속하기 위해서는 Vagrantfile에 몇가지 설정을 추가해야 한다.</p>
+
+<p>먼저 호스트머신으로 접속한 port(8080)를 가상머신의 port(80)로 전달을 해야한다.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">config</span><span class="p">.</span><span class="nf">vm</span><span class="p">.</span><span class="nf">network</span> <span class="s2">"forwarded_port"</span><span class="p">,</span> <span class="ss">guest: </span><span class="mi">80</span><span class="p">,</span> <span class="ss">host: </span><span class="mi">8080</span>
+</code></pre></div></div>
+
+<p>그리고 가상머신의 아이피주소를 설정을 해주어야 한다.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">config</span><span class="p">.</span><span class="nf">vm</span><span class="p">.</span><span class="nf">network</span> <span class="s2">"private_network"</span><span class="p">,</span> <span class="ss">ip: </span><span class="s2">"192.168.33.10"</span>
+</code></pre></div></div>
+
+<p> </p>
+
+<p>마지막으로 가상머신과 호스트머신과의 실시간 자동으로 동기화되는 폴더를 설정해야 한다. 호스트머신에서 소스파일을 수정하게 되면 바로 가상머신의 소스파일도 변경이 되기때문에 개발작업은 호스트머신에서 실행은 가상머신에서 하는 것이 가능해진다.</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1"># 가상머신의 80포트를 호스트머신의 8080 포트에 할당함</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">vm</span><span class="p">.</span><span class="nf">network</span> <span class="s2">"forwarded_port"</span><span class="p">,</span> <span class="ss">guest: </span><span class="mi">80</span><span class="p">,</span> <span class="ss">host: </span><span class="mi">8080</span>
+  <span class="c1">#</span>
+  <span class="c1"># 가상머신의 IP를 아래 설정한 IP주소에 할당함</span>
+  <span class="n">config</span><span class="p">.</span><span class="nf">vm</span><span class="p">.</span><span class="nf">network</span> <span class="s2">"private_network"</span><span class="p">,</span> <span class="ss">ip: </span><span class="s2">"192.168.33.10"</span>
+  <span class="c1">#</span>
+  <span class="c1"># 가상머신의 폴더와 호스트 머신의 폴더를 공유함(동기화)</span>
+  <span class="c1"># 별도로 세팅을 하지 않은경우 호스트머신의 vagrant설정이 있는 폴더와 가상머신의 /vagrant 폴더가 동기화 됨</span>
+  <span class="c1"># config.vm.synced_folder "호스트머신의 경로", "가상머신의 경로"</span>
+</code></pre></div></div>
+:ET
