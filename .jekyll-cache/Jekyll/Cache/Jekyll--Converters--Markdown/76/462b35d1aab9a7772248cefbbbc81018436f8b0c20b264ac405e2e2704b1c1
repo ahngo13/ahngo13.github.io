@@ -1,0 +1,151 @@
+I"E <h3 id="기본-개념">기본 개념</h3>
+
+<ul>
+  <li>iptables는 라눅스상에서 방화벽을 설정하는 도구이다.</li>
+  <li>netfilter 패킷 필터링 기능을 사용자 공간에서 제어한다.</li>
+</ul>
+
+<h3 id="체인-chain">체인 (Chain)</h3>
+
+<ul>
+  <li>체인의 종류에는 총 3개가 있으며 INPUT, OUTPUT, FORWORD가 있다.
+    <ul>
+      <li>INPUT : 호스트 컴퓨터를 향해 들어오는 모든 패킷</li>
+      <li>OUTPUT : 호스트 컴퓨터에서 발생해서 나가는 모든 패킷</li>
+      <li>FORWARD : 호스트 컴퓨터가 목적지가 아닌 모든 패킷, 라우터로 사용되는 호스트 컴퓨터를 통과하는 패킷</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="매치-match">매치 (Match)</h3>
+
+<p>패킷을 처리할 때 만족해야 하는 조건, 이 조건들을 만족하는 패킷들만 규칙을 적용함.</p>
+
+<ul>
+  <li><strong>-source (-s)</strong> : 출발지 IP주소나 네트워크와의 매칭</li>
+  <li><strong>-destination (-d)</strong> : 목적지 ip주소나 네트워크와의 매칭</li>
+  <li><strong>-protocol (-p)</strong> : 특정 프로토콜과의 매칭</li>
+  <li><strong>-in-interface (i)</strong> : 입력 인터페이스</li>
+  <li><strong>-out-interface (-o)</strong> : 출력 인터페이스</li>
+  <li><strong>-state</strong> : 연결 상태와의 매칭</li>
+  <li><strong>-string</strong> : 애플리케이션 계층 데이터 바이트 순서와의 매칭</li>
+  <li><strong>-comment</strong> : 커널 메모리 내의 규칙과 연계되는 최대 256바이트 주석</li>
+  <li><strong>-syn (-y)</strong> : SYN 패킷을 허용하지 않음</li>
+  <li><strong>-fragment (-f)</strong> : 두 번째 이후의 조각에 대해서 규칙을 명시</li>
+  <li><strong>-table (-t)</strong> : 처리될 테이블</li>
+  <li><strong>-jump (-j)</strong> : 규칙에 맞는 패킷을 어떻게 처리할 것인가를 명시</li>
+  <li><strong>-match (-m)</strong> : 특정 모듈과의 매치</li>
+</ul>
+
+<h3 id="타겟-target">타겟 (Target)</h3>
+
+<p>패킷 규칙과 일정할 때 타겟을 지원</p>
+
+<ul>
+  <li><strong>ACCEPT</strong> : 패킷을 받아들임</li>
+  <li><strong>DROP</strong> : 패킷을 버림 (패킷이 전송된 적이 없던 것처럼)
+    <ul>
+      <li>DROP은 서비스에 접속하려는 사용자의 액세스를 거부하고 어떠한 경고 메시지도 보여주지 않은 채 패킷을 DROP 한다.</li>
+    </ul>
+  </li>
+  <li><strong>REJECT</strong> : 패킷을 버리고 이와 동시에 적절한 응답 패킷을 전송
+    <ul>
+      <li>REJECT는 서비스에 접속하려는 사용자의 액세스를 거부하고 오류 메시지를 보여준다.</li>
+    </ul>
+  </li>
+  <li><strong>LOG</strong> : 패킷을 syslog에 기록</li>
+  <li><strong>RETURN</strong> : 호출 체인 내에서 패킷 처리를 계속 진행</li>
+</ul>
+
+<h3 id="연결-추적connection-tracking">연결 추적(Connection Tracking)</h3>
+
+<p>서비스 연결 상태에 따라서 그 연결을 감시하고 제한</p>
+
+<ul>
+  <li><strong>NEW</strong> : 새로운 연결을 요청하는 패킷, 예, HTTP 요청</li>
+  <li><strong>ESTABLISHED</strong> : 기존 연결의 일부인 패킷</li>
+  <li><strong>RELATED</strong> : 기존 연결에 속하지만 새로운 연결을 요청하는 패킷, 예를 들면 접속 포트가 20인 수동 FTP의 경우 전송 포트는 사용되지 않은 1024 이상의 어느 포트라도 사용 가능</li>
+  <li><strong>INVALID</strong> : 연결 추적표에서 어디 연결에도 속하지 않은 패킷</li>
+</ul>
+
+<h3 id="명령어-commend">명령어 (Commend)</h3>
+
+<ul>
+  <li><strong>A (–append)</strong> : 새로운 규칙을 추가</li>
+  <li><strong>D (–delete)</strong> : 규칙을 삭제</li>
+  <li><strong>C (–check)</strong> : 패킷을 테스트</li>
+  <li><strong>R (–replace)</strong> : 새로운 규칙으로 교체</li>
+  <li><strong>I (–insert)</strong> : 새로운 규칙을 삽입</li>
+  <li><strong>L (–list)</strong> : 규칙을 출력</li>
+  <li><strong>F (–flush)</strong> : chain으로부터 규칙을 모두 삭제</li>
+  <li><strong>Z (–zero)</strong> : 모든 chain의 패킷과 바이트 카운터 값을 0으로 초기화</li>
+  <li><strong>N (–new)</strong> : 새로운 chain을 만듦</li>
+  <li><strong>X (–delete-chain)</strong> : chain을 삭제</li>
+  <li><strong>P (–policy)</strong> : 기본정책을 변경</li>
+</ul>
+
+<h3 id="iptable-적용-내용-출력">iptable 적용 내용 출력</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>iptables <span class="nt">-nvL</span>
+</code></pre></div></div>
+
+<h3 id="iptable의-기본-설정-내용-centos-minamal-기준">iptable의 기본 설정 내용 (CentOS Minamal 기준)</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Chain INPUT <span class="o">(</span>policy ACCEPT<span class="o">)</span> 
+target prot opt <span class="nb">source </span>destination 
+ACCEPT all <span class="nt">--</span> anywhere anywhere state RELATED,ESTABLISHED 
+ACCEPT icmp <span class="nt">--</span> anywhere anywhere 
+ACCEPT all <span class="nt">--</span> anywhere anywhere 
+ACCEPT tcp <span class="nt">--</span> anywhere anywhere state NEW tcp dpt:ssh 
+REJECT all <span class="nt">--</span> anywhere anywhere reject-with icmp-host-prohibited // 모든 패킷을 reject
+
+Chain FORWARD <span class="o">(</span>policy ACCEPT<span class="o">)</span> 
+target prot opt <span class="nb">source </span>destination 
+REJECT all <span class="nt">--</span> anywhere anywhere reject-with icmp-host-prohibited 
+
+Chain OUTPUT <span class="o">(</span>policy ACCEPT<span class="o">)</span> 
+target prot opt <span class="nb">source </span>destination
+</code></pre></div></div>
+
+<h3 id="기본-설정">기본 설정</h3>
+
+<p>1.기본 정책을 ACCEPT로 변경 (변경하면 이후에 사용하는 명령어는 기본 정책이 ACCEPT 기준)</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>iptables <span class="nt">-P</span> INPUT ACCEPT
+</code></pre></div></div>
+
+<p>2.체인에 정의된 모든 규칙을 삭제</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>iptables <span class="nt">-F</span>
+</code></pre></div></div>
+
+<p>3.INPUT 체인에 로컬호스트 인터페이스에 들어오는 모든 패킷을 허용</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>iptables <span class="nt">-A</span> INPUT <span class="nt">-i</span> lo <span class="nt">-j</span> ACCEPT
+</code></pre></div></div>
+
+<p>4.INPUT Chain에 state 모듈과 매치되는 연결상태가 ESTABLISHED, RELATED인 패킷에 대해 허용 추가</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>iptables <span class="nt">-A</span> INPUT <span class="nt">-m</span> state <span class="nt">--state</span> ESTABLISHED, RELATED <span class="nt">-j</span> ACCEPT
+</code></pre></div></div>
+
+<p>5.INPUT 체인에 프로토콜이 tcp이며 목적지 포트가 22번인 패킷에 대해 허용 추가</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>iptables <span class="nt">-A</span> INPUT <span class="nt">-p</span> tcp <span class="nt">-m</span> tcp <span class="nt">---dport</span> 22 <span class="nt">-j</span> ACCEPT
+</code></pre></div></div>
+
+<p>6.INPUT 체인에 대한 기본 정책을 DROP으로 변경</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>iptables <span class="nt">-P</span> INPUT DROP
+</code></pre></div></div>
+
+<p>7.FORWARD 체인에 대한 기본정책을 DROP으로 변경</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>iptables <span class="nt">-P</span> FORWORD DROP
+</code></pre></div></div>
+
+<p>8.설정한 것을 저장 (iptables-service 패키지 설치가 필요할 수 있음)</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>service iptables save
+</code></pre></div></div>
+:ET
