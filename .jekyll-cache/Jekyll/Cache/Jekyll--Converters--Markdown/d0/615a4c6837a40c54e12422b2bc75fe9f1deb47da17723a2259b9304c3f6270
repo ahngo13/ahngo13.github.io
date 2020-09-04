@@ -1,0 +1,105 @@
+I"<h2 id="apache-설치-및-서버-구동">Apache 설치 및 서버 구동</h2>
+
+<p>Apache가 설치되어 있는지 확인</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>yum list installed | <span class="nb">grep </span>httpd
+</code></pre></div></div>
+
+<p>설치되어 있지 않다면 해당 명령어로 설치</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>yum <span class="nb">install</span> <span class="nt">-y</span> httpd
+</code></pre></div></div>
+
+<p>설치가 완료되면 방화벽 설정</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost ~]# firewall-cmd <span class="nt">--permanent</span> <span class="nt">--add-service</span><span class="o">=</span>http
+success
+<span class="o">[</span>root@localhost ~]# firewall-cmd <span class="nt">--permanent</span> <span class="nt">--add-service</span><span class="o">=</span>https
+success
+<span class="o">[</span>root@localhost ~]# firewall-cmd <span class="nt">--reload</span>
+success
+</code></pre></div></div>
+
+<p>아파치 서비스를 활성화 시키고 부팅시 실행되도록 설정</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost ~]# systemctl <span class="nb">enable </span>httpd
+Created symlink from /etc/systemd/system/multi-user.target.wants/httpd.service to /usr/lib/systemd/system/httpd.service.
+</code></pre></div></div>
+
+<p>아파치 서비스 시작</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost ~]# systemctl start httpd
+</code></pre></div></div>
+
+<p>/var/www/html에 index.html 파일을 생성</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vi /var/www/html
+&lt;html&gt;
+&lt;<span class="nb">head</span><span class="o">&gt;</span>&lt;title&gt;test&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+        &lt;h1&gt;test&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre></div></div>
+
+<p>해당 서버의 IP 주소를 입력하여 아래와 같은 페이지가 표시되는지 확인</p>
+
+<p><img src="/assets/img/202009041.png" alt="/assets/img/202009041.png" /></p>
+
+<h2 id="tomcat-설치-및-서버-구동">Tomcat 설치 및 서버 구동</h2>
+
+<p>Tomcat이 설치되어 있는지 확인</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost html]# yum list installed | <span class="nb">grep </span>tomcat
+</code></pre></div></div>
+
+<p>설치가 되어있지 않다면 해당 명령어로 설치</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost html]# yum <span class="nt">-y</span> <span class="nb">install </span>tomcat<span class="k">*</span>
+</code></pre></div></div>
+
+<p>Tomcat의 경우 자바를 설치해주어야 하므로 oracle 사이트에서 rpm 확장자의 자바 경로를 복사해준다.</p>
+
+<p><a href="https://www.oracle.com/java/technologies/javase-jdk11-downloads.html">https://www.oracle.com/java/technologies/javase-jdk11-downloads.html</a></p>
+
+<p><img src="/assets/img/202009043.png" alt="/assets/img/202009043.png" /></p>
+
+<p>아래의 명령어를 입력해서 설치해준다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wget <span class="nt">-c</span> <span class="o">[</span>java rpm 파일 설치 URL]
+</code></pre></div></div>
+
+<p>파일명에 파라미터까지 따라붙기 때문에 파일명을 간편하게 변경해주고 rpm 파일을 실행해서 설치한다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>//파일명을 간편하게 변경
+<span class="o">[</span>root@localhost html]# <span class="nb">mv </span>jdk-11.0.8_linux-x64_bin.rpm?AuthParam<span class="o">=</span>1599197896_eef9f525fd8c466a136075ad6364ec6d jdk-11.0.8_linux-x64_bin.rpm
+<span class="o">[</span>root@localhost html]# <span class="nb">ls
+</span>index.html  jdk-11.0.8_linux-x64_bin.rpm
+
+//rpm 파일 실행
+<span class="o">[</span>root@localhost html]# rpm <span class="nt">-ivh</span> jdk-11.0.8_linux-x64_bin.rpm
+</code></pre></div></div>
+
+<p>설치가 완료되면 방화벽 설정</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost html]# firewall-cmd <span class="nt">--permanent</span> <span class="nt">--add-port</span><span class="o">=</span>8080/tcp
+success
+<span class="o">[</span>root@localhost html]# firewall-cmd <span class="nt">--reload</span>
+success
+</code></pre></div></div>
+
+<p>톰캣 서비스 활성화 시키기</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost html]# systemctl <span class="nb">enable </span>tomcat
+Created symlink from /etc/systemd/system/multi-user.target.wants/tomcat.service to /usr/lib/systemd/system/tomcat.service.
+</code></pre></div></div>
+
+<p>톰캣 서비스 실행</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost html]# systemctl start tomcat
+</code></pre></div></div>
+
+<p>정상적으로 실행됨을 확인할 수 있다.</p>
+
+<p><img src="/assets/img/202009042.png" alt="/assets/img/202009042.png" /></p>
+:ET
