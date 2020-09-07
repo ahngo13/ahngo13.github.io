@@ -1,0 +1,169 @@
+I"n+<h2 id="elk-스택이란">ELK 스택이란?</h2>
+
+<ul>
+  <li>Elasticsearch, Logstash, Kibana 를 통칭</li>
+</ul>
+
+<h3 id="elasticsearch--json-기반의-분산형-오픈-소스-검색-및-분석-엔진-주로-rest-api로-처리">ElasticSearch : JSON 기반의 분산형 오픈 소스 검색 및 분석 엔진, 주로 REST API로 처리</h3>
+
+<h3 id="logstash--여러-소스에서-동시에-데이터를-수집하여-변환한-후-stash엘라스틱-서치와-같은로-전송하는-서버-사이드-데이터-처리-파이프-라인">Logstash : 여러 소스에서 동시에 데이터를 수집하여 변환한 후 <code class="language-plaintext highlighter-rouge">stash</code>(엘라스틱 서치와 같은)로 전송하는 서버 사이드 데이터 처리 파이프 라인</h3>
+
+<h3 id="kibana--사용자가-엘라스틱-서치에서-차트와-그래프를-이용해-데이터를-시각화-할-수-있게-함">Kibana : 사용자가 엘라스틱 서치에서 차트와 그래프를 이용해 데이터를 시각화 할 수 있게 함</h3>
+
+<h2 id="elastic-search-kibana-logstash-이미지-pull-받기">elastic search, kibana, logstash 이미지 pull 받기</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker pull docker.elastic.co/elasticsearch/elasticsearch:7.3.1</span>
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker pull docker.elastic.co/kibana/kibana:7.3.1</span>
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker pull docker.elastic.co/logstash/logstash:7.3.1</span>
+</code></pre></div></div>
+
+<h2 id="엘라스틱-서치-커스텀-빌드">엘라스틱 서치 커스텀 빌드</h2>
+
+<ul>
+  <li>한국어 분석기 플러그인인 <code class="language-plaintext highlighter-rouge">nori</code> 를 함께 설치하기 위해 DockerFile로 커스텀 빌드함</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>//Dockerfile 생성
+vi Dockerfile
+
+//Dockerfile 내용
+FROM elasticsearch:7.3.1
+
+RUN /usr/share/elasticsearch/bin/elasticsearch-plugin <span class="nb">install</span> <span class="nt">--batch</span> analysis-nori
+
+//elasticsearch-custom이라는 태그로 커스텀 빌드 <span class="o">(</span>default는 elasticsearch<span class="o">)</span>
+<span class="o">[</span>root@localhost elk]# docker build <span class="nt">--tag</span> elasticsearch-custom <span class="nb">.</span>
+</code></pre></div></div>
+
+<h2 id="컨테이너-실행">컨테이너 실행</h2>
+
+<ul>
+  <li>엘리스틱 서치 : 커스텀 빌드하였으므로 elasticsearch-custom의 이름으로 지정하여 컨테이너를 올려줌. (JVM의 Heap 메모리를 설정할 수 있는 -e ES_JAVA_OPTS=”-Xms16g -Xmx16g”는 기억)</li>
+  <li>키바나 : pull 받은 이미지에 5601 포트를 지정하여 컨테이너를 올려줌.</li>
+  <li>로그스태시 : pull 받은 이미지에 5044 포트를 지정하여 컨테이너를 올려줌.</li>
+  <li>커맨드 뒤에 로그가 출력되는 것이 불편하다면 <code class="language-plaintext highlighter-rouge">/dev/null 2&gt;&amp;1</code> 를 붙여줌.</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost elk]# docker run <span class="nt">-p</span> 9200:9200 <span class="nt">-p</span> 9300:9300 elk-e <span class="s2">"discovery.type=single-node"</span> elasticsearch-custom
+<span class="o">[</span>root@localhost elk]# docker run <span class="nt">-d</span> <span class="nt">--link</span> elk-e:elasticsearch-custom <span class="nt">--name</span> elk-k <span class="nt">-p</span> 5601:5601 docker.elastic.co/kibana/kibana:7.3.1
+<span class="o">[</span>root@localhost elk]# docker run <span class="nt">-d</span> <span class="nt">--link</span> elk-e:elasticsearch-custom <span class="nt">--name</span> elk-l <span class="nt">-p</span> 5044:5044 docker.elastic.co/logstash/logstash:7.3.1
+</code></pre></div></div>
+
+<h2 id="컨테이너-프로세스-확인">컨테이너 프로세스 확인</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost elk]# docker container ps
+CONTAINER ID        IMAGE                                       COMMAND                  CREATED             STATUS              PORTS                                            NAMES
+c07c91e993f6        docker.elastic.co/logstash/logstash:7.3.1   <span class="s2">"/usr/local/bin/dock…"</span>   5 minutes ago       Up 5 minutes        0.0.0.0:5044-&gt;5044/tcp, 9600/tcp                 elk-l
+f2e06e2e88e6        docker.elastic.co/kibana/kibana:7.3.1       <span class="s2">"/usr/local/bin/dumb…"</span>   6 minutes ago       Up 6 minutes        0.0.0.0:5601-&gt;5601/tcp                           elk-k
+79ec3b09b257        elasticsearch-custom                        <span class="s2">"/usr/local/bin/dock…"</span>   10 minutes ago      Up 10 minutes       0.0.0.0:9200-&gt;9200/tcp, 0.0.0.0:9300-&gt;9300/tcp   elk-e
+</code></pre></div></div>
+
+<h2 id="elk-k-config-수정">elk-k config 수정</h2>
+
+<ul>
+  <li>elasticsearch-custom으로 빌드했기 때문에 설정 변경 필요</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost elk]# docker container <span class="nb">exec</span> <span class="nt">-it</span> elk-k bash
+bash-4.2<span class="nv">$ </span>vi config/kibana.yml
+
+<span class="c"># ** THIS IS AN AUTO-GENERATED FILE **</span>
+<span class="c">#</span>
+
+<span class="c"># Default Kibana configuration for docker target</span>
+server.name: kibana
+server.host: <span class="s2">"0"</span>
+elasticsearch.hosts: <span class="o">[</span> <span class="s2">"http://elasticsearch-custom:9200"</span> <span class="o">]</span> //변경할 부분
+xpack.monitoring.ui.container.elasticsearch.enabled: <span class="nb">true</span>
+
+//수정을 완료했다면 쉘에서 빠져나온다.
+bash-4.2<span class="nv">$ </span><span class="nb">exit</span>
+
+//elk-k 재시작
+<span class="o">[</span>root@localhost elk]# docker container restart elk-k
+elk-k
+</code></pre></div></div>
+
+<h2 id="logstash-config-수정">logstash config 수정</h2>
+
+<ul>
+  <li>logstash도 위와 동일하게 config를 수정해준다.</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost elk]# docker <span class="nb">exec</span> <span class="nt">-it</span> elk-l bash
+bash-4.2<span class="nv">$ </span>vi config/logstash.yml
+
+http.host: <span class="s2">"0.0.0.0"</span>
+xpack.monitoring.elasticsearch.hosts: <span class="o">[</span> <span class="s2">"http://elasticsearch-custom:9200"</span> <span class="o">]</span> //수정할 부분
+
+//수정을 완료했다면 쉘에서 빠져나온다.
+bash-4.2<span class="nv">$ </span><span class="nb">exit</span>
+
+//elk-l 재시작
+<span class="o">[</span>root@localhost elk]# docker container restart elk-l
+elk-l
+</code></pre></div></div>
+
+<h2 id="각-컨테이너의-포트-접속">각 컨테이너의 포트 접속</h2>
+
+<p><img src="/assets/img/elk1.png" alt="/assets/img/elk1.png" /></p>
+
+<p><img src="/assets/img/elk2.png" alt="/assets/img/elk2.png" /></p>
+
+<h2 id="컨테이너-쉘-실행-명령어">컨테이너 쉘 실행 명령어</h2>
+
+<ul>
+  <li>엘라스틱 서치 : <code class="language-plaintext highlighter-rouge">docker exec -it elk-e bash</code></li>
+  <li>로그 스태시 : <code class="language-plaintext highlighter-rouge">docker exec -it elk-l bash</code></li>
+  <li>키바나 : <code class="language-plaintext highlighter-rouge">docker exec -it elk-k bash</code></li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost elk]# docker <span class="nb">exec</span> <span class="nt">-it</span> elk-e bash
+<span class="o">[</span>root@79ec3b09b257 elasticsearch]# <span class="nb">exit
+exit</span>
+<span class="o">[</span>root@localhost elk]# docker <span class="nb">exec</span> <span class="nt">-it</span> elk-l bash
+bash-4.2<span class="nv">$ </span><span class="nb">exit
+exit</span>
+<span class="o">[</span>root@localhost elk]# docker <span class="nb">exec</span> <span class="nt">-it</span> elk-k bash
+bash-4.2<span class="nv">$ </span><span class="nb">exit
+exit</span>
+</code></pre></div></div>
+
+<h2 id="컨테이너-로그-확인">컨테이너 로그 확인</h2>
+
+<ul>
+  <li>엘라스틱 서치 : <code class="language-plaintext highlighter-rouge">docker container logs elk-e</code></li>
+  <li>로그 스태시 : <code class="language-plaintext highlighter-rouge">docker container logs elk-l</code></li>
+  <li>키바나 : <code class="language-plaintext highlighter-rouge">docker container logs elk-k</code></li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost elk]# docker container logs elk-e
+<span class="o">[</span>root@localhost elk]# docker container logs elk-l
+<span class="o">[</span>root@localhost elk]# docker container logs elk-k
+</code></pre></div></div>
+
+<h2 id="컨테이너-중지-삭제">컨테이너 중지, 삭제</h2>
+
+<ul>
+  <li>엘라스틱 서치 중지 : <code class="language-plaintext highlighter-rouge">docker container stop elk-e</code></li>
+  <li>로그 스태시 중지 : <code class="language-plaintext highlighter-rouge">docker container stop elk-l</code></li>
+  <li>키바나 중지 : <code class="language-plaintext highlighter-rouge">docker container stop elk-k</code></li>
+  <li>엘라스틱 서치 삭제 : <code class="language-plaintext highlighter-rouge">docker container rm elk-e</code></li>
+  <li>로그 스태시 삭제 : <code class="language-plaintext highlighter-rouge">docker container rm elk-e</code></li>
+  <li>키바나 삭제 : <code class="language-plaintext highlighter-rouge">docker container rm elk-e</code></li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost elk]# docker container stop elk-e
+<span class="o">[</span>root@localhost elk]# docker container stop elk-l
+<span class="o">[</span>root@localhost elk]# docker container stop elk-k
+
+<span class="o">[</span>root@localhost elk]# docker container <span class="nb">rm </span>elk-e
+<span class="o">[</span>root@localhost elk]# docker container <span class="nb">rm </span>elk-l
+<span class="o">[</span>root@localhost elk]# docker container <span class="nb">rm </span>elk-k
+</code></pre></div></div>
+
+<h2 id="컨테이너-프로세스-체크">컨테이너 프로세스 체크</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker container ps
+</code></pre></div></div>
+:ET
