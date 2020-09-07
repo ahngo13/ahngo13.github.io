@@ -1,0 +1,87 @@
+I"�<ul>
+  <li>컨테이너 기반의 오픈소스 가상화 플랫폼</li>
+  <li>경량 컨테이너</li>
+  <li>개발환경 구축 뿐만 아니라 개발 후 운영 환경에 대한 배포나 애플리케이션 플랫폼으로 사용가능</li>
+  <li>다양한 프로그램, 실행환경을 컨테이너로 추상화하고 동일한 인터페이스를 제공하여 프로그램의 배포 및 관리를 단순하게 해줌</li>
+  <li>조립PC, AWS, Azure, Google cloud등 어디에서든 실행가능</li>
+</ul>
+
+<h2 id="의의">의의</h2>
+
+<ul>
+  <li>변화하지 않는 실행 환경으로 멱등성 확보</li>
+  <li>코드를 통한 실행 환경 구축 및 애플리케이션 구성</li>
+  <li>실행 환경과 애플리케이션의 일체화로 이식성 향상</li>
+  <li>시스템을 구성하는 애플리케이션 및 미들웨어의 관리 용이성</li>
+</ul>
+
+<h3 id="-도커가-적합하지-않은-경우">※ 도커가 적합하지 않은 경우</h3>
+
+<p>도커 컨테이너는 운영체제의 동작을 완벽히 재현하지는 못하기 때문에 엄밀한 리눅스 계열 운영체제의 동작이 요구되는 가상 환경을 구축해야 한다면 가상화 소프트웨어(Vmware, VisualBox)를 사용하는 것이 낫다.</p>
+
+<h2 id="도커-컴포즈docker-compose">도커 컴포즈(Docker Compose)</h2>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">version </span><span class="pi">:</span> <span class="s2">"</span><span class="s">3"</span>
+<span class="na">services</span><span class="pi">:</span>
+<span class="err">	</span><span class="na">web</span><span class="pi">:</span>
+<span class="err">		</span><span class="na">image</span><span class="pi">:</span> <span class="s">gihyodocker</span> 
+<span class="err">		</span><span class="na">posts</span><span class="pi">:</span>
+<span class="err">			</span><span class="pi">-</span> <span class="s2">"</span><span class="s">3000:3000"</span>
+<span class="err">		</span><span class="na">environment</span><span class="pi">:</span>
+<span class="err">			</span><span class="na">REDIS_TARGET</span><span class="pi">:</span> <span class="s">redis</span>
+<span class="err">			</span><span class="na">depends_on</span><span class="pi">:</span>
+<span class="err">				</span><span class="pi">-</span> <span class="s">redis</span>
+<span class="err">		</span><span class="na">redis</span><span class="pi">:</span>
+<span class="err">			</span><span class="na">images</span><span class="pi">:</span> <span class="s2">"</span><span class="s">redis:alpine</span>
+</code></pre></div></div>
+
+<ul>
+  <li>yaml 포맷으로 작성된 설정 파일로 컨테이너를 정의하거나 컨테이너 간의 의존 관계를 정의해 시작 순서를 제어할 수 있다.</li>
+  <li>여러 애플리케이션과 미들웨어의 의존관계를 간결한 코드로 관리할 수 있다.</li>
+</ul>
+
+<h3 id="도커와-관련된-오픈-소스-제품-container-orchestration">도커와 관련된 오픈 소스 제품 (container orchestration)</h3>
+
+<ul>
+  <li>도커 스웜 (DockerSwarm) : 여러 컨테이너를 클러스터로 만들어 관리해줌</li>
+  <li>쿠버네티스 (Kubernetes) : 컨테이너를 쉽고 빠르게 배포, 확장하고 관리를 자동화해주는 오픈소스 플랫폼</li>
+  <li>아파치 메소스 (Apache Mesos) : 분산된 시스템 커널, 프레임워크에 컴퓨터 자원을 공급하는 클러스터 플랫폼</li>
+</ul>
+
+<h2 id="컨테이너-container">컨테이너 (Container)</h2>
+
+<ul>
+  <li>격리된 공간에서 프로세스가 동작하는 기술</li>
+  <li>기존의 가상화 방식은 OS를 가상화 하였음 (VMware, VisualBox 등)</li>
+</ul>
+
+<h2 id="이미지-image">이미지 (Image)</h2>
+
+<ul>
+  <li>컨테이너 실행에 필요한 파일과 설정값 등을 포함하고 있는 것</li>
+  <li>의존성 파일을 컴파일하고 이것저것 설치할 필요가 없음</li>
+  <li>미리 만들어 놓은 이미지를 다운받고 컨테이너만 생성하면 됨 (Docker hub에 등록, Docker Registry)</li>
+</ul>
+
+<h2 id="dockerfile">Dockerfile</h2>
+
+<div class="language-docker highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">FROM</span><span class="s"> ubuntu:16.04 # 도커 이미지 운영체제</span>
+
+<span class="k">COPY</span><span class="s"> helloworld /usr/local/bin # 작성한 셸 파일을 /usr/local/bin 경로로 복사</span>
+<span class="k">RUN </span><span class="nb">chmod</span> +x /usr/local/bin/helloworld <span class="c"># 작성한 셸 스크립트 파일에 권한 부여</span>
+
+<span class="k">CMD</span><span class="s"> ["helloworld"] # 도커 컨테이너로 실행하기 전에 먼터 실행할 명령어</span>
+</code></pre></div></div>
+
+<ul>
+  <li>DSL(Domain-specific language) 언어를 이용하여 이미지 생성 과정을 기술 (서버 구성을 코드로 관리할 수 있다)</li>
+  <li>서버에 어떤 프로그램을 설치하고 이것저것 의존성 패키지를 설치하고 설정파일을 만드는 것이 가능</li>
+  <li>소스와 함께 버전 관리되고 누구나 수정 가능</li>
+</ul>
+
+<h2 id="docker-hub">Docker Hub</h2>
+
+<ul>
+  <li>공개 이미지를 무료로 관리</li>
+</ul>
+:ET
