@@ -94,6 +94,24 @@ Status: Downloaded newer image for nginx:latest
 - -d는 백그라운드 실행을 의미
 - 없으면 pull 받고 실행
 
+옵션
+
+-d : detached mode 흔히 말하는 백그라운드 모드
+
+-p : 호스트와 컨테이너의 포트를 연결 (포워딩)
+
+-v : 호스트와 컨테이너의 디렉토리를 연결 (마운트)
+
+-e : 컨테이너 내에서 사용할 환경변수 설정
+
+–name : 컨테이너 이름 설정
+
+–rm : 프로세스 종료시 컨테이너 자동 제거
+
+-it : -i와 -t를 동시에 사용한 것으로 터미널 입력을 위한 옵션
+
+–link : 컨테이너 연결 [컨테이너명:별칭]
+
 ```bash
 [root@localhost ~]# docker container run --name web2 -d -p 8080:8080 nginx
 7a268c7232e69181df35699a4b4a4cf3aa663da7ae1249c160b48088e85ab8cc
@@ -320,4 +338,25 @@ Digest: sha256:19a79828ca2e505eaee0ff38c2f3fd9901f4826737295157cc5212b7a372cd2b
 Status: Downloaded newer image for centos:7
 [root@ba56f9c7a6a2 /]# set | grep foo=bar
 foo=bar
+```
+
+## 도커 모든 이미지 삭제
+```bash
+[root@localhost test]# docker rmi $(docker images -q)
+Untagged: nginx:latest
+Untagged: nginx@sha256:b0ad43f7ee5edbc0effbc14645ae7055e21bc1973aee5150745632a24a752661
+Deleted: sha256:4bb46517cac397bdb0bab6eba09b0e1f8e90ddd17cf99662997c3253531136f8
+Deleted: sha256:80b21afd8140706d5fe3b7106ae6147e192e6490b402bf2dd2df5df6dac13db8
+Deleted: sha256:0f04ae71e99f5ef9021b92f76bac3979e25c98d73a51d33ce76a78da6afa9f27
+Deleted: sha256:9a14852344d88a1fdf8297914729834521ec1c77a27e7e7e394f9c1ef9b87f9d
+Deleted: sha256:74299126f8099031c5bbd4774147f4ab6b0d0c3afcec774be65d4d07b956752e
+Deleted: sha256:d0f104dc0a1f9c744b65b23b3fd4d4d3236b4656e67f776fe13f8ad8423b955c
+Untagged: centos:7
+Untagged: centos@sha256:19a79828ca2e505eaee0ff38c2f3fd9901f4826737295157cc5212b7a372cd2b
+Deleted: sha256:7e6257c9f8d8d4cdff5e155f196d67150b871bbe8c02761026f803a704acb3e9
+Deleted: sha256:613be09ab3c0860a5216936f412f09927947012f86bfa89b263dfa087a725f81
+Untagged: hello-world:latest
+Untagged: hello-world@sha256:7f0a9f93b4aa3022c3a4c147a449bf11e0941a1fd0bf4a8e6c9408b2600777c5
+Deleted: sha256:bf756fb1ae65adf866bd8c456593cd24beb6a0a061dedf42b26a993176745f6b
+Deleted: sha256:9c27e219663c25e0f28493790cc0b88bc973ba3b1686355f221c38a36978ac63
 ```

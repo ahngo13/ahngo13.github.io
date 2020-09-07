@@ -1,0 +1,239 @@
+I"�><ul>
+  <li>컨테이너는 기본적으로 eth0과 lo 네트워크 인터페이스로 구성</li>
+  <li>내부 IP를 순차적으로 할당하기 때문에 재시작 할 때마다 변경될 수 있음</li>
+  <li>외부와 연결시에는 veth(virtual eth)라는 네트워크 인터페이스를 생성하고 컨테이너의 eth와 연결됨. (veth 인터페이스는 도커 엔진에서 자동 생성함)</li>
+  <li>docker() 브리지라는 것도 있는데 veth 인터페이스와 바인딩되어 호스트의 eth 인터페이스와 연결</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@36075ffb5c95 /]# ifconfig
+eth0: <span class="nv">flags</span><span class="o">=</span>4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500
+        inet 172.18.0.4  netmask 255.255.0.0  broadcast 172.18.255.255
+        ether 02:42:ac:12:00:04  txqueuelen 0  <span class="o">(</span>Ethernet<span class="o">)</span>
+        RX packets 1521  bytes 11865754 <span class="o">(</span>11.3 MiB<span class="o">)</span>
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 1377  bytes 93549 <span class="o">(</span>91.3 KiB<span class="o">)</span>
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: <span class="nv">flags</span><span class="o">=</span>73&lt;UP,LOOPBACK,RUNNING&gt;  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        loop  txqueuelen 1000  <span class="o">(</span>Local Loopback<span class="o">)</span>
+        RX packets 0  bytes 0 <span class="o">(</span>0.0 B<span class="o">)</span>
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 <span class="o">(</span>0.0 B<span class="o">)</span>
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+</code></pre></div></div>
+
+<h2 id="도커-네트워크-드라이버-종류">도커 네트워크 드라이버 종류</h2>
+
+<ul>
+  <li>브리지 (bridge)</li>
+  <li>호스트 (host)</li>
+  <li>논 (none)</li>
+  <li>컨테이너 (container)</li>
+  <li>등등</li>
+</ul>
+
+<h3 id="브릿지-네트워크">브릿지 네트워크</h3>
+
+<ul>
+  <li>docker() 브리지와 비슷하지만 사용자가 브리지를 생성해 각 컨테이너에 연결하는 네트워크 구조</li>
+  <li>docker network create —driver bridge [브리지 이름]</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker network create --driver bridge ahngo13</span>
+ff3a3c35f36a9bdcb83a24453801d1550194be46cce3aa2a82762fbccc4742ea
+</code></pre></div></div>
+
+<ul>
+  <li>위에서 생성한 브리지는 <code class="language-plaintext highlighter-rouge">docker run</code> 나  <code class="language-plaintext highlighter-rouge">docker create</code>  명령어에서 <code class="language-plaintext highlighter-rouge">--net</code> 옵션을 설정하면 커스텀 브리지를 사용할 수 있음</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker run -it --name web4 --net ahngo13 centos:7</span>
+<span class="o">[</span>root@19aa7f2263e2 /]#
+</code></pre></div></div>
+
+<h3 id="호스트-네트워크">호스트 네트워크</h3>
+
+<ul>
+  <li>네트워크를 호스트로 설정하면 호스트 네트워크 환경을 그대로 사용 가능</li>
+  <li>컨테이너 내부의 어플리케이션을 별도의 포트 포워딩 없이 바로 서비스 가능</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker run -it --name web5 --net host centos:7</span>
+<span class="o">[</span>root@localhost /]#
+</code></pre></div></div>
+
+<h3 id="논-네트워크">논 네트워크</h3>
+
+<ul>
+  <li>네트워크를 사용하지 않는 것을 의미</li>
+  <li>네트워크 인터페이스는 lo 인터페이스만 나타남</li>
+  <li>외부와 단절</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@3af348080363:/# ifconfig
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>  TX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>
+</code></pre></div></div>
+
+<h3 id="컨테이너-네트워크">컨테이너 네트워크</h3>
+
+<ul>
+  <li>다른 컨테이너의 환경을 공유할 수 있음</li>
+  <li>— net container : [다른 컨테이너의 ID]</li>
+  <li>아래의 결과를 보면 container_network와 container_network1이 동일한 네트워크를 가지고 있는 것을 확인할 수 있음</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker run -it -d --name container_network1 ubuntu:14.04</span>
+7fc4148c57308db88a2e2989f30a6402fef4b97748ec1bf10dd5d4302c997a8b
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker run -it -d --name container_network --net container:container_network1 ubuntu:14.04</span>
+0b8d2ddb296081fc19b6298f0b62fdc88e5b5e11bf4337baaf09ae43286a2b9a
+
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker exec -it container_network1 /bin/bash</span>
+root@7fc4148c5730:/# ifconfig
+eth0      Link encap:Ethernet  HWaddr 02:42:ac:12:00:05
+          inet addr:172.18.0.5  Bcast:172.18.255.255  Mask:255.255.0.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:8 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:656 <span class="o">(</span>656.0 B<span class="o">)</span>  TX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>  TX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>
+
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker exec -it container_network /bin/bash</span>
+root@7fc4148c5730:/# ifconfig
+eth0      Link encap:Ethernet  HWaddr 02:42:ac:12:00:05
+          inet addr:172.18.0.5  Bcast:172.18.255.255  Mask:255.255.0.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:8 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:656 <span class="o">(</span>656.0 B<span class="o">)</span>  TX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>  TX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>
+</code></pre></div></div>
+
+<h3 id="브릿지-네트워크의-net-alias-활용">브릿지 네트워크의 —net-alias 활용</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">—net-alias</code> 옵션을 같이 사용하면 네트워크 구성에 별칭을 줄 수 있음</li>
+  <li>mybridge라는 브릿지 네트워크에 net-alias를 적용해서 ping으로 응답 테스트</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>//mybridge 브릿지 네트워크 생성
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker network create --driver bridge mybridge</span>
+e38754cae9281f8325207315cee017204523abe29e25e7185002d325cd673066
+
+//3개의 container에 net-alias net_team이라는 net-alias 적용
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker run -it -d --name network_alias_con1 --net mybridge --net-alias net_team ubuntu:14.04</span>
+a31137b554a318a8a1c8dc768df22258c8d17d74236c3debbdb8ecfb621504c3
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker run -it -d --name network_alias_con2 --net mybridge --net-alias net_team ubuntu:14.04</span>
+80f0fce079d349a8308c7b4517b727032d1411198364b65e40cfe1381e08d699
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker run -it -d --name network_alias_con3 --net mybridge --net-alias net_team ubuntu:14.04</span>
+58ffab5637f74728896ad08cdfbdf6156087ccf3bd3fa7dbb6f3940a438f6396
+
+//각각의 container의 ip 확인
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker exec -it network_alias_con1 /bin/bash</span>
+root@a31137b554a3:/# ifconfig
+eth0      Link encap:Ethernet  HWaddr 02:42:ac:14:00:02
+          inet addr:172.20.0.2  Bcast:172.20.255.255  Mask:255.255.0.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:13 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:1102 <span class="o">(</span>1.1 KB<span class="o">)</span>  TX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>  TX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>
+
+root@a31137b554a3:/# <span class="nb">exit
+exit</span>
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker exec -it network_alias_con2 /bin/bash                      root@80f0fce079d3:/# ifconfig</span>
+eth0      Link encap:Ethernet  HWaddr 02:42:ac:14:00:03
+          inet addr:172.20.0.3  Bcast:172.20.255.255  Mask:255.255.0.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:8 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:656 <span class="o">(</span>656.0 B<span class="o">)</span>  TX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>  TX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>
+
+root@80f0fce079d3:/# <span class="nb">exit
+exit</span>
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker exec -it network_alias_con3 /bin/bash</span>
+root@58ffab5637f7:/# ifconfig
+eth0      Link encap:Ethernet  HWaddr 02:42:ac:14:00:04
+          inet addr:172.20.0.4  Bcast:172.20.255.255  Mask:255.255.0.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:8 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0
+          RX bytes:656 <span class="o">(</span>656.0 B<span class="o">)</span>  TX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>  TX bytes:0 <span class="o">(</span>0.0 B<span class="o">)</span>
+
+//ping 테스트를 위한 컨테이너 생성
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker run -it -d --name ping_test --net mybridge ubuntu:14.04</span>
+d214ed9902224f08ca0ed34a5584cfbe81da68146976c04bac5ba874bf149dba
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker exec -it ping_test /bin/bash</span>
+root@d214ed990222:/# ping <span class="nt">-c</span> 1 net_team
+
+//ping 테스트 <span class="o">(</span>IP가 그때마다 다르다는 것을 알 수 있음<span class="o">)</span>
+<span class="nt">---</span> net_team ping statistics <span class="nt">---</span>
+1 packets transmitted, 1 received, 0% packet loss, <span class="nb">time </span>0ms
+rtt min/avg/max/mdev <span class="o">=</span> 0.044/0.044/0.044/0.000 ms
+root@d214ed990222:/# ping <span class="nt">-c</span> 1 net_team
+PING net_team <span class="o">(</span>172.20.0.3<span class="o">)</span> 56<span class="o">(</span>84<span class="o">)</span> bytes of data.
+64 bytes from network_alias_con2.mybridge <span class="o">(</span>172.20.0.3<span class="o">)</span>: <span class="nv">icmp_seq</span><span class="o">=</span>1 <span class="nv">ttl</span><span class="o">=</span>64 <span class="nb">time</span><span class="o">=</span>0.047 ms
+
+<span class="nt">---</span> net_team ping statistics <span class="nt">---</span>
+1 packets transmitted, 1 received, 0% packet loss, <span class="nb">time </span>0ms
+rtt min/avg/max/mdev <span class="o">=</span> 0.047/0.047/0.047/0.000 ms
+root@d214ed990222:/# ping <span class="nt">-c</span> 1 net_team
+PING net_team <span class="o">(</span>172.20.0.2<span class="o">)</span> 56<span class="o">(</span>84<span class="o">)</span> bytes of data.
+64 bytes from network_alias_con1.mybridge <span class="o">(</span>172.20.0.2<span class="o">)</span>: <span class="nv">icmp_seq</span><span class="o">=</span>1 <span class="nv">ttl</span><span class="o">=</span>64 <span class="nb">time</span><span class="o">=</span>0.043 ms
+
+<span class="nt">---</span> net_team ping statistics <span class="nt">---</span>
+1 packets transmitted, 1 received, 0% packet loss, <span class="nb">time </span>0ms
+rtt min/avg/max/mdev <span class="o">=</span> 0.043/0.043/0.043/0.000 ms
+root@d214ed990222:/# ping <span class="nt">-c</span> 1 net_team
+PING net_team <span class="o">(</span>172.20.0.4<span class="o">)</span> 56<span class="o">(</span>84<span class="o">)</span> bytes of data.
+64 bytes from network_alias_con3.mybridge <span class="o">(</span>172.20.0.4<span class="o">)</span>: <span class="nv">icmp_seq</span><span class="o">=</span>1 <span class="nv">ttl</span><span class="o">=</span>64 <span class="nb">time</span><span class="o">=</span>0.073 ms
+</code></pre></div></div>
+:ET
