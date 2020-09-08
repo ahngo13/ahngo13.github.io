@@ -1,0 +1,127 @@
+I"�<h1 id="docker-compose란">Docker Compose란?</h1>
+
+<ul>
+  <li>다중 컨테이너 Docker 애플리케이션을 정의하고 실행하기 위한 도구</li>
+  <li>YAML 파일을 사용하여 애플리케이션의 서비스를 구성</li>
+  <li>단일 명령으로 구성에서 모든 서비스를 만들고 시작</li>
+</ul>
+
+<h1 id="docker-compose의-3단계-프로세스">Docker Compose의 3단계 프로세스</h1>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">Dockerfile</code> 정의</li>
+  <li><code class="language-plaintext highlighter-rouge">docker-compose.yml</code> 로 격리된 환경에서 함께 실행할 수 있도록 정의</li>
+  <li><code class="language-plaintext highlighter-rouge">docker-compose up</code> 로 전체 앱을 시작하고 실행</li>
+</ol>
+
+<h1 id="docker-compose의-기능">Docker Compose의 기능</h1>
+
+<ul>
+  <li>단일 호스트의 여러 격리된 환경</li>
+  <li>컨테이너가 생성될 때 볼륨 데이터 보존</li>
+  <li>변경된 컨테이너만 재생성</li>
+  <li>변수 및 환경 간 컴포지션 이동</li>
+</ul>
+
+<h1 id="docker-compose-설치-및-간단한-예제-실행">Docker Compose 설치 및 간단한 예제 실행</h1>
+
+<h2 id="docker-compose-설치-centos-7-minimal-버전-기준">Docker Compose 설치 (CentOS 7 minimal 버전 기준)</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-L</span> <span class="s2">"https://github.com/docker/compose/releases/download/1.25.0/docker-compose-</span><span class="si">$(</span><span class="nb">uname</span> <span class="nt">-s</span><span class="si">)</span><span class="s2">-</span><span class="si">$(</span><span class="nb">uname</span> <span class="nt">-m</span><span class="si">)</span><span class="s2">"</span> <span class="nt">-o</span> /usr/local/bin/docker-compose
+
+<span class="c"># 바이너리 실행 권한 부여</span>
+<span class="nb">chmod</span> +x /usr/local/bin/docker-compose
+
+<span class="c"># docker-compose 설치되었는지 확인</span>
+docker-compose <span class="nt">--version</span>
+</code></pre></div></div>
+
+<h2 id="파이썬-개발환경-세팅-requirementstxt-생성">파이썬 개발환경 세팅 (requirements.txt 생성)</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>//파이썬 3 버전대가 설치되지 않을 때 강제로 다운받아서 압축풀고 설치
+wget https://www.python.org/ftp/python/3.7.1/Python-3.7.1.tgz
+<span class="nb">tar </span>xzf Python-3.7.1.tgz
+<span class="nb">cd </span>Python-3.7.1 
+./configure <span class="nt">--enable-optimizations</span>
+make altinstall
+python3.7 <span class="nt">-V</span>
+vi /root/.bashrc
+//.bashrc 파일에 내용 추가
+<span class="nb">alias </span><span class="nv">python</span><span class="o">=</span><span class="s2">"/usr/local/bin/python3.7"</span>
+<span class="nb">source</span> /root/.bashrc
+python <span class="nt">-V</span>
+
+yum <span class="nb">install </span>epel-release
+yum <span class="nt">-y</span> update
+yum <span class="nt">-y</span> <span class="nb">install </span>python-pip
+pip <span class="nb">install</span> <span class="nt">--upgrade</span> pip
+pip freeze <span class="o">&gt;</span> requirements.txt
+</code></pre></div></div>
+
+<h2 id="dockerfile-생성-django-build용">Dockerfile 생성 (django build용)</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>FROM python:3
+
+RUN apt-get update <span class="o">&amp;&amp;</span> apt-get <span class="nt">-y</span> <span class="nb">install</span> <span class="se">\</span>
+    libpq-dev
+
+WORKDIR /app
+ADD    ./requirements.txt   /app/
+RUN    pip <span class="nb">install</span> <span class="nt">-r</span> requirements.txt
+</code></pre></div></div>
+
+<h2 id="docker-composeyml-파일-정의">docker-compose.yml 파일 정의</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## 파일의 규격 버전 (3이라고 적으면 3으로 시작하는 최신버전 사용)</span>
+version: <span class="s1">'3'</span>
+
+<span class="c">## 실행할 서비스들 정의</span>
+services:
+  <span class="c">## 서비스의 이름을 db라고 정의 (별명일뿐)</span>
+  db:
+    <span class="c">## DB 서비스에서 사용할 도커 이미지 정의</span>
+    image: postgres
+    <span class="c">## [호스트 공유폴더 경로]:[컨테이너 공유폴더 경로](상대경로 입력가능)</span>
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    <span class="c">## 환경변수 설정 (docker run 명령어의 -e에 있던 내용들)</span>
+    environment:
+      - <span class="nv">POSTGRES_DB</span><span class="o">=</span>sampledb
+      - <span class="nv">POSTGRES_USER</span><span class="o">=</span>sampleuser
+      - <span class="nv">POSTGRES_PASSWORD</span><span class="o">=</span>samplesecret
+      - <span class="nv">POSTGRES_INITDB_ARGS</span><span class="o">=</span><span class="nt">--encoding</span><span class="o">=</span>UTF-8
+  <span class="c">## 앱의 서비스 이름(별명)을 django로 정함</span>
+  django:
+    <span class="c">## db서비스와 다르게 특정 이미지 대신 build 옵션을 추가</span>
+    build:
+      context: <span class="nb">.</span>
+      <span class="c">## docker build 명령을 실행할 디렉터리 경로</span>
+      dockerfile: ./Dockerfile-dev
+    <span class="c">## 환경변수 설정 (docker run 명령어의 -e에 있던 내용들)</span>
+    environment:
+      - <span class="nv">DJANGO_DEBUG</span><span class="o">=</span>True
+      - <span class="nv">DJANGO_DB_HOST</span><span class="o">=</span>db
+      - <span class="nv">DJANGO_DB_PORT</span><span class="o">=</span>5432
+      - <span class="nv">DJANGO_DB_NAME</span><span class="o">=</span>sampledb
+      - <span class="nv">DJANGO_DB_USERNAME</span><span class="o">=</span>sampleuser
+      - <span class="nv">DJANGO_DB_PASSWORD</span><span class="o">=</span>samplesecret
+      - <span class="nv">DJANGO_SECRET_KEY</span><span class="o">=</span>dev_secret_key
+    <span class="c">## 포트 지정(docker run -p 옵션과 같음)</span>
+    ports:
+      - <span class="s2">"8000:8000"</span>
+    <span class="c">## (docker run 마지막 명령어 부분과 같음)</span>
+    <span class="nb">command</span>: 
+      - python manage.py runserver 0:8000
+    <span class="c">## 프로젝트 루트 디렉토리와 컨테이너 안의 /app 디렉토리 연결</span>
+    volumes:
+      - ./:/app/
+</code></pre></div></div>
+
+<h2 id="docker-compose-실행">docker-compose 실행</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker-compose up <span class="nt">-d</span>
+
+//다른 부분은 문제가 없었는데 장고를 실행하는데 있어서 오류가 발생했다.
+ERROR: Service <span class="s1">'django'</span> failed to build: The <span class="nb">command</span> <span class="s1">'/bin/sh -c pip install -r requirements.txt'</span> returned a non-zero code: 1
+</code></pre></div></div>
+:ET

@@ -1,0 +1,379 @@
+I"K<h1 id="도커-이미지-생성">도커 이미지 생성</h1>
+
+<ul>
+  <li>일반적으로 도커는 컨테이너 상태를 그대로 이미지로 저장하는 방법을 사용함.</li>
+</ul>
+
+<h1 id="gemfile로-sinatra-웹-애플리케이션-샘플-만들기">Gemfile로 Sinatra 웹 애플리케이션 샘플 만들기</h1>
+
+<ul>
+  <li>test 폴더 생성 및 Gamfile 생성</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>//test 폴더 생성
+<span class="o">[</span>root@localhost /]# <span class="nb">mkdir test</span>
+<span class="o">[</span>root@localhost /]# <span class="nb">ls
+</span>bin   dev  home  lib64  mnt  proc  run   srv  <span class="nb">test  </span>usr
+boot  etc  lib   media  opt  root  sbin  sys  tmp   var
+<span class="o">[</span>root@localhost /]# <span class="nb">cd test</span>
+
+//Gemfile 만들기
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># vi Gemfile</span>
+
+//Gemfile 내용
+<span class="nb">source</span> <span class="s1">'https://rubygems.org'</span>
+gem <span class="s1">'sinatra'</span>
+</code></pre></div></div>
+
+<ul>
+  <li>app.rb 파일 생성</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>//app.rb 파일 생성
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># vi app.rb</span>
+
+//app.rb 파일 내용
+require <span class="s1">'sinatra'</span>
+require <span class="s1">'socket'</span>
+
+get <span class="s1">'/'</span> <span class="k">do
+    </span>Socket.gethostname
+end
+</code></pre></div></div>
+
+<ul>
+  <li>Gemfile : 패키지 관리</li>
+  <li>app.rb : 호스트명을 출력하는 웹서버</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>//rvm, ruby, gem 설치가 필요하다면 아래의 명령어 실행 <span class="o">(</span>centos 7 minimal 버전으로 진행 기준<span class="o">)</span>
+yum <span class="nb">install </span>libyaml-devel glibc-headers autoconf gcc-c++ glibc-devel patch readline-devel zlib-devel libffi-devel openssl-devel automake libtool bison sqlite-devel
+gpg <span class="nt">--keyserver</span> hkp://keys.gnupg.net <span class="nt">--recv-keys</span> 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+curl <span class="nt">-sSL</span> https://get.rvm.io | bash <span class="nt">-s</span> stable <span class="nt">--ruby</span>
+curl <span class="nt">-sSL</span> https://rvm.io/mpapis.asc | gpg <span class="nt">--import</span> -
+curl <span class="nt">-sSL</span> https://get.rvm.io | bash <span class="nt">-s</span> stable <span class="nt">--ruby</span>
+<span class="nb">source</span> /usr/local/rvm/scripts/rvm
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># rvm version</span>
+rvm 1.29.10 <span class="o">(</span>latest<span class="o">)</span> by Michal Papis, Piotr Kuczynski, Wayne E. Seguin <span class="o">[</span>https://rvm.io]
+
+//패키지 설치 후 웹서버 실행
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># bundle install</span>
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># bundle exec ruby app.rb</span>
+</code></pre></div></div>
+
+<ul>
+  <li>도커에서 컨테이너로 실행</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>//컨테이너 생성 및 실행
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker run -it -d -p 4567:4567 -v $PWD:/usr/src/app -w /usr/src/app ruby bash -c "bundle install &amp;&amp; bundle exec ruby app.rb -o 0.0.0.0"</span>
+9a2cf3c3383f6fcdc49352076ca9b6bc189f6b6462ce47ce7419f659014e6264
+
+//컨테이너 접속해서 볼륨 공유파일들 확인
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker ps</span>
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                    NAMES
+9a2cf3c3383f        ruby                <span class="s2">"bash -c 'bundle ins…"</span>   34 seconds ago      Up 33 seconds       0.0.0.0:4567-&gt;4567/tcp   vibrant_bardeen
+f24b617440ff        ubuntu:14.04        <span class="s2">"/bin/bash"</span>              2 hours ago         Up 2 hours                                   another_myvolume
+b36d00500da9        ubuntu:14.04        <span class="s2">"/bin/bash"</span>              2 hours ago         Up 2 hours                                   myvolume
+f3ae1266b7e2        wordpress           <span class="s2">"docker-entrypoint.s…"</span>   2 hours ago         Up 2 hours          80/tcp                   volumes_from_container
+3ffaa29ed044        mysql:5.7           <span class="s2">"docker-entrypoint.s…"</span>   3 hours ago         Up 3 hours          3306/tcp, 33060/tcp      volume_override
+b4e100040227        wordpress           <span class="s2">"docker-entrypoint.s…"</span>   3 hours ago         Up 3 hours          0.0.0.0:32769-&gt;80/tcp    wordpress_hostvolume
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker exec -it 9a2cf3c3383f bash</span>
+root@9a2cf3c3383f:/usr/src/app# <span class="nb">ls
+</span>Gemfile  Gemfile.lock  app.rb
+</code></pre></div></div>
+
+<ul>
+  <li>브라우저에서 해당 서버 <code class="language-plaintext highlighter-rouge">IP주소:포트번호</code> 로 서버가 잘 실행되어 있는지 확인</li>
+</ul>
+
+<p><img src="/assets/img/dockerhub1.png" alt="/assets/img/dockerhub1.png" /></p>
+
+<h1 id="dockerfile로-ruby-애플리케이션-이미지-만들기">Dockerfile로 Ruby 애플리케이션 이미지 만들기</h1>
+
+<h2 id="작업-순서">작업 순서</h2>
+
+<ol>
+  <li>ubuntu 설치</li>
+  <li>ruby 설치</li>
+  <li>소스 복사</li>
+  <li>Gem 패키지 설치</li>
+  <li>Sinatra 서버 실행</li>
+</ol>
+
+<ul>
+  <li>필자의 가상머신 환경은 CentOS 7 minimal 버전이지만 docker에서 만들 환경은 ubuntu이므로 ubuntu 기준 셸 스크립트로 옮겨보자.</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 1. ubuntu 설치 (패키지 업데이트)</span>
+apt-get update
+
+<span class="c"># 2. ruby 설치</span>
+apt-get <span class="nb">install </span>ruby
+gem <span class="nb">install </span>bundler
+
+<span class="c"># 3. 소스 복사</span>
+<span class="nb">mkdir</span> <span class="nt">-p</span> /usr/src/app
+scp Gemfile app.rb root@ubuntu:/usr/src/app  <span class="c"># From host</span>
+
+<span class="c"># 4. Gem 패키지 설치</span>
+bundle <span class="nb">install</span>
+
+<span class="c"># 5. Sinatra 서버 실행</span>
+bundle <span class="nb">exec </span>ruby app.rb
+</code></pre></div></div>
+
+<h2 id="dockerfile-기본-명령어">Dockerfile 기본 명령어</h2>
+
+<h3 id="from">FROM</h3>
+
+<ul>
+  <li>베이스 이미지 지정 (필수)</li>
+  <li>tag는 되도록이면 구체적인 버전을 지정하는 것이 좋음</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>FROM &lt;image&gt;:&lt;tag&gt;
+FROM ubuntu:16.04
+</code></pre></div></div>
+
+<h3 id="maintainer">MAINTAINER</h3>
+
+<ul>
+  <li>Dockerfile을 관리하는 사람 이름이나 이메일 정보 입력</li>
+  <li>빌드에 영향 없음</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>MAINTAINER SiU Ahn
+MAINTAINER ahngo13@naver.com
+</code></pre></div></div>
+
+<h3 id="copy">COPY</h3>
+
+<ul>
+  <li>파일이나 디렉토리를 이미지로 복사 (일반적으로 소스 복사용)</li>
+  <li>디렉토리가 없을 경우 자동 생성</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>COPY &lt;src&gt;... &lt;dest&gt;
+
+//예제
+COPY ./usr/src/app
+</code></pre></div></div>
+
+<h3 id="add">ADD</h3>
+
+<ul>
+  <li>COPY와 비슷하지만 url 입력 가능하고 압축 파일을 입력할 경우 자동으로 압축 해제하며 복사됨.</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ADD &lt;src&gt;... &lt;dest&gt;
+
+//예제
+ADD ./usr/src/app
+</code></pre></div></div>
+
+<h3 id="run">RUN</h3>
+
+<ul>
+  <li>명령어를 그대로 실행 (<code class="language-plaintext highlighter-rouge">/bin/sh -c</code> 뒤에 명령어를 실행하는 방식)</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>RUN &lt;<span class="nb">command</span><span class="o">&gt;</span>
+
+//예제
+RUN bundle <span class="nb">install</span>
+</code></pre></div></div>
+
+<h3 id="cmd">CMD</h3>
+
+<ul>
+  <li>도커 컨테이너가 실행 되었을 때 실행될 명령어 설정</li>
+  <li>빌드할 때는 실행되지 않음</li>
+  <li>마지막 CMD만 실행되므로 <code class="language-plaintext highlighter-rouge">[run.sh](http://run.sh)</code> 파일을 작성하여 데몬으로 실행하거나 <code class="language-plaintext highlighter-rouge">supervisord</code>나 <code class="language-plaintext highlighter-rouge">forego</code> 와 같은 여러 개의 프로그램을 실행하는 프로그램을 사용</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>CMD <span class="nb">command </span>param1 param2
+
+//예제
+CMD bundle <span class="nb">exec </span>ruby app.rb
+</code></pre></div></div>
+
+<h3 id="workdir">WORKDIR</h3>
+
+<ul>
+  <li>RUN/CMD/ADD/COPY 등의 기본 디렉토리를 지정</li>
+  <li>각 명령어의 현재 디렉토리는 명령어 한줄마다 초기화 됨 (따라서 같은 디렉토리에서 작업하기 위해서는 <code class="language-plaintext highlighter-rouge">WORKDIR</code> 사용)</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>WORKDIR /path/to/workdir
+</code></pre></div></div>
+
+<h3 id="expose">EXPOSE</h3>
+
+<ul>
+  <li>컨테이너가 실행되었을 때의 포트 지정 (여러 개 포트 가능)</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>EXPOSE &lt;port&gt; <span class="o">[</span>&lt;port&gt;...]
+
+//예시
+EXPOSE 4567
+</code></pre></div></div>
+
+<h3 id="volume">VOLUME</h3>
+
+<ul>
+  <li>컨테이너 외부에 파일시스템을 마운트 할 때 사용 (지정하는 것을 권장)</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>VOLUME <span class="o">[</span><span class="s2">"/data"</span><span class="o">]</span>
+</code></pre></div></div>
+
+<h3 id="env">ENV</h3>
+
+<ul>
+  <li>컨테이너에서 사용할 환경변수 지정</li>
+  <li><code class="language-plaintext highlighter-rouge">-e</code> 옵션을 사용하면 기존 값 오버라이딩 가능</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ENV &lt;key&gt; &lt;value&gt;
+ENV &lt;key&gt;<span class="o">=</span>&lt;value&gt; ...
+
+//예시
+ENV DB_URL mysql
+</code></pre></div></div>
+
+<h2 id="dockerfile-명령어를-토대로-dockerfile-작성">Dockerfile 명령어를 토대로 Dockerfile 작성</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># vi Dockerfile</span>
+
+// Dockerfile 내용
+<span class="c"># 1. 우분투 설치</span>
+FROM ubuntu:16.04
+MAINTAINER ahngo13@naver.com <span class="c">#도커파일 관리자 정보</span>
+RUN apt-get <span class="nt">-y</span> update <span class="c"># 명령어 그대로 실행 (패키지 업데이트)</span>
+
+<span class="c"># 2. 루비 설치</span>
+RUN apt-get <span class="nt">-y</span> <span class="nb">install </span>ruby <span class="c"># 명령어 그대로 실행 (ruby 설치)</span>
+RUN gem <span class="nb">install </span>bundler <span class="c"># 명령어 그대로 실행 (bundler 설치)</span>
+
+<span class="c"># 3. 소스 복사</span>
+COPY <span class="nb">.</span> /usr/src/app
+
+<span class="c"># 4. Gem 패키지 설치</span>
+WORKDIR /usr/src/app <span class="c"># 실행 디렉토리 지정</span>
+RUN bundle <span class="nb">install</span> <span class="c"># 명령어 그대로 실행 (bundler 설치)</span>
+
+<span class="c"># 5. Sinatra 서버 실행</span>
+EXPOSE 4567 <span class="c"># 포트 설정</span>
+CMD bundle <span class="nb">exec </span>ruby app.rb <span class="nt">-o</span> 0.0.0.0 <span class="c"># 도커가 실행되었을 때 실행할 명령어</span>
+</code></pre></div></div>
+
+<h2 id="docker-build">Docker build</h2>
+
+<ul>
+  <li>이미지를 빌드하는 명령어</li>
+  <li><code class="language-plaintext highlighter-rouge">docker build [OPTION] PATH | URL | -</code></li>
+  <li><code class="language-plaintext highlighter-rouge">-t</code> : 생성할 이미지 이름 지정</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker build <span class="nt">-t</span> app <span class="nb">.</span>
+</code></pre></div></div>
+
+<h2 id="docker-images">Docker Images</h2>
+
+<ul>
+  <li>생성된 이미지 확인</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker images</span>
+REPOSITORY                                      TAG                 IMAGE ID            CREATED              SIZE
+app                                             latest              d6401465165f        About a minute ago   209MB
+</code></pre></div></div>
+
+<h2 id="생성된-이미지-파일로-여러-컨테이너-실행-테스트">생성된 이미지 파일로 여러 컨테이너 실행 테스트</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker run -d -p 8080:4567 app</span>
+2c5de08267ae1b9070b4090aa62061df839b8e056400642a5161e4b0dcb98fe5
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker run -d -p 8081:4567 app</span>
+76bf3923e409ac03c274e6990cbe9435caef4a79199b4d3a1ade5ecb101a83cd
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker run -d -p 8082:4567 app</span>
+de52d3ca3437f5b64313e18eabde98099190926ec572e528dd6e356c3b5601d0
+</code></pre></div></div>
+
+<ul>
+  <li>8080, 8081, 8082 3개의 포트에서 모두 아래과 비슷한 페이지가 잘 나온다면 성공</li>
+</ul>
+
+<p><img src="/assets/img/dockerhub2.png" alt="/assets/img/dockerhub2.png" /></p>
+
+<h2 id="이미지-최적화-하기">이미지 최적화 하기</h2>
+
+<ul>
+  <li>Base Image 변경 : <code class="language-plaintext highlighter-rouge">ubuntu</code> 보다 가벼운 <code class="language-plaintext highlighter-rouge">ruby</code>로 이미지 변경 (python, java, go, nodejs 등)</li>
+  <li>Build Cache : 도커는 빌드할 때 Dockerfile의 명령어가 수정되었거나 추가하는 파일이 변경 되었을 때 캐시가 깨지고 그 이후 작업은 새로 이미지를 만들게 되므로 Gemfile을 먼저 복사</li>
+  <li>명령어 최적화 : <code class="language-plaintext highlighter-rouge">RUN apt-get -y -qq update</code> : -qq를 통해 불필요한 로그 줄임</li>
+  <li>적용 후 Dockerfile</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>//Dockerfile 내용
+FROM ruby:2.3
+MAINTAINER ahngo13@naver.com
+COPY Gemfile<span class="k">*</span> /usr/src/app/
+WORKDIR /usr/src/app
+RUN bundle <span class="nb">install</span> <span class="nt">--no-rdoc</span> <span class="nt">--no-ri</span>
+COPY <span class="nb">.</span> /usr/src/app
+EXPOSE 4567
+CMD bundle <span class="nb">exec </span>ruby app.rb <span class="nt">-o</span> 0.0.0.0
+</code></pre></div></div>
+
+<h1 id="docker-hub">Docker Hub</h1>
+
+<ul>
+  <li>도커에서 제공하는 이미지 저장소</li>
+  <li>무료로 저장할 수 있고 다운로드 트래픽 무료 (비공개로 사용하려면 유료 서비스 이용필요)</li>
+</ul>
+
+<h2 id="로그인">로그인</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker login
+
+Login with your Docker ID to push and pull images from Docker Hub. If you don<span class="s1">'t have a Docker ID, head over to https://hub.docker.com to create one.
+Username: ahngo13
+Password:
+Login Succeeded
+</span></code></pre></div></div>
+
+<h2 id="이미지-태그">이미지 태그</h2>
+
+<p><code class="language-plaintext highlighter-rouge">[Registry URL]/[사용자 ID]/[이미지명]:[tag]</code></p>
+
+<h2 id="이미지에-계정정보와-버전-정보-추가">이미지에 계정정보와 버전 정보 추가</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker tag app ahngo13/sinatra-app:1
+
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker tag app ahngo13/sinatra-app:1</span>
+<span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker images</span>
+REPOSITORY                                      TAG                 IMAGE ID            CREATED             SIZE
+&lt;none&gt;                                          &lt;none&gt;              7416ee6746c6        33 minutes ago      946MB
+&lt;none&gt;                                          &lt;none&gt;              c2ef72273bdc        41 minutes ago      946MB
+app                                             latest              d6401465165f        56 minutes ago      209MB
+ahngo13/sinatra-app                             1                   d6401465165f        56 minutes ago      209MB
+</code></pre></div></div>
+
+<h2 id="도커-허브docker-hub에-푸시하기">도커 허브(Docker Hub)에 푸시하기</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost <span class="nb">test</span><span class="o">]</span><span class="c"># docker push ahngo13/sinatra-app:1</span>
+The push refers to repository <span class="o">[</span>docker.io/ahngo13/sinatra-app]
+f99db444f8e6: Pushed
+a7921e78dec1: Pushed
+3ab843bf79ed: Pushed
+c931372ad2a2: Pushed
+44ac61e5bdb9: Pushed
+dcc0cc99372e: Mounted from library/ubuntu
+87c128261339: Mounted from library/ubuntu
+41a253a417e6: Mounted from library/ubuntu
+e06660e80cf4: Mounted from library/ubuntu
+1: digest: sha256:89475983142340762be762d4efa3af6d34c4d40e3750ed797b95a07615f64e56 size: 2203
+</code></pre></div></div>
+:ET
