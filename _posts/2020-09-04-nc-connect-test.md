@@ -2,7 +2,7 @@
 title: nc(netcat)를 활용한 서버 간 통신 테스트 하기
 layout: post
 date: 2020-09-04 17:00:00 +0300
-description: You’ll find this post in your `_posts` directory. Go ahead and edit it and re-build the site to see your changes. # Add post description (optional)
+description: nc는 netcat의 약자로 TCP/UDP 프로토콜로 연결된 네트워크 상에서 데이터를 읽고 쓸 수 있는 유틸리티이다.
 img: 2020-09-04_10h34_23.png # Add image post (optional)
 fig-caption: # Add figcaption (optional)
 tags: [nc, netcat, 서버통신, iptables]

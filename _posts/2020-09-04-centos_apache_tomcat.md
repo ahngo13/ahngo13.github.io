@@ -2,7 +2,7 @@
 title: CentOS에서 Apache, Tomcat 설치 및 서버 구동하기
 layout: post
 date: 2020-09-04 17:30:00 +0300
-description: You’ll find this post in your `_posts` directory. Go ahead and edit it and re-build the site to see your changes. # Add post description (optional)
+description: Apache 설치 및 서버 구동
 img: 202009041.png # Add image post (optional)
 fig-caption: # Add figcaption (optional)
 tags: [centos, apache, tomcat]

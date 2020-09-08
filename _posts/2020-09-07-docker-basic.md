@@ -2,7 +2,7 @@
 title: 도커 기본 개념 및 용어 정리
 layout: post
 date: 2020-09-07 17:50:00 +0300
-description: You’ll find this post in your `_posts` directory. Go ahead and edit it and re-build the site to see your changes. # Add post description (optional)
+description: 컨테이너 기반의 오픈소스 가상화 플랫폼
 img:  # Add image post (optional)
 fig-caption: # Add figcaption (optional)
 tags: [도커, docker, container, dockercompose, dockerfile, dockerhub]

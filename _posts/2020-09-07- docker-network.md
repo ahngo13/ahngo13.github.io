@@ -2,7 +2,7 @@
 title: 도커 네트워크 (Docker Network) 명령어 정리
 layout: post
 date: 2020-09-07 17:52:00 +0300
-description: You’ll find this post in your `_posts` directory. Go ahead and edit it and re-build the site to see your changes. # Add post description (optional)
+description: 컨테이너는 기본적으로 eth0과 lo 네트워크 인터페이스로 구성
 img:  # Add image post (optional)
 fig-caption: # Add figcaption (optional)
 tags: [도커, docker, dockernetwork, dockerbridge, hostnetwork, nonenetwork, containernetwork]

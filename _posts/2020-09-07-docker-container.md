@@ -2,7 +2,7 @@
 title: 도커(Docker) 설치 및 컨테이너(Container) 기본 명령어 정리
 layout: post
 date: 2020-09-07 17:51:00 +0300
-description: You’ll find this post in your `_posts` directory. Go ahead and edit it and re-build the site to see your changes. # Add post description (optional)
+description: Docker 기본 설치
 img:  # Add image post (optional)
 fig-caption: # Add figcaption (optional)
 tags: [도커, docker, container, docker명령어, dockercontainer]

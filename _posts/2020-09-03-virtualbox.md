@@ -2,7 +2,7 @@
 title: VirtualBox에 CentOS minimal 가상 환경 구성하기
 layout: post
 date: 2020-09-03 17:00:00 +0300
-description: You’ll find this post in your `_posts` directory. Go ahead and edit it and re-build the site to see your changes. # Add post description (optional)
+description: 로컬 가상환경을 구성하기 위해 2가지의 툴을 먼저 설치해준다.
 img: 2020-09-03_09h59_39.png # Add image post (optional)
 fig-caption: # Add figcaption (optional)
 tags: [VirtualBox, CentOS]

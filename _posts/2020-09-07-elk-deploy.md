@@ -2,7 +2,7 @@
 title: 도커(Docker) + 엘라스틱 서치(Elastic Search) ELK 스택 디플로이 하기
 layout: post
 date: 2020-09-07 17:55:00 +0300
-description: You’ll find this post in your `_posts` directory. Go ahead and edit it and re-build the site to see your changes. # Add post description (optional)
+description: Elasticsearch, Logstash, Kibana 를 통칭
 img:  # Add image post (optional)
 fig-caption: # Add figcaption (optional)
 tags: [도커, 엘라스틱서치, ELK, docker, elasticsearch]
