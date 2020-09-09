@@ -1,0 +1,198 @@
+I"&*<h1 id="버전-확인">버전 확인</h1>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost dockertest]# docker-compose <span class="nt">--version</span>
+docker-compose version 1.27.0, build 980ec85b
+</code></pre></div></div>
+
+<h1 id="컨테이너-생성-및-실행">컨테이너 생성 및 실행</h1>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">docker-compose up [옵션] [서비스명]</code></li>
+  <li><code class="language-plaintext highlighter-rouge">-d</code> : 백그라운드 실행</li>
+  <li><code class="language-plaintext highlighter-rouge">--no-deps</code> : 링크 서비스 실행하지 않음</li>
+  <li><code class="language-plaintext highlighter-rouge">--build</code> : 이미지 빌드</li>
+  <li><code class="language-plaintext highlighter-rouge">-t</code> : 타임아웃 지정 (default 10초)</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost dockertest]# docker-compose up <span class="nt">-d</span>
+Creating dockertest_db_1     ... <span class="k">done
+</span>Creating dockertest_centos_1 ... <span class="k">done
+</span>Creating dockertest_web_1    ... <span class="k">done</span>
+</code></pre></div></div>
+
+<h1 id="컨테이너들의-상태-확인">컨테이너들의 상태 확인</h1>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost dockertest]# docker-compose ps
+       Name                      Command                  State                     Ports
+<span class="nt">-------------------------------------------------------------------------------------------------------</span>
+dockertest_centos_1   /bin/bash                        Up
+dockertest_db_1       /entrypoint.sh <span class="nt">--default-a</span> ...   Up <span class="o">(</span>healthy<span class="o">)</span>   0.0.0.0:3306-&gt;3306/tcp, 33060/tcp
+dockertest_web_1      /usr/sbin/httpd <span class="nt">-D</span> FOREGROUND    Up             0.0.0.0:4000-&gt;80/tcp
+</code></pre></div></div>
+
+<h1 id="생성된-서비스-컨테이너-실행하기">생성된 서비스 컨테이너 실행하기</h1>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">docker-compose up</code> 명령어로 생성 및 실행된 컨테이너에 임의의 명령을 실행하기 위해 사용</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## web이라는 서비스의 /bin/bash 실행</span>
+<span class="o">[</span>root@localhost dockertest]# docker-compose run web /bin/bash
+Starting dockertest_db_1 ... <span class="k">done
+</span>Creating dockertest_web_run ... <span class="k">done</span>
+<span class="o">[</span>root@5fe9a5bd7bd2 /]# <span class="nb">exit
+exit</span>
+
+<span class="c">## db라는 서비스의 /bin/bash 실행</span>
+<span class="o">[</span>root@localhost dockertest]# docker-compose run db /bin/bash
+Creating dockertest_db_run ... <span class="k">done</span>
+<span class="o">[</span>Entrypoint] MySQL Docker Image 8.0.19-1.1.15
+bash-4.2#
+</code></pre></div></div>
+
+<h1 id="서비스-시작정지일시정지일시정지-해제재시작">서비스 시작/정지/일시정지/일시정지 해제/재시작</h1>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">docker-compose start</code> : 서비스 시작</li>
+  <li><code class="language-plaintext highlighter-rouge">docker-compose pause</code> : 서비스 일시정지</li>
+  <li><code class="language-plaintext highlighter-rouge">docker-compose unpause</code> : 서비스 일시정지 해제</li>
+  <li><code class="language-plaintext highlighter-rouge">docker-compose restart</code> : 서비스 재시작</li>
+  <li><code class="language-plaintext highlighter-rouge">docker-compose stop</code> : 서비스 중지</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## 서비스 시작</span>
+<span class="o">[</span>root@localhost dockertest]# docker-compose start
+Starting db     ... <span class="k">done
+</span>Starting web    ... <span class="k">done
+</span>Starting centos ... <span class="k">done</span>
+
+<span class="c">## 서비스 일시중지</span>
+<span class="o">[</span>root@localhost dockertest]# docker-compose pause
+Pausing dockertest_db_1     ... <span class="k">done
+</span>Pausing dockertest_centos_1 ... <span class="k">done
+</span>Pausing dockertest_web_1    ... <span class="k">done</span>
+
+<span class="c">## 서비스 일시중지 해제</span>
+<span class="o">[</span>root@localhost dockertest]# docker-compose unpause
+Unpausing dockertest_web_1    ... <span class="k">done
+</span>Unpausing dockertest_centos_1 ... <span class="k">done
+</span>Unpausing dockertest_db_1     ... <span class="k">done</span>
+
+<span class="c">## 서비스 재시작</span>
+<span class="o">[</span>root@localhost dockertest]# docker-compose restart
+Restarting dockertest_web_1    ... <span class="k">done
+</span>Restarting dockertest_centos_1 ... <span class="k">done
+</span>Restarting dockertest_db_1     ... <span class="k">done</span>
+
+<span class="c">## 서비스 중지</span>
+<span class="o">[</span>root@localhost dockertest]# docker-compose stop
+Stopping dockertest_web_1    ... <span class="k">done
+</span>Stopping dockertest_centos_1 ... <span class="k">done
+</span>Stopping dockertest_db_1     ... <span class="k">done</span>
+</code></pre></div></div>
+
+<h1 id="실행중인-컨테이너들-강제정지">실행중인 컨테이너들 강제정지</h1>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">docker-compose kill</code></li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## 컨테이너들 강제 정지</span>
+<span class="o">[</span>root@localhost dockertest]# docker-compose <span class="nb">kill
+</span>Killing dockertest_web_1    ... <span class="k">done
+</span>Killing dockertest_centos_1 ... <span class="k">done
+</span>Killing dockertest_db_1     ... <span class="k">done</span>
+
+<span class="c">## 컨테이너들 상태 확인</span>
+<span class="o">[</span>root@localhost dockertest]# docker-compose ps
+               Name                             Command                   State               Ports
+<span class="nt">----------------------------------------------------------------------------------------------------------</span>
+dockertest_centos_1                  /bin/bash                        Exit 137
+dockertest_centos_run_444b50259d8b   /bin/bash                        Up
+dockertest_db_1                      /entrypoint.sh <span class="nt">--default-a</span> ...   Exit 137
+dockertest_db_run_7be8af87b69d       /entrypoint.sh /bin/bash         Up <span class="o">(</span>unhealthy<span class="o">)</span>   3306/tcp, 33060/tcp
+dockertest_db_run_d093e7ed46ea       /entrypoint.sh <span class="nt">--default-a</span> ...   Up <span class="o">(</span>healthy<span class="o">)</span>     3306/tcp, 33060/tcp
+dockertest_web_1                     /usr/sbin/httpd <span class="nt">-D</span> FOREGROUND    Exit 137
+dockertest_web_run_cdccf2c10ea2      /bin/bash                        Up               80/tcp
+</code></pre></div></div>
+
+<h1 id="네트워크-정보-볼륨-컨테이너들-일괄정지삭제">네트워크 정보, 볼륨, 컨테이너들 일괄정지/삭제</h1>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">docker-compose down</code></li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost dockertest]# docker-compose down
+Stopping dockertest_web_run_cdccf2c10ea2    ... <span class="k">done
+</span>Stopping dockertest_centos_run_444b50259d8b ... <span class="k">done
+</span>Stopping dockertest_db_run_7be8af87b69d     ... <span class="k">done
+</span>Stopping dockertest_db_run_d093e7ed46ea     ... <span class="k">done
+</span>Removing dockertest_web_1                   ... <span class="k">done
+</span>Removing dockertest_centos_1                ... <span class="k">done
+</span>Removing dockertest_db_run_9bcc586000a1     ... <span class="k">done
+</span>Removing dockertest_web_run_c1a19e5e884c    ... <span class="k">done
+</span>Removing dockertest_web_run_cdccf2c10ea2    ... <span class="k">done
+</span>Removing dockertest_db_1                    ... <span class="k">done
+</span>Removing dockertest_centos_run_444b50259d8b ... <span class="k">done
+</span>Removing dockertest_db_run_7be8af87b69d     ... <span class="k">done
+</span>Removing dockertest_db_run_e048466d0c45     ... <span class="k">done
+</span>Removing dockertest_db_run_d093e7ed46ea     ... <span class="k">done
+</span>Network our_net is external, skipping
+<span class="o">[</span>root@localhost dockertest]# docker-compose ps
+Name   Command   State   Ports
+<span class="nt">------------------------------</span>
+</code></pre></div></div>
+
+<h1 id="서비스-private-포트번호-확인">서비스 private 포트번호 확인</h1>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">docker-compose [서비스명] [프라이빗 포트 번호]</code></li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost dockertest]# docker-compose port web 80
+0.0.0.0:4000
+</code></pre></div></div>
+
+<h1 id="docker-compose-구성파일-확인">docker-compose 구성파일 확인</h1>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">docker-compose config</code></li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost dockertest]# docker-compose config
+networks:
+  default:
+    external: <span class="nb">true
+    </span>name: our_net
+services:
+  centos:
+    image: centos:7
+    stdin_open: <span class="nb">true
+    tty</span>: <span class="nb">true
+  </span>db:
+    build:
+      context: /dockertest/mysql
+      dockerfile: Dockerfile
+    <span class="nb">command</span>: <span class="nt">--default-authentication-plugin</span><span class="o">=</span>mysql_native_password
+    environment:
+      MYSQL_ROOT_HOST: <span class="s1">'%'</span>
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+    - published: 3306
+      target: 3306
+    volumes:
+    - /dockertest/data:/var/lib/mysql:rw
+  web:
+    build:
+      context: /dockertest/apache-php
+      dockerfile: Dockerfile
+    depends_on:
+    - db
+    ports:
+    - published: 4000
+      target: 80
+    volumes:
+    - /dockertest/www:/var/www:rw
+version: <span class="s1">'3'</span>
+</code></pre></div></div>
+:ET
