@@ -1,0 +1,178 @@
+I"35<h1 id="쿠버네티스란">쿠버네티스란?</h1>
+
+<ul>
+  <li>컨테이너 운영을 자동화하기 위한 컨테이너 오케스트레이션 도구 (풀어서 말하면 많은 컨테이너를 협조적으로 연동시키기 위한 통합 시스템, API와 명령행 도구인 kubectl, Minikube 등 도구 제공)</li>
+  <li>배포 이외에도 배치, 스케일링, 로드 밸런싱, 헬스 체크 등 기능 보유</li>
+  <li>유연한 애플리케이션 구축 가능</li>
+  <li>컴포즈, 스택, 스웜 기능을 통합하여 고수준의 관리 기능 제공</li>
+</ul>
+
+<h1 id="minikube-설치-및-실행-window10-기준">Minikube 설치 및 실행 (Window10 기준)</h1>
+
+<ul>
+  <li>관리자 권한으로 cmd창을 실행해야 설치가 정상적으로 됨</li>
+  <li><code class="language-plaintext highlighter-rouge">Hyper-V 설치</code>와 <code class="language-plaintext highlighter-rouge">Docker Desktop</code> 실행까지는 이미 되었다는 가정하에 진행</li>
+  <li>드라이버가 필자와 다를 경우 해당사이트에서 확인 - <a href="https://kubernetes.io/ko/docs/setup/learning-environment/minikube/#vm-%EB%93%9C%EB%9D%BC%EC%9D%B4%EB%B2%84-%EC%A7%80%EC%A0%95%ED%95%98%EA%B8%B0">https://kubernetes.io/ko/docs/setup/learning-environment/minikube/#vm-드라이버-지정하기</a></li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## choco 설치</span>
+@<span class="s2">"%SystemRoot%</span><span class="se">\S</span><span class="s2">ystem32</span><span class="se">\W</span><span class="s2">indowsPowerShell</span><span class="se">\v</span><span class="s2">1.0</span><span class="se">\p</span><span class="s2">owershell.exe"</span> <span class="nt">-NoProfile</span> <span class="nt">-InputFormat</span> None <span class="nt">-ExecutionPolicy</span> Bypass <span class="nt">-Command</span> <span class="s2">"iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"</span> <span class="o">&amp;&amp;</span> SET <span class="s2">"PATH=%PATH%;%ALLUSERSPROFILE%</span><span class="se">\c</span><span class="s2">hocolatey</span><span class="se">\b</span><span class="s2">in"</span>
+
+<span class="c">## minikube 설치</span>
+choco <span class="nb">install </span>minikube
+
+<span class="c">## minikube 클러스터 실행 (드라이버는 hyperv 기준으로 세팅함)</span>
+C:<span class="se">\W</span>INDOWS<span class="se">\s</span>ystem32&gt;minikube start <span class="nt">--driver</span><span class="o">=</span>hyperv
+
+<span class="c">## minikube 클러스터 상태 확인</span>
+C:<span class="se">\W</span>INDOWS<span class="se">\s</span>ystem32&gt;minikube status
+minikube
+<span class="nb">type</span>: Control Plane
+host: Running
+kubelet: Running
+apiserver: Running
+kubeconfig: Configured
+
+<span class="c">## minikube 클러스터 중지</span>
+C:<span class="se">\W</span>INDOWS<span class="se">\s</span>ystem32&gt;minikube stop
+<span class="k">*</span> Stopping node <span class="s2">"minikube"</span>  ...
+<span class="k">*</span> 1 nodes stopped.
+</code></pre></div></div>
+
+<h1 id="minikube로-쿠버네티스-설치하기">Minikube로 쿠버네티스 설치하기</h1>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## minikube를 시작하고 클러스터를 생성</span>
+C:<span class="se">\W</span>INDOWS<span class="se">\s</span>ystem32&gt;minikube start
+<span class="k">*</span> Microsoft Windows 10 Pro 10.0.19041 Build 19041 위의 minikube v1.13.0
+<span class="k">*</span> 기존 프로필에 기반하여 hyperv 드라이버를 사용하는 중
+<span class="k">*</span> Starting control plane node minikube <span class="k">in </span>cluster minikube
+<span class="k">*</span> Restarting existing hyperv VM <span class="k">for</span> <span class="s2">"minikube"</span> ...
+<span class="k">*</span> 쿠버네티스 v1.19.0 을 Docker 19.03.12 런타임으로 설치하는 중
+<span class="k">*</span> Verifying Kubernetes components...
+<span class="k">*</span> Enabled addons: default-storageclass, storage-provisioner
+
+<span class="o">!</span> C:<span class="se">\P</span>rogram Files<span class="se">\D</span>ocker<span class="se">\D</span>ocker<span class="se">\r</span>esources<span class="se">\b</span><span class="k">in</span><span class="se">\k</span>ubectl.exe is version 1.16.6-beta.0, which may have incompatibilites with Kubernetes 1.19.0.
+<span class="k">*</span> Want kubectl v1.19.0? Try <span class="s1">'minikube kubectl -- get pods -A'</span>
+<span class="k">*</span> Done! kubectl is now configured to use <span class="s2">"minikube"</span> by default
+
+<span class="c">## 간단한 http 서버인 echoserver를 8080포트로 노출하기</span>
+C:<span class="se">\W</span>INDOWS<span class="se">\s</span>ystem32&gt;kubectl create deployment hello-minikube <span class="nt">--image</span><span class="o">=</span>k8s.gcr.io/echoserver:1.10
+deployment.apps/hello-minikube created
+
+C:<span class="se">\W</span>INDOWS<span class="se">\s</span>ystem32&gt;kubectl expose deployment hello-minikube <span class="nt">--type</span><span class="o">=</span>NodePort <span class="nt">--port</span><span class="o">=</span>8080
+service/hello-minikube exposed
+
+<span class="c">## 노출된 서비스를 접근하기 전에 파트가 떴는지 확인</span>
+<span class="c">## 파드는 하나 또는 그 이상의 애플리케이션 컨테이너 (도커 또는 rkt와 같은)들의 그룹을 나타내는 쿠버네티스의 추상적 개념</span>
+C:<span class="se">\W</span>INDOWS<span class="se">\s</span>ystem32&gt;kubectl get pod
+NAME                              READY   STATUS    RESTARTS   AGE
+hello-minikube-5d9b964bfb-wdl9f   1/1     Running   0          2m57s
+
+<span class="c">## 서비스 상세를 보기 위해 url 정보 얻기</span>
+C:<span class="se">\W</span>INDOWS<span class="se">\s</span>ystem32&gt;minikube service hello-minikube <span class="nt">--url</span>
+http://172.21.19.43:32512
+</code></pre></div></div>
+
+<ul>
+  <li>URL을 통해 로컬 클러스터의 상세 확인</li>
+</ul>
+
+<p>![(/assets/img/kubernetes1.png]((/assets/img/kubernetes1.png)</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## hello-minikube 서비스 삭제</span>
+C:<span class="se">\W</span>INDOWS<span class="se">\s</span>ystem32&gt;kubectl delete services  hello-minikube
+
+<span class="c">## hello-minikube deployment 삭제                                                             service "hello-minikube" deleted                                                                                        </span>
+C:<span class="se">\W</span>INDOWS<span class="se">\s</span>ystem32&gt;kubectl delete deployment hello-minikube
+deployment.apps <span class="s2">"hello-minikube"</span> deleted
+
+<span class="c">## 로컬 minikube 클러스터 중지</span>
+C:<span class="se">\W</span>INDOWS<span class="se">\s</span>ystem32&gt;minikube stop
+<span class="k">*</span> Stopping node <span class="s2">"minikube"</span>  ...
+<span class="k">*</span> Powering off <span class="s2">"minikube"</span> via SSH ...
+E0909 17:38:41.574408   26032 main.go:111] libmachine: <span class="o">[</span>stderr <span class="o">=====&gt;]</span> : Hyper-V<span class="se">\S</span>top-VM : Windows PowerShell is <span class="k">in </span>NonInteractive mode. Read and Prompt functionality is not available.
+At line:1 char:1
++ Hyper-V<span class="se">\S</span>top-VM minikube
++ ~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: <span class="o">(</span>:<span class="o">)</span> <span class="o">[</span>Stop-VM], VirtualizationException
+    + FullyQualifiedErrorId : InvalidOperation,Microsoft.HyperV.PowerShell.Commands.StopVM
+
+<span class="k">*</span> Stopping node <span class="s2">"minikube"</span>  ...
+<span class="k">*</span> 1 nodes stopped.
+
+<span class="c">## 로컬 minikube 클러스터 삭제</span>
+C:<span class="se">\W</span>INDOWS<span class="se">\s</span>ystem32&gt;minikube delete
+<span class="k">*</span> Stopping node <span class="s2">"minikube"</span>  ...
+<span class="k">*</span> hyperv 의 <span class="s2">"minikube"</span> 를 삭제하는 중 ...
+<span class="k">*</span> <span class="s2">"minikube"</span> 클러스터 관련 정보가 모두 삭제되었습니다
+</code></pre></div></div>
+
+<h1 id="클러스터-관리하기">클러스터 관리하기</h1>
+
+<h2 id="클러스터-시작하기">클러스터 시작하기</h2>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">minikube start</code></li>
+</ul>
+
+<h3 id="프록시-지정">프록시 지정</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>minikube start <span class="nt">--docker-env</span> <span class="nv">http_proxy</span><span class="o">=</span>&lt;my proxy&gt; <span class="nt">--docker-env</span> <span class="nv">https_proxy</span><span class="o">=</span>&lt;my proxy&gt; <span class="nt">--docker-env</span> <span class="nv">no_proxy</span><span class="o">=</span>192.168.99.0/24
+</code></pre></div></div>
+
+<h3 id="쿠버네티스-버전-지정">쿠버네티스 버전 지정</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>minikube start <span class="nt">--kubernetes-version</span> v1.19.0
+</code></pre></div></div>
+
+<h3 id="vm-드라이버-지정-택-1">VM 드라이버 지정 (택 1)</h3>
+
+<ul>
+  <li>docker (<a href="https://minikube.sigs.k8s.io/docs/drivers/docker/">드라이버 설치</a>)</li>
+  <li>virtualbox (<a href="https://minikube.sigs.k8s.io/docs/drivers/virtualbox/">드라이버 설치</a>)</li>
+  <li>podman (<a href="https://minikube.sigs.k8s.io/docs/drivers/podman/">드라이버 설치</a>) (EXPERIMENTAL)</li>
+  <li>vmwarefusion</li>
+  <li>kvm2 (<a href="https://minikube.sigs.k8s.io/docs/reference/drivers/kvm2/">드라이버 설치</a>)</li>
+  <li>hyperkit (<a href="https://minikube.sigs.k8s.io/docs/reference/drivers/hyperkit/">드라이버 설치</a>)</li>
+  <li>hyperv (<a href="https://minikube.sigs.k8s.io/docs/reference/drivers/hyperv/">드라이버 설치</a>) 다음 IP는 동적이며 변경할 수 있다. <code class="language-plaintext highlighter-rouge">minikube ip</code>로 알아낼 수 있다.</li>
+  <li>vmware (<a href="https://minikube.sigs.k8s.io/docs/reference/drivers/vmware/">드라이버 설치</a>) (VMware unified driver)</li>
+  <li>parallels (<a href="https://minikube.sigs.k8s.io/docs/reference/drivers/parallels/">드라이버 설치</a>)</li>
+  <li>none (쿠버네티스 컴포넌트를 가상 머신이 아닌 호스트 상에서 구동한다. 리눅스를 실행중이어야 하고, <a href="https://docs.docker.com/engine/">도커(Docker)</a>가 설치되어야 한다.)</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>minikube start <span class="nt">--driver</span><span class="o">=</span>&lt;driver_name&gt;
+</code></pre></div></div>
+
+<h3 id="컨테이너-런타임-상에서-클러스터-시작하기">컨테이너 런타임 상에서 클러스터 시작하기</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## 기본 버전</span>
+minikube start <span class="se">\</span>
+    <span class="nt">--network-plugin</span><span class="o">=</span>cni <span class="se">\</span>
+    <span class="nt">--enable-default-cni</span> <span class="se">\</span>
+    <span class="nt">--container-runtime</span><span class="o">=</span>containerd <span class="se">\</span>
+    <span class="nt">--bootstrapper</span><span class="o">=</span>kubeadm
+
+<span class="c">## 확장 버전</span>
+minikube start <span class="se">\</span>
+    <span class="nt">--network-plugin</span><span class="o">=</span>cni <span class="se">\</span>
+    <span class="nt">--enable-default-cni</span> <span class="se">\</span>
+    <span class="nt">--extra-config</span><span class="o">=</span>kubelet.container-runtime<span class="o">=</span>remote <span class="se">\</span>
+    <span class="nt">--extra-config</span><span class="o">=</span>kubelet.container-runtime-endpoint<span class="o">=</span>unix:///run/containerd/containerd.sock <span class="se">\</span>
+    <span class="nt">--extra-config</span><span class="o">=</span>kubelet.image-service-endpoint<span class="o">=</span>unix:///run/containerd/containerd.sock <span class="se">\</span>
+    <span class="nt">--bootstrapper</span><span class="o">=</span>kubeadm
+</code></pre></div></div>
+
+<h3 id="도커-데몬-재사용을-통한-로컬-이미지-사용하기">도커 데몬 재사용을 통한 로컬 이미지 사용하기</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">도커데몬(dockerd)</code>은 도커 API를 입력받아 도커 엔진의 기능을 수행</li>
+  <li>쿠버네티스 단일 VM을 사용하면 minikube에 내장된 도커 데몬을 재사용하기에 간편</li>
+  <li>호스트 장비에 도커 레지스트리를 설치하고 이미지를 푸시할 필요가 없음
+(minikube와 동일한 도커 데몬 안에서 이미지를 빌드하기 때문)</li>
+  <li>맥이나 리눅스 호스트에서 해당 Docker 데몬을 사용하려면 <code class="language-plaintext highlighter-rouge">minikube docker-env</code> 에서 마지막 줄을 실행</li>
+</ul>
+
+<p>※ 참고 사이트</p>
+
+<p><a href="https://kubernetes.io/ko/docs/setup/learning-environment">https://kubernetes.io/ko/docs/setup/learning-environment</a></p>
+:ET
