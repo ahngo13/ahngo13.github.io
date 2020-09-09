@@ -1,0 +1,767 @@
+I"V�<h1 id="compose-설치-centos-7-minimal-기준">Compose 설치 (CentOS 7 minimal 기준)</h1>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>yum <span class="nb">install</span> <span class="nt">-y</span> yum-utils device-mapper-persistent-data lvm2
+yum-config-manager <span class="nt">--add-repo</span> https://download.docker.com/linux/centos/docker-ce.repo
+yum <span class="nb">install </span>docker-ce
+systemctl start docker
+
+//도커 컴포즈 버전 확인
+<span class="o">[</span>root@localhost ~]# docker-compose <span class="nt">--version</span>
+docker-compose version 1.27.0, build 980ec85b
+</code></pre></div></div>
+
+<h1 id="도커-컴포즈-기본-사용법">도커 컴포즈 기본 사용법</h1>
+
+<h2 id="docker-composeyml-파일-작성">docker-compose.yml 파일 작성</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vi docker-compose.yml
+
+//docker-compose.yml 파일 내용
+version: <span class="s2">"3"</span>
+services:
+  <span class="nb">echo</span>:
+    image: centos:7
+    ports:
+      - 9000:8080
+</code></pre></div></div>
+
+<h2 id="docker-compose-실행">docker-compose 실행</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker-compose up <span class="nt">-d</span> // <span class="nt">-d</span> 옵션 : 백그라운드 실행
+</code></pre></div></div>
+
+<h2 id="docker-compose-실행-상태-확인">docker-compose 실행 상태 확인</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost dockertest]# docker-compose ps
+      Name           Command    State    Ports
+<span class="nt">----------------------------------------------</span>
+dockertest_echo_1   /bin/bash   Exit 0
+</code></pre></div></div>
+
+<h1 id="centos-apache-php-mysql-환경-구성">CentOS, Apache, PHP, MySQL 환경 구성</h1>
+
+<h2 id="파일-구조">파일 구조</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dockertest/
+   ├─ apache-php/
+   │  └─ Dockerfile
+   ├─ data/
+   ├─ docker-compose.yml
+   ├─ mysql/
+   │   ├─ docker-entrypoint.sh
+   │   └─ Dockerfile
+   │   └─ healthcheck.sh
+   └─ www/
+      └─ html/
+          └─ test.php
+</code></pre></div></div>
+
+<h2 id="centos-apache-웹서버php-dockerfile">CentOS Apache 웹서버(PHP) Dockerfile</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>FROM centos:7
+
+<span class="c"># Install Apache</span>
+RUN yum <span class="nt">-y</span> update
+RUN yum <span class="nt">-y</span> <span class="nb">install </span>httpd httpd-tools
+
+<span class="c"># Install EPEL Repo</span>
+RUN rpm <span class="nt">-Uvh</span> https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm <span class="se">\</span>
+ <span class="o">&amp;&amp;</span> rpm <span class="nt">-Uvh</span> http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+
+<span class="c"># Install PHP</span>
+RUN yum <span class="nt">--enablerepo</span><span class="o">=</span>remi-php73 <span class="nt">-y</span> <span class="nb">install </span>php php-bcmath php-cli php-common php-gd php-intl php-ldap php-mbstring <span class="se">\</span>
+    php-mysqlnd php-pear php-soap php-xml php-xmlrpc php-zip
+
+<span class="c"># Update Apache Configuration</span>
+RUN <span class="nb">sed</span> <span class="nt">-E</span> <span class="nt">-i</span> <span class="nt">-e</span> <span class="s1">'/&lt;Directory "\/var\/www\/html"&gt;/,/&lt;\/Directory&gt;/s/AllowOverride None/AllowOverride All/'</span> /etc/httpd/conf/httpd.conf
+RUN <span class="nb">sed</span> <span class="nt">-E</span> <span class="nt">-i</span> <span class="nt">-e</span> <span class="s1">'s/DirectoryIndex (.*)$/DirectoryIndex index.php \1/g'</span> /etc/httpd/conf/httpd.conf
+
+EXPOSE 80
+
+<span class="c"># Start Apache</span>
+CMD <span class="o">[</span><span class="s2">"/usr/sbin/httpd"</span>,<span class="s2">"-D"</span>,<span class="s2">"FOREGROUND"</span><span class="o">]</span>
+</code></pre></div></div>
+
+<h2 id="mysql-db-서버-dockerfile">MySQL DB 서버 Dockerfile</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>FROM oraclelinux:7-slim
+
+ARG <span class="nv">MYSQL_SERVER_PACKAGE</span><span class="o">=</span>mysql-community-server-minimal-8.0.19
+ARG <span class="nv">MYSQL_SHELL_PACKAGE</span><span class="o">=</span>mysql-shell-8.0.19
+
+<span class="c"># Install server</span>
+RUN yum <span class="nb">install</span> <span class="nt">-y</span> https://repo.mysql.com/mysql-community-minimal-release-el7.rpm <span class="se">\</span>
+        https://repo.mysql.com/mysql-community-release-el7.rpm <span class="se">\</span>
+    <span class="o">&amp;&amp;</span> yum-config-manager <span class="nt">--enable</span> mysql80-server-minimal <span class="se">\</span>
+    <span class="o">&amp;&amp;</span> yum <span class="nb">install</span> <span class="nt">-y</span> <span class="se">\</span>
+        <span class="nv">$MYSQL_SERVER_PACKAGE</span> <span class="se">\</span>
+        <span class="nv">$MYSQL_SHELL_PACKAGE</span> <span class="se">\</span>
+        libpwquality <span class="se">\</span>
+    <span class="o">&amp;&amp;</span> yum clean all <span class="se">\</span>
+    <span class="o">&amp;&amp;</span> <span class="nb">mkdir</span> /docker-entrypoint-initdb.d
+
+VOLUME /var/lib/mysql
+
+COPY docker-entrypoint.sh /entrypoint.sh
+COPY healthcheck.sh /healthcheck.sh
+
+RUN <span class="nb">chmod</span> +x /entrypoint.sh
+RUN <span class="nb">chmod</span> +x /healthcheck.sh
+
+ENTRYPOINT <span class="o">[</span><span class="s2">"/entrypoint.sh"</span><span class="o">]</span>
+HEALTHCHECK CMD /healthcheck.sh
+EXPOSE 3306 33060
+CMD <span class="o">[</span><span class="s2">"mysqld"</span><span class="o">]</span>
+</code></pre></div></div>
+
+<h2 id="docker-entrypointsh">docker-entrypoint.sh</h2>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/bin/bash</span>
+<span class="c1"># Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># the Free Software Foundation; version 2 of the License.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with this program; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA</span>
+<span class="n">set</span> <span class="o">-</span><span class="n">e</span>
+
+<span class="k">echo</span> <span class="s2">"[Entrypoint] MySQL Docker Image 8.0.19-1.1.15"</span>
+<span class="c1"># Fetch value from server config</span>
+<span class="c1"># We use mysqld --verbose --help instead of my_print_defaults because the</span>
+<span class="c1"># latter only show values present in config files, and not server defaults</span>
+<span class="nf">_get_config</span><span class="p">()</span> <span class="p">{</span>
+	<span class="n">local</span> <span class="n">conf</span><span class="o">=</span><span class="s2">"$1"</span><span class="p">;</span> <span class="n">shift</span>
+	<span class="s2">"$@"</span> <span class="o">--</span><span class="n">verbose</span> <span class="o">--</span><span class="n">help</span> <span class="mi">2</span><span class="o">&gt;/</span><span class="n">dev</span><span class="o">/</span><span class="kc">null</span> <span class="o">|</span> <span class="n">grep</span> <span class="s2">"^</span><span class="nv">$conf</span><span class="s2">"</span> <span class="o">|</span> <span class="n">awk</span> <span class="s1">'$1 == "'</span><span class="s2">"</span><span class="nv">$conf</span><span class="s2">"</span><span class="s1">'" { print $2; exit }'</span>
+<span class="p">}</span>
+
+<span class="c1"># If command starts with an option, prepend mysqld</span>
+<span class="c1"># This allows users to add command-line options without</span>
+<span class="c1"># needing to specify the "mysqld" command</span>
+<span class="k">if</span> <span class="p">[</span> <span class="s2">"${1:0:1}"</span> <span class="o">=</span> <span class="s1">'-'</span> <span class="p">];</span> <span class="n">then</span>
+	<span class="n">set</span> <span class="o">--</span> <span class="n">mysqld</span> <span class="s2">"$@"</span>
+<span class="n">fi</span>
+
+<span class="k">if</span> <span class="p">[</span> <span class="s2">"$1"</span> <span class="o">=</span> <span class="s1">'mysqld'</span> <span class="p">];</span> <span class="n">then</span>
+	<span class="c1"># Test that the server can start. We redirect stdout to /dev/null so</span>
+	<span class="c1"># only the error messages are left.</span>
+	<span class="n">result</span><span class="o">=</span><span class="mi">0</span>
+	<span class="n">output</span><span class="o">=</span><span class="err">$</span><span class="p">(</span><span class="s2">"$@"</span> <span class="o">--</span><span class="n">validate</span><span class="o">-</span><span class="n">config</span><span class="p">)</span> <span class="o">||</span> <span class="n">result</span><span class="o">=</span><span class="err">$</span><span class="o">?</span>
+	<span class="k">if</span> <span class="p">[</span> <span class="o">!</span> <span class="s2">"</span><span class="nv">$result</span><span class="s2">"</span> <span class="o">=</span> <span class="s2">"0"</span> <span class="p">];</span> <span class="n">then</span>
+		<span class="k">echo</span> <span class="o">&gt;&amp;</span><span class="mi">2</span> <span class="s1">'[Entrypoint] ERROR: Unable to start MySQL. Please check your configuration.'</span>
+		<span class="k">echo</span> <span class="o">&gt;&amp;</span><span class="mi">2</span> <span class="s2">"[Entrypoint] </span><span class="nv">$output</span><span class="s2">"</span>
+		<span class="k">exit</span> <span class="mi">1</span>
+	<span class="n">fi</span>
+
+	<span class="c1"># Get config</span>
+	<span class="no">DATADIR</span><span class="o">=</span><span class="s2">"$(_get_config 'datadir' "</span><span class="err">$</span><span class="o">@</span><span class="s2">")"</span>
+	<span class="no">SOCKET</span><span class="o">=</span><span class="s2">"$(_get_config 'socket' "</span><span class="err">$</span><span class="o">@</span><span class="s2">")"</span>
+
+	<span class="k">if</span> <span class="p">[</span> <span class="o">-</span><span class="n">n</span> <span class="s2">"</span><span class="nv">$MYSQL_LOG_CONSOLE</span><span class="s2">"</span> <span class="p">]</span> <span class="o">||</span> <span class="p">[</span> <span class="o">-</span><span class="n">n</span> <span class="s2">"console"</span> <span class="p">];</span> <span class="n">then</span>
+		<span class="c1"># Don't touch bind-mounted config files</span>
+		<span class="k">if</span> <span class="o">!</span> <span class="n">cat</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="mi">1</span><span class="o">/</span><span class="n">mounts</span> <span class="o">|</span> <span class="n">grep</span> <span class="s2">"etc/my.cnf"</span><span class="p">;</span> <span class="n">then</span>
+			<span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s1">'s/^log-error=/#&amp;/'</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">my</span><span class="mf">.</span><span class="n">cnf</span>
+		<span class="n">fi</span>
+	<span class="n">fi</span>
+
+	<span class="k">if</span> <span class="p">[</span> <span class="o">!</span> <span class="o">-</span><span class="n">d</span> <span class="s2">"</span><span class="nv">$DATADIR</span><span class="s2">/mysql"</span> <span class="p">];</span> <span class="n">then</span>
+		<span class="c1"># If the password variable is a filename we use the contents of the file. We</span>
+		<span class="c1"># read this first to make sure that a proper error is generated for empty files.</span>
+		<span class="k">if</span> <span class="p">[</span> <span class="o">-</span><span class="n">f</span> <span class="s2">"</span><span class="nv">$MYSQL_ROOT_PASSWORD</span><span class="s2">"</span> <span class="p">];</span> <span class="n">then</span>
+			<span class="no">MYSQL_ROOT_PASSWORD</span><span class="o">=</span><span class="s2">"$(cat </span><span class="nv">$MYSQL_ROOT_PASSWORD</span><span class="s2">)"</span>
+			<span class="k">if</span> <span class="p">[</span> <span class="o">-</span><span class="n">z</span> <span class="s2">"</span><span class="nv">$MYSQL_ROOT_PASSWORD</span><span class="s2">"</span> <span class="p">];</span> <span class="n">then</span>
+				<span class="k">echo</span> <span class="o">&gt;&amp;</span><span class="mi">2</span> <span class="s1">'[Entrypoint] Empty MYSQL_ROOT_PASSWORD file specified.'</span>
+				<span class="k">exit</span> <span class="mi">1</span>
+			<span class="n">fi</span>
+		<span class="n">fi</span>
+		<span class="k">if</span> <span class="p">[</span> <span class="o">-</span><span class="n">z</span> <span class="s2">"</span><span class="nv">$MYSQL_ROOT_PASSWORD</span><span class="s2">"</span> <span class="o">-</span><span class="n">a</span> <span class="o">-</span><span class="n">z</span> <span class="s2">"</span><span class="nv">$MYSQL_ALLOW_EMPTY_PASSWORD</span><span class="s2">"</span> <span class="o">-</span><span class="n">a</span> <span class="o">-</span><span class="n">z</span> <span class="s2">"</span><span class="nv">$MYSQL_RANDOM_ROOT_PASSWORD</span><span class="s2">"</span> <span class="p">];</span> <span class="n">then</span>
+			<span class="k">echo</span> <span class="o">&gt;&amp;</span><span class="mi">2</span> <span class="s1">'[Entrypoint] No password option specified for new database.'</span>
+			<span class="k">echo</span> <span class="o">&gt;&amp;</span><span class="mi">2</span> <span class="s1">'[Entrypoint]   A random onetime password will be generated.'</span>
+			<span class="no">MYSQL_RANDOM_ROOT_PASSWORD</span><span class="o">=</span><span class="kc">true</span>
+			<span class="no">MYSQL_ONETIME_PASSWORD</span><span class="o">=</span><span class="kc">true</span>
+		<span class="n">fi</span>
+		<span class="n">mkdir</span> <span class="o">-</span><span class="n">p</span> <span class="s2">"</span><span class="nv">$DATADIR</span><span class="s2">"</span>
+		<span class="n">chown</span> <span class="o">-</span><span class="nc">R</span> <span class="n">mysql</span><span class="o">:</span><span class="n">mysql</span> <span class="s2">"</span><span class="nv">$DATADIR</span><span class="s2">"</span>
+
+		<span class="k">echo</span> <span class="s1">'[Entrypoint] Initializing database'</span>
+		<span class="s2">"$@"</span> <span class="o">--</span><span class="n">initialize</span><span class="o">-</span><span class="n">insecure</span>
+		<span class="k">echo</span> <span class="s1">'[Entrypoint] Database initialized'</span>
+
+		<span class="s2">"$@"</span> <span class="o">--</span><span class="n">daemonize</span> <span class="o">--</span><span class="n">skip</span><span class="o">-</span><span class="n">networking</span> <span class="o">--</span><span class="n">socket</span><span class="o">=</span><span class="s2">"</span><span class="nv">$SOCKET</span><span class="s2">"</span>
+
+		<span class="c1"># To avoid using password on commandline, put it in a temporary file.</span>
+		<span class="c1"># The file is only populated when and if the root password is set.</span>
+		<span class="no">PASSFILE</span><span class="o">=</span><span class="err">$</span><span class="p">(</span><span class="n">mktemp</span> <span class="o">-</span><span class="n">u</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">mysql</span><span class="o">-</span><span class="n">files</span><span class="o">/</span><span class="no">XXXXXXXXXX</span><span class="p">)</span>
+		<span class="n">install</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="kc">null</span> <span class="o">-</span><span class="n">m0600</span> <span class="o">-</span><span class="n">omysql</span> <span class="o">-</span><span class="n">gmysql</span> <span class="s2">"</span><span class="nv">$PASSFILE</span><span class="s2">"</span>
+		<span class="c1"># Define the client command used throughout the script</span>
+		<span class="c1"># "SET @@SESSION.SQL_LOG_BIN=0;" is required for products like group replication to work properly</span>
+		<span class="n">mysql</span><span class="o">=</span><span class="p">(</span> <span class="n">mysql</span> <span class="o">--</span><span class="n">defaults</span><span class="o">-</span><span class="n">extra</span><span class="o">-</span><span class="n">file</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PASSFILE</span><span class="s2">"</span> <span class="o">--</span><span class="n">protocol</span><span class="o">=</span><span class="n">socket</span> <span class="o">-</span><span class="n">uroot</span> <span class="o">-</span><span class="n">hlocalhost</span> <span class="o">--</span><span class="n">socket</span><span class="o">=</span><span class="s2">"</span><span class="nv">$SOCKET</span><span class="s2">"</span> <span class="o">--</span><span class="n">init</span><span class="o">-</span><span class="n">command</span><span class="o">=</span><span class="s2">"SET @@SESSION.SQL_LOG_BIN=0;"</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="p">[</span> <span class="o">!</span> <span class="o">-</span><span class="n">z</span> <span class="s2">""</span> <span class="p">];</span>
+		<span class="n">then</span>
+			<span class="k">for</span> <span class="n">i</span> <span class="n">in</span> <span class="p">{</span><span class="mf">30..0</span><span class="p">};</span> <span class="k">do</span>
+				<span class="k">if</span> <span class="n">mysqladmin</span> <span class="o">--</span><span class="n">socket</span><span class="o">=</span><span class="s2">"</span><span class="nv">$SOCKET</span><span class="s2">"</span> <span class="n">ping</span> <span class="o">&amp;&gt;/</span><span class="n">dev</span><span class="o">/</span><span class="kc">null</span><span class="p">;</span> <span class="n">then</span>
+					<span class="k">break</span>
+				<span class="n">fi</span>
+				<span class="k">echo</span> <span class="s1">'[Entrypoint] Waiting for server...'</span>
+				<span class="n">sleep</span> <span class="mi">1</span>
+			<span class="n">done</span>
+			<span class="k">if</span> <span class="p">[</span> <span class="s2">"</span><span class="nv">$i</span><span class="s2">"</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">];</span> <span class="n">then</span>
+				<span class="k">echo</span> <span class="o">&gt;&amp;</span><span class="mi">2</span> <span class="s1">'[Entrypoint] Timeout during MySQL init.'</span>
+				<span class="k">exit</span> <span class="mi">1</span>
+			<span class="n">fi</span>
+		<span class="n">fi</span>
+
+		<span class="n">mysql_tzinfo_to_sql</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">zoneinfo</span> <span class="o">|</span> <span class="s2">"${mysql[@]}"</span> <span class="n">mysql</span>
+		
+		<span class="k">if</span> <span class="p">[</span> <span class="o">!</span> <span class="o">-</span><span class="n">z</span> <span class="s2">"</span><span class="nv">$MYSQL_RANDOM_ROOT_PASSWORD</span><span class="s2">"</span> <span class="p">];</span> <span class="n">then</span>
+			<span class="no">MYSQL_ROOT_PASSWORD</span><span class="o">=</span><span class="s2">"$(pwmake 128)"</span>
+			<span class="k">echo</span> <span class="s2">"[Entrypoint] GENERATED ROOT PASSWORD: </span><span class="nv">$MYSQL_ROOT_PASSWORD</span><span class="s2">"</span>
+		<span class="n">fi</span>
+		<span class="k">if</span> <span class="p">[</span> <span class="o">-</span><span class="n">z</span> <span class="s2">"</span><span class="nv">$MYSQL_ROOT_HOST</span><span class="s2">"</span> <span class="p">];</span> <span class="n">then</span>
+			<span class="no">ROOTCREATE</span><span class="o">=</span><span class="s2">"ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"</span>
+		<span class="k">else</span>
+			<span class="no">ROOTCREATE</span><span class="o">=</span><span class="s2">"ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}'; \
+			CREATE USER 'root'@'${MYSQL_ROOT_HOST}' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}'; \
+			GRANT ALL ON *.* TO 'root'@'${MYSQL_ROOT_HOST}' WITH GRANT OPTION ; \
+			GRANT PROXY ON ''@'' TO 'root'@'${MYSQL_ROOT_HOST}' WITH GRANT OPTION ;"</span>
+		<span class="n">fi</span>
+		<span class="s2">"${mysql[@]}"</span> <span class="o">&lt;&lt;-</span><span class="no">EOSQL</span>
+			<span class="no">DELETE</span> <span class="no">FROM</span> <span class="n">mysql</span><span class="mf">.</span><span class="n">user</span> <span class="no">WHERE</span> <span class="n">user</span> <span class="no">NOT</span> <span class="nf">IN</span> <span class="p">(</span><span class="s1">'mysql.infoschema'</span><span class="p">,</span> <span class="s1">'mysql.session'</span><span class="p">,</span> <span class="s1">'mysql.sys'</span><span class="p">,</span> <span class="s1">'root'</span><span class="p">)</span> <span class="k">OR</span> <span class="n">host</span> <span class="no">NOT</span> <span class="nf">IN</span> <span class="p">(</span><span class="s1">'localhost'</span><span class="p">);</span>
+			<span class="no">CREATE</span> <span class="no">USER</span> <span class="s1">'healthchecker'</span><span class="o">@</span><span class="s1">'localhost'</span> <span class="no">IDENTIFIED</span> <span class="no">BY</span> <span class="s1">'healthcheckpass'</span><span class="p">;</span>
+			<span class="err">$</span><span class="p">{</span><span class="no">ROOTCREATE</span><span class="p">}</span>
+			<span class="no">FLUSH</span> <span class="no">PRIVILEGES</span> <span class="p">;</span>
+		<span class="no">EOSQL</span>
+		<span class="k">if</span> <span class="p">[</span> <span class="o">!</span> <span class="o">-</span><span class="n">z</span> <span class="s2">"</span><span class="nv">$MYSQL_ROOT_PASSWORD</span><span class="s2">"</span> <span class="p">];</span> <span class="n">then</span>
+			<span class="c1"># Put the password into the temporary config file</span>
+			<span class="n">cat</span> <span class="o">&gt;</span><span class="s2">"</span><span class="nv">$PASSFILE</span><span class="s2">"</span> <span class="o">&lt;&lt;</span><span class="no">EOF</span>
+<span class="p">[</span><span class="n">client</span><span class="p">]</span>
+<span class="n">password</span><span class="o">=</span><span class="s2">"${MYSQL_ROOT_PASSWORD}"</span>
+<span class="no">EOF</span>
+			<span class="c1">#mysql+=( -p"${MYSQL_ROOT_PASSWORD}" )</span>
+		<span class="n">fi</span>
+
+		<span class="k">if</span> <span class="p">[</span> <span class="s2">"</span><span class="nv">$MYSQL_DATABASE</span><span class="s2">"</span> <span class="p">];</span> <span class="n">then</span>
+			<span class="k">echo</span> <span class="s2">"CREATE DATABASE IF NOT EXISTS \`</span><span class="nv">$MYSQL_DATABASE</span><span class="s2">\` ;"</span> <span class="o">|</span> <span class="s2">"${mysql[@]}"</span>
+			<span class="n">mysql</span><span class="o">+=</span><span class="p">(</span> <span class="s2">"</span><span class="nv">$MYSQL_DATABASE</span><span class="s2">"</span> <span class="p">)</span>
+		<span class="n">fi</span>
+
+		<span class="k">if</span> <span class="p">[</span> <span class="s2">"</span><span class="nv">$MYSQL_USER</span><span class="s2">"</span> <span class="o">-</span><span class="n">a</span> <span class="s2">"</span><span class="nv">$MYSQL_PASSWORD</span><span class="s2">"</span> <span class="p">];</span> <span class="n">then</span>
+			<span class="k">echo</span> <span class="s2">"CREATE USER '"</span><span class="nv">$MYSQL_USER</span><span class="s2">"'@'%' IDENTIFIED BY '"</span><span class="nv">$MYSQL_PASSWORD</span><span class="s2">"' ;"</span> <span class="o">|</span> <span class="s2">"${mysql[@]}"</span>
+
+			<span class="k">if</span> <span class="p">[</span> <span class="s2">"</span><span class="nv">$MYSQL_DATABASE</span><span class="s2">"</span> <span class="p">];</span> <span class="n">then</span>
+				<span class="k">echo</span> <span class="s2">"GRANT ALL ON \`"</span><span class="nv">$MYSQL_DATABASE</span><span class="s2">"\`.* TO '"</span><span class="nv">$MYSQL_USER</span><span class="s2">"'@'%' ;"</span> <span class="o">|</span> <span class="s2">"${mysql[@]}"</span>
+			<span class="n">fi</span>
+
+		<span class="n">elif</span> <span class="p">[</span> <span class="s2">"</span><span class="nv">$MYSQL_USER</span><span class="s2">"</span> <span class="o">-</span><span class="n">a</span> <span class="o">!</span> <span class="s2">"</span><span class="nv">$MYSQL_PASSWORD</span><span class="s2">"</span> <span class="o">-</span><span class="n">o</span> <span class="o">!</span> <span class="s2">"</span><span class="nv">$MYSQL_USER</span><span class="s2">"</span> <span class="o">-</span><span class="n">a</span> <span class="s2">"</span><span class="nv">$MYSQL_PASSWORD</span><span class="s2">"</span> <span class="p">];</span> <span class="n">then</span>
+			<span class="k">echo</span> <span class="s1">'[Entrypoint] Not creating mysql user. MYSQL_USER and MYSQL_PASSWORD must be specified to create a mysql user.'</span>
+		<span class="n">fi</span>
+		<span class="k">echo</span>
+		<span class="k">for</span> <span class="n">f</span> <span class="n">in</span> <span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">entrypoint</span><span class="o">-</span><span class="n">initdb</span><span class="mf">.</span><span class="n">d</span><span class="o">/*</span><span class="p">;</span> <span class="k">do</span>
+			<span class="k">case</span> <span class="s2">"</span><span class="nv">$f</span><span class="s2">"</span> <span class="n">in</span>
+				<span class="o">*.</span><span class="n">sh</span><span class="p">)</span>  <span class="k">echo</span> <span class="s2">"[Entrypoint] running </span><span class="nv">$f</span><span class="s2">"</span><span class="p">;</span> <span class="mf">.</span> <span class="s2">"</span><span class="nv">$f</span><span class="s2">"</span> <span class="p">;;</span>
+				<span class="o">*.</span><span class="n">sql</span><span class="p">)</span> <span class="k">echo</span> <span class="s2">"[Entrypoint] running </span><span class="nv">$f</span><span class="s2">"</span><span class="p">;</span> <span class="s2">"${mysql[@]}"</span> <span class="o">&lt;</span> <span class="s2">"</span><span class="nv">$f</span><span class="s2">"</span> <span class="o">&amp;&amp;</span> <span class="k">echo</span> <span class="p">;;</span>
+				<span class="o">*</span><span class="p">)</span>     <span class="k">echo</span> <span class="s2">"[Entrypoint] ignoring </span><span class="nv">$f</span><span class="s2">"</span> <span class="p">;;</span>
+			<span class="n">esac</span>
+			<span class="k">echo</span>
+		<span class="n">done</span>
+
+		<span class="c1"># When using a local socket, mysqladmin shutdown will only complete when the server is actually down</span>
+		<span class="n">mysqladmin</span> <span class="o">--</span><span class="n">defaults</span><span class="o">-</span><span class="n">extra</span><span class="o">-</span><span class="n">file</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PASSFILE</span><span class="s2">"</span> <span class="n">shutdown</span> <span class="o">-</span><span class="n">uroot</span> <span class="o">--</span><span class="n">socket</span><span class="o">=</span><span class="s2">"</span><span class="nv">$SOCKET</span><span class="s2">"</span>
+		<span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="s2">"</span><span class="nv">$PASSFILE</span><span class="s2">"</span>
+		<span class="n">unset</span> <span class="no">PASSFILE</span>
+		<span class="k">echo</span> <span class="s2">"[Entrypoint] Server shut down"</span>
+
+		<span class="c1"># This needs to be done outside the normal init, since mysqladmin shutdown will not work after</span>
+		<span class="k">if</span> <span class="p">[</span> <span class="o">!</span> <span class="o">-</span><span class="n">z</span> <span class="s2">"</span><span class="nv">$MYSQL_ONETIME_PASSWORD</span><span class="s2">"</span> <span class="p">];</span> <span class="n">then</span>
+			<span class="k">if</span> <span class="p">[</span> <span class="o">-</span><span class="n">z</span> <span class="s2">"yes"</span> <span class="p">];</span> <span class="n">then</span>
+				<span class="k">echo</span> <span class="s2">"[Entrypoint] User expiration is only supported in MySQL 5.6+"</span>
+			<span class="k">else</span>
+				<span class="k">echo</span> <span class="s2">"[Entrypoint] Setting root user as expired. Password will need to be changed before database can be used."</span>
+				<span class="no">SQL</span><span class="o">=</span><span class="err">$</span><span class="p">(</span><span class="n">mktemp</span> <span class="o">-</span><span class="n">u</span> <span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">mysql</span><span class="o">-</span><span class="n">files</span><span class="o">/</span><span class="no">XXXXXXXXXX</span><span class="p">)</span>
+				<span class="n">install</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="kc">null</span> <span class="o">-</span><span class="n">m0600</span> <span class="o">-</span><span class="n">omysql</span> <span class="o">-</span><span class="n">gmysql</span> <span class="s2">"</span><span class="nv">$SQL</span><span class="s2">"</span>
+				<span class="k">if</span> <span class="p">[</span> <span class="o">!</span> <span class="o">-</span><span class="n">z</span> <span class="s2">"</span><span class="nv">$MYSQL_ROOT_HOST</span><span class="s2">"</span> <span class="p">];</span> <span class="n">then</span>
+					<span class="n">cat</span> <span class="o">&lt;&lt;</span> <span class="no">EOF</span> <span class="o">&gt;</span> <span class="s2">"</span><span class="nv">$SQL</span><span class="s2">"</span>
+<span class="no">ALTER</span> <span class="no">USER</span> <span class="s1">'root'</span><span class="o">@</span><span class="s1">'${MYSQL_ROOT_HOST}'</span> <span class="no">PASSWORD</span> <span class="no">EXPIRE</span><span class="p">;</span>
+<span class="no">ALTER</span> <span class="no">USER</span> <span class="s1">'root'</span><span class="o">@</span><span class="s1">'localhost'</span> <span class="no">PASSWORD</span> <span class="no">EXPIRE</span><span class="p">;</span>
+<span class="no">EOF</span>
+				<span class="k">else</span>
+					<span class="n">cat</span> <span class="o">&lt;&lt;</span> <span class="no">EOF</span> <span class="o">&gt;</span> <span class="s2">"</span><span class="nv">$SQL</span><span class="s2">"</span>
+<span class="no">ALTER</span> <span class="no">USER</span> <span class="s1">'root'</span><span class="o">@</span><span class="s1">'localhost'</span> <span class="no">PASSWORD</span> <span class="no">EXPIRE</span><span class="p">;</span>
+<span class="no">EOF</span>
+				<span class="n">fi</span>
+				<span class="n">set</span> <span class="o">--</span> <span class="s2">"$@"</span> <span class="o">--</span><span class="n">init</span><span class="o">-</span><span class="n">file</span><span class="o">=</span><span class="s2">"</span><span class="nv">$SQL</span><span class="s2">"</span>
+				<span class="n">unset</span> <span class="no">SQL</span>
+			<span class="n">fi</span>
+		<span class="n">fi</span>
+
+		<span class="k">echo</span>
+		<span class="k">echo</span> <span class="s1">'[Entrypoint] MySQL init process done. Ready for start up.'</span>
+		<span class="k">echo</span>
+	<span class="n">fi</span>
+
+	<span class="c1"># Used by healthcheck to make sure it doesn't mistakenly report container</span>
+	<span class="c1"># healthy during startup</span>
+	<span class="c1"># Put the password into the temporary config file</span>
+	<span class="n">touch</span> <span class="o">/</span><span class="n">healthcheck</span><span class="mf">.</span><span class="n">cnf</span>
+	<span class="n">cat</span> <span class="o">&gt;</span><span class="s2">"/healthcheck.cnf"</span> <span class="o">&lt;&lt;</span><span class="no">EOF</span>
+<span class="p">[</span><span class="n">client</span><span class="p">]</span>
+<span class="n">user</span><span class="o">=</span><span class="n">healthchecker</span>
+<span class="n">socket</span><span class="o">=</span><span class="err">$</span><span class="p">{</span><span class="no">SOCKET</span><span class="p">}</span>
+<span class="n">password</span><span class="o">=</span><span class="n">healthcheckpass</span>
+<span class="no">EOF</span>
+	<span class="n">touch</span> <span class="o">/</span><span class="n">mysql</span><span class="o">-</span><span class="n">init</span><span class="o">-</span><span class="n">complete</span>
+	<span class="n">chown</span> <span class="o">-</span><span class="nc">R</span> <span class="n">mysql</span><span class="o">:</span><span class="n">mysql</span> <span class="s2">"</span><span class="nv">$DATADIR</span><span class="s2">"</span>
+	<span class="k">echo</span> <span class="s2">"[Entrypoint] Starting MySQL 8.0.19-1.1.15"</span>
+<span class="n">fi</span>
+
+<span class="n">exec</span> <span class="s2">"$@"</span>
+</code></pre></div></div>
+
+<h2 id="healthchecksh">healthcheck.sh</h2>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#!/bin/bash</span>
+<span class="c1"># Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software; you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># the Free Software Foundation; version 2 of the License.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with this program; if not, write to the Free Software</span>
+<span class="c1"># Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA</span>
+
+<span class="c1"># The mysql-init-complete file is touched by the entrypoint file before the</span>
+<span class="c1"># main server process is started</span>
+<span class="k">if</span> <span class="p">[</span> <span class="o">-</span><span class="n">f</span> <span class="o">/</span><span class="n">mysql</span><span class="o">-</span><span class="n">init</span><span class="o">-</span><span class="n">complete</span> <span class="p">];</span> <span class="c1"># The entrypoint script touches this file</span>
+<span class="n">then</span> <span class="c1"># Ping server to see if it is ready</span>
+  <span class="n">mysqladmin</span> <span class="o">--</span><span class="n">defaults</span><span class="o">-</span><span class="n">extra</span><span class="o">-</span><span class="n">file</span><span class="o">=/</span><span class="n">healthcheck</span><span class="mf">.</span><span class="n">cnf</span> <span class="n">ping</span>
+<span class="k">else</span> <span class="c1"># Initialization still in progress</span>
+  <span class="k">exit</span> <span class="mi">1</span>
+<span class="n">fi</span>
+</code></pre></div></div>
+
+<h2 id="testphp">test.php</h2>
+
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?php</span>
+<span class="nv">$host</span> <span class="o">=</span> <span class="s1">'db'</span><span class="p">;</span>
+<span class="nv">$user</span> <span class="o">=</span> <span class="s1">'root'</span><span class="p">;</span>
+<span class="nv">$pass</span> <span class="o">=</span> <span class="s1">'root'</span><span class="p">;</span>
+
+<span class="nv">$mysqli</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">mysqli</span><span class="p">(</span><span class="nv">$host</span><span class="p">,</span> <span class="nv">$user</span><span class="p">,</span> <span class="nv">$pass</span><span class="p">);</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nv">$mysqli</span><span class="o">-&gt;</span><span class="n">connect_error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">echo</span> <span class="s1">'Connection successful!'</span><span class="p">;</span>
+<span class="p">}</span>  <span class="k">else</span> <span class="p">{</span>
+    <span class="k">echo</span> <span class="s1">'Error ('</span> <span class="mf">.</span> <span class="nv">$mysqli</span><span class="o">-&gt;</span><span class="n">connect_errno</span> <span class="mf">.</span> <span class="s1">') '</span> <span class="mf">.</span> <span class="nv">$mysqli</span><span class="o">-&gt;</span><span class="n">connect_error</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nv">$mysqli</span><span class="o">-&gt;</span><span class="nf">close</span><span class="p">();</span>
+<span class="cp">?&gt;</span>
+</code></pre></div></div>
+
+<h2 id="docker-composeyml">docker-compose.yml</h2>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">## docker-compose 문서의 규격 버전 (3이라고 적으면 3으로 시작하는 최신버전 사용)</span>
+<span class="na">version</span><span class="pi">:</span> <span class="s2">"</span><span class="s">3.7"</span>
+<span class="c1">## 실행할 서비스 정의</span>
+<span class="na">services</span><span class="pi">:</span>
+  <span class="c1">## web이라는 서비스를 정의</span>
+  <span class="na">web</span><span class="pi">:</span>
+    <span class="c1">## 특정 이미지 대신 Dockerfile을 활용한 이미지 빌드 옵션 추가</span>
+    <span class="na">build</span><span class="pi">:</span>
+      <span class="na">context</span><span class="pi">:</span> <span class="s">./apache-php</span>
+      <span class="na">dockerfile</span><span class="pi">:</span> <span class="s">Dockerfile</span>
+    <span class="c1">## 종속성 추가 db가 먼저 실행되어야 함</span>
+    <span class="na">depends_on</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">db</span>
+    <span class="c1">## 호스트 4000 포트 : 컨테이너 80 포트</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">4000:80"</span>
+    <span class="c1">## 볼륨 설정 : [호스트 공유 경로]:[컨테이너 공유 경로]</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">./www:/var/www</span>
+  <span class="c1">## db라는 서비스를 정의</span>
+  <span class="na">db</span><span class="pi">:</span>
+    <span class="c1">## 특정 이미지 대신 Dockerfile을 활용한 이미지 빌드 옵션 추가</span>
+    <span class="na">build</span><span class="pi">:</span>
+      <span class="na">context</span><span class="pi">:</span> <span class="s">./mysql</span>
+      <span class="na">dockerfile</span><span class="pi">:</span> <span class="s">Dockerfile</span>
+    <span class="c1">## 환경변수 설정(docker run 명령어 -e에 있던 내용들)</span>
+    <span class="na">environment</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">MYSQL_ROOT_PASSWORD=root</span>
+      <span class="pi">-</span> <span class="s">MYSQL_ROOT_HOST=%</span>
+    <span class="c1">## 호스트 3306 포트 : 컨테이너 3306 포트</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">3306:3306"</span>
+    <span class="c1">## 볼륨 설정 : [호스트 공유 경로]:[컨테이너 공유 경로]</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">./data:/var/lib/mysql</span>
+    <span class="c1">## (docker run 마지막 명령어 부분과 같음)</span>
+    <span class="na">command</span><span class="pi">:</span> <span class="s">--default-authentication-plugin=mysql_native_password</span>
+</code></pre></div></div>
+
+<h2 id="docker-compose-실행-1">docker-compose 실행</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker-compose up <span class="nt">-d</span>
+</code></pre></div></div>
+
+<h2 id="정상-동작-확인">정상 동작 확인</h2>
+
+<p><img src="/assets/img/2020-09-09_10h45_26.png" alt="/assets/img/2020-09-09_10h45_26.png" /></p>
+
+<h1 id="docker-compose-네트워크">docker-compose 네트워크</h1>
+
+<h2 id="디폴트-네트워크">디폴트 네트워크</h2>
+
+<ul>
+  <li>Docker Compose는 하나의 디폴트 네트워크에 모든 컨테이너를 연결함</li>
+  <li>디폴트 네트워크의 이름은 위치한 디렉토리 이름 뒤에 <code class="language-plaintext highlighter-rouge">_default</code> 붙음</li>
+  <li><code class="language-plaintext highlighter-rouge">docker-compose up -d</code> , <code class="language-plaintext highlighter-rouge">docker-compose down</code> 해보면 쉽게 알 수 있음</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost dockertest]# docker-compose down
+Stopping dockertest_web_1 ... <span class="k">done
+</span>Stopping dockertest_db_1  ... <span class="k">done
+</span>WARNING: Found orphan containers <span class="o">(</span>dockertest_echo_1<span class="o">)</span> <span class="k">for </span>this project. If you removed or renamed this service <span class="k">in </span>your compose file, you can run this <span class="nb">command </span>with the <span class="nt">--remove-orphans</span> flag to clean it up.
+Removing dockertest_web_1 ... <span class="k">done
+</span>Removing dockertest_db_1  ... <span class="k">done</span>
+<span class="c">## 디렉토리명이 deckertest임. 따라서 dockertest_default가 디폴트 네트워크 이름이 됨.</span>
+Removing network dockertest_default
+</code></pre></div></div>
+
+<ul>
+  <li>네트워크 목록 조회 : <code class="language-plaintext highlighter-rouge">docker network ls</code></li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost dockertest]# docker network <span class="nb">ls
+</span>NETWORK ID          NAME                DRIVER              SCOPE
+00745070e427        bridge              bridge              <span class="nb">local
+</span>54246cd5feb1        host                host                <span class="nb">local
+</span>c66f0618ca7e        none                null                <span class="nb">local</span>
+</code></pre></div></div>
+
+<h2 id="컨테이너-간-통신">컨테이너 간 통신</h2>
+
+<ul>
+  <li>디폴트 네트워크 안 컨테이너 간 통신에서는 서비스의 이름이 호스트명으로 사용</li>
+  <li>docker-compose.yml 파일 참고</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">services</span><span class="pi">:</span>
+  <span class="c1">## web이라는 서비스를 정의</span>
+  <span class="na">web</span><span class="pi">:</span>
+  <span class="s">...</span>
+    <span class="s">## 호스트 컴퓨터로 접속할 때는 4000 포트, 컨테이너로 접속할 때는 80 포트</span> 
+    <span class="s">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">4000:80"</span>
+  <span class="s">...</span>
+  <span class="c1">## db라는 서비스를 정의</span>
+  <span class="na">db </span><span class="pi">:</span>
+  <span class="s">...</span>
+    <span class="s">## 호스트 컴퓨터로 접속할 떄는 3306 포트, 컨테이너로 접속할 때는 3306 포트</span>
+    <span class="s">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">3306:3306"</span>
+  <span class="s">...</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## 도커 컴포즈가 내려가 있다면 다시 올리기</span>
+<span class="o">[</span>root@localhost dockertest]# docker-compose up <span class="nt">-d</span>
+Creating network <span class="s2">"dockertest_default"</span> with the default driver
+WARNING: Found orphan containers <span class="o">(</span>dockertest_echo_1<span class="o">)</span> <span class="k">for </span>this project. If you removed or renamed this service <span class="k">in </span>your compose file, you can run this <span class="nb">command </span>with the <span class="nt">--remove-orphans</span> flag to clean it up.
+Creating dockertest_db_1 ... <span class="k">done
+</span>Creating dockertest_web_1 ... <span class="k">done</span>
+
+<span class="c">## web이라는 이름의 서비스에서 db라는 이름의 서비스에 ping을 날린다.</span>
+<span class="c">## db 컨테이너의 IP가 172.20.0.2라는 것을 알 수 있음.</span>
+<span class="o">[</span>root@localhost dockertest]# docker-compose <span class="nb">exec </span>web ping db
+PING db <span class="o">(</span>172.20.0.2<span class="o">)</span> 56<span class="o">(</span>84<span class="o">)</span> bytes of data.
+64 bytes from dockertest_db_1.dockertest_default <span class="o">(</span>172.20.0.2<span class="o">)</span>: <span class="nv">icmp_seq</span><span class="o">=</span>1 <span class="nv">ttl</span><span class="o">=</span>64 <span class="nb">time</span><span class="o">=</span>0.044 ms
+64 bytes from dockertest_db_1.dockertest_default <span class="o">(</span>172.20.0.2<span class="o">)</span>: <span class="nv">icmp_seq</span><span class="o">=</span>2 <span class="nv">ttl</span><span class="o">=</span>64 <span class="nb">time</span><span class="o">=</span>0.130 ms
+64 bytes from dockertest_db_1.dockertest_default <span class="o">(</span>172.20.0.2<span class="o">)</span>: <span class="nv">icmp_seq</span><span class="o">=</span>3 <span class="nv">ttl</span><span class="o">=</span>64 <span class="nb">time</span><span class="o">=</span>0.046 ms
+64 bytes from dockertest_db_1.dockertest_default <span class="o">(</span>172.20.0.2<span class="o">)</span>: <span class="nv">icmp_seq</span><span class="o">=</span>4 <span class="nv">ttl</span><span class="o">=</span>64 <span class="nb">time</span><span class="o">=</span>0.048 ms
+</code></pre></div></div>
+
+<ul>
+  <li>호스트 컴퓨터에서 web 서비스 컨테이너 접속</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="pi">[</span><span class="nv">root@localhost dockertest</span><span class="pi">]</span><span class="c1"># curl -I localhost:4000/test.php</span>
+<span class="s">HTTP/1.1 200 OK</span>
+<span class="na">Date</span><span class="pi">:</span> <span class="s">Wed, 09 Sep 2020 04:52:14 GMT</span>
+<span class="na">Server</span><span class="pi">:</span> <span class="s">Apache/2.4.6 (CentOS) PHP/7.3.22</span>
+<span class="na">X-Powered-By</span><span class="pi">:</span> <span class="s">PHP/7.3.22</span>
+<span class="na">Content-Type</span><span class="pi">:</span> <span class="s">text/html; charset=UTF-8</span>
+</code></pre></div></div>
+
+<ul>
+  <li>다른 컨테이너에서 web 서비스 컨테이너 접속
+    <ul>
+      <li>docker-compose.yml 파일에 최하단에 해당 내용 추가</li>
+    </ul>
+
+    <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="na">centos</span><span class="pi">:</span>
+      <span class="na">image</span><span class="pi">:</span> <span class="s">centos:7</span>
+      <span class="c1">## 하단 내용을 안 쓰면 바로 종료되는 듯.</span>
+      <span class="na">stdin_open</span><span class="pi">:</span> <span class="no">true</span>
+      <span class="na">tty</span><span class="pi">:</span> <span class="no">true</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>docker-compose 내렸다 올린 후 컨테이너 접속</li>
+    </ul>
+
+    <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="pi">[</span><span class="nv">root@localhost dockertest</span><span class="pi">]</span><span class="c1"># docker-compose down</span>
+  <span class="pi">[</span><span class="nv">root@localhost dockertest</span><span class="pi">]</span><span class="c1"># docker-compose up -d</span>
+
+  <span class="pi">[</span><span class="nv">root@localhost dockertest</span><span class="pi">]</span><span class="c1"># docker-compose exec centos curl -I web/test.php</span>
+  <span class="s">HTTP/1.1 200 OK</span>
+  <span class="s">Date</span><span class="pi">:</span> <span class="s">Wed, 09 Sep 2020 04:51:22 GMT</span>
+  <span class="na">Server</span><span class="pi">:</span> <span class="s">Apache/2.4.6 (CentOS) PHP/7.3.22</span>
+  <span class="na">X-Powered-By</span><span class="pi">:</span> <span class="s">PHP/7.3.22</span>
+  <span class="na">Content-Type</span><span class="pi">:</span> <span class="s">text/html; charset=UTF-8</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h2 id="커스텀-네트워크-추가">커스텀 네트워크 추가</h2>
+
+<ul>
+  <li>docker-compose.yml 파일 수정 (<code class="language-plaintext highlighter-rouge">db</code> 서비스는 디폴트 네트워크에만 연결되지만 <code class="language-plaintext highlighter-rouge">web</code> 서비스는 <code class="language-plaintext highlighter-rouge">our_net</code> 네트워크에도 연결됨)</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">version</span><span class="pi">:</span> <span class="s2">"</span><span class="s">3.7"</span>
+<span class="na">services</span><span class="pi">:</span>
+  <span class="na">web</span><span class="pi">:</span>
+    <span class="na">build</span><span class="pi">:</span>
+      <span class="na">context</span><span class="pi">:</span> <span class="s">./apache-php</span>
+      <span class="na">dockerfile</span><span class="pi">:</span> <span class="s">Dockerfile</span>
+    <span class="na">depends_on</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">db</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">4000:80"</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">./www:/var/www</span>
+    <span class="na">networks</span><span class="pi">:</span> <span class="c1">## 네트워크 추가</span>
+      <span class="pi">-</span> <span class="s">default</span>
+      <span class="pi">-</span> <span class="s">our_net</span>
+  <span class="na">db</span><span class="pi">:</span>
+    <span class="na">build</span><span class="pi">:</span>
+      <span class="na">context</span><span class="pi">:</span> <span class="s">./mysql</span>
+      <span class="na">dockerfile</span><span class="pi">:</span> <span class="s">Dockerfile</span>
+    <span class="na">environment</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">MYSQL_ROOT_PASSWORD=root</span>
+      <span class="pi">-</span> <span class="s">MYSQL_ROOT_HOST=%</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">3306:3306"</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">./data:/var/lib/mysql</span>
+    <span class="na">command</span><span class="pi">:</span> <span class="s">--default-authentication-plugin=mysql_native_password</span>
+  <span class="na">centos</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">centos:7</span>
+    <span class="na">stdin_open</span><span class="pi">:</span> <span class="no">true</span>
+    <span class="na">tty</span><span class="pi">:</span> <span class="no">true</span>
+<span class="na">networks</span><span class="pi">:</span> <span class="c1">## 네트워크 추가</span>
+  <span class="na">our_net</span><span class="pi">:</span>
+    <span class="na">driver</span><span class="pi">:</span> <span class="s">bridge</span>
+</code></pre></div></div>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">docker-compose up -d</code> 후 네트워크 리스트 조회</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost dockertest]# docker-compose up <span class="nt">-d</span>
+
+<span class="o">[</span>root@localhost dockertest]# docker network <span class="nb">ls
+</span>NETWORK ID          NAME                 DRIVER              SCOPE
+30bc74ec733e        bridge               bridge              <span class="nb">local
+</span>a79e77e15b90        dockertest_default   bridge              <span class="nb">local
+</span>e07ee08147b6        dockertest_our_net   bridge              <span class="nb">local
+</span>54246cd5feb1        host                 host                <span class="nb">local
+</span>c66f0618ca7e        none                 null                <span class="nb">local</span>
+</code></pre></div></div>
+
+<h2 id="외부-네트워크-사용">외부 네트워크 사용</h2>
+
+<ul>
+  <li>Docker Compose가 제공하는 디폴트 네트워크 이외에 외부에 생성한 다른 네트워크도 사용가능</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## our_net이라는 네트워크 생성</span>
+<span class="o">[</span>root@localhost dockertest]# docker network create our_net
+dbf31d28767d0280c85cc2fd3148af08dd04986aa290640a3a50c53ecbd361d0
+
+<span class="c">## docker 네트워크 리스트 확인</span>
+<span class="o">[</span>root@localhost dockertest]# docker network <span class="nb">ls
+</span>NETWORK ID          NAME                 DRIVER              SCOPE
+30bc74ec733e        bridge               bridge              <span class="nb">local
+</span>a79e77e15b90        dockertest_default   bridge              <span class="nb">local
+</span>e07ee08147b6        dockertest_our_net   bridge              <span class="nb">local
+</span>54246cd5feb1        host                 host                <span class="nb">local
+</span>c66f0618ca7e        none                 null                <span class="nb">local
+</span>dbf31d28767d        our_net              bridge              <span class="nb">local</span>
+
+<span class="c">## docker-compose.yml 파일 수정</span>
+<span class="o">[</span>root@localhost dockertest]# vi docker-compose.yml
+
+version: <span class="s2">"3.7"</span>
+services:
+  web:
+    build:
+      context: ./apache-php
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    ports:
+      - <span class="s2">"4000:80"</span>
+    volumes:
+      - ./www:/var/www
+    <span class="c">## 아까 작업했던 부분은 삭제</span>
+  db:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    environment:
+      - <span class="nv">MYSQL_ROOT_PASSWORD</span><span class="o">=</span>root
+      - <span class="nv">MYSQL_ROOT_HOST</span><span class="o">=</span>%
+    ports:
+      - <span class="s2">"3306:3306"</span>
+    volumes:
+      - ./data:/var/lib/mysql
+    <span class="nb">command</span>: <span class="nt">--default-authentication-plugin</span><span class="o">=</span>mysql_native_password
+  centos:
+    image: centos:7
+    stdin_open: <span class="nb">true
+    tty</span>: <span class="nb">true</span>
+
+<span class="c">## 이 부분 수정</span>
+networks:
+  default:
+    external:
+      name: our_net
+
+<span class="c">## Docker Compose 재실행</span>
+<span class="o">[</span>root@localhost dockertest]# docker-compose up <span class="nt">-d</span>
+Recreating dockertest_db_1     ... <span class="k">done
+</span>Recreating dockertest_centos_1 ... <span class="k">done
+</span>Recreating dockertest_web_1    ... <span class="k">done</span>
+
+<span class="c">## 3개의 컨테이너가 our_net에 연결된 것 확인 가능</span>
+<span class="o">[</span>root@localhost dockertest]# docker network inspect our_net
+<span class="o">[</span>
+    <span class="o">{</span>
+        <span class="s2">"Name"</span>: <span class="s2">"our_net"</span>,
+        <span class="s2">"Id"</span>: <span class="s2">"dbf31d28767d0280c85cc2fd3148af08dd04986aa290640a3a50c53ecbd361d0"</span>,
+        <span class="s2">"Created"</span>: <span class="s2">"2020-09-09T14:12:09.376220231+09:00"</span>,
+        <span class="s2">"Scope"</span>: <span class="s2">"local"</span>,
+        <span class="s2">"Driver"</span>: <span class="s2">"bridge"</span>,
+        <span class="s2">"EnableIPv6"</span>: <span class="nb">false</span>,
+        <span class="s2">"IPAM"</span>: <span class="o">{</span>
+            <span class="s2">"Driver"</span>: <span class="s2">"default"</span>,
+            <span class="s2">"Options"</span>: <span class="o">{}</span>,
+            <span class="s2">"Config"</span>: <span class="o">[</span>
+                <span class="o">{</span>
+                    <span class="s2">"Subnet"</span>: <span class="s2">"172.23.0.0/16"</span>,
+                    <span class="s2">"Gateway"</span>: <span class="s2">"172.23.0.1"</span>
+                <span class="o">}</span>
+            <span class="o">]</span>
+        <span class="o">}</span>,
+        <span class="s2">"Internal"</span>: <span class="nb">false</span>,
+        <span class="s2">"Attachable"</span>: <span class="nb">false</span>,
+        <span class="s2">"Ingress"</span>: <span class="nb">false</span>,
+        <span class="s2">"ConfigFrom"</span>: <span class="o">{</span>
+            <span class="s2">"Network"</span>: <span class="s2">""</span>
+        <span class="o">}</span>,
+        <span class="s2">"ConfigOnly"</span>: <span class="nb">false</span>,
+        <span class="s2">"Containers"</span>: <span class="o">{</span>
+            <span class="s2">"5f327ad099591176eeb72c04a440989404015e1e408ffc6a5fd847394632498a"</span>: <span class="o">{</span>
+                <span class="s2">"Name"</span>: <span class="s2">"dockertest_centos_1"</span>,
+                <span class="s2">"EndpointID"</span>: <span class="s2">"491a974176ed082205bcbf16748524d1f5580e57e64cab8506036917df59ad79"</span>,
+                <span class="s2">"MacAddress"</span>: <span class="s2">"02:42:ac:17:00:04"</span>,
+                <span class="s2">"IPv4Address"</span>: <span class="s2">"172.23.0.4/16"</span>,
+                <span class="s2">"IPv6Address"</span>: <span class="s2">""</span>
+            <span class="o">}</span>,
+            <span class="s2">"8c1077320403cd744e1626072bbeabbdde103e204e6edb848de82c1faa304d48"</span>: <span class="o">{</span>
+                <span class="s2">"Name"</span>: <span class="s2">"dockertest_db_1"</span>,
+                <span class="s2">"EndpointID"</span>: <span class="s2">"2ddc8678ffadfeae3aef6547be62fc66d74aaa5ba7a65407746f77c61b2e7173"</span>,
+                <span class="s2">"MacAddress"</span>: <span class="s2">"02:42:ac:17:00:02"</span>,
+                <span class="s2">"IPv4Address"</span>: <span class="s2">"172.23.0.2/16"</span>,
+                <span class="s2">"IPv6Address"</span>: <span class="s2">""</span>
+            <span class="o">}</span>,
+            <span class="s2">"c92d9fb055e97c66bafe8fbd92f00e5e981b7f123a3e6fb33123aeece6f803a6"</span>: <span class="o">{</span>
+                <span class="s2">"Name"</span>: <span class="s2">"dockertest_web_1"</span>,
+                <span class="s2">"EndpointID"</span>: <span class="s2">"eeee377e9281b6b1ddf68f50b41e60981f94b7e7ed674d2c0d9e0f059b126cd8"</span>,
+                <span class="s2">"MacAddress"</span>: <span class="s2">"02:42:ac:17:00:03"</span>,
+                <span class="s2">"IPv4Address"</span>: <span class="s2">"172.23.0.3/16"</span>,
+                <span class="s2">"IPv6Address"</span>: <span class="s2">""</span>
+            <span class="o">}</span>
+        <span class="o">}</span>,
+        <span class="s2">"Options"</span>: <span class="o">{}</span>,
+        <span class="s2">"Labels"</span>: <span class="o">{}</span>
+    <span class="o">}</span>
+<span class="o">]</span>
+</code></pre></div></div>
+
+<h1 id="docker-compose-볼륨-실습">docker-compose 볼륨 실습</h1>
+
+<ul>
+  <li>docker-compose.yml 파일에 볼륨 설정을 걸어놓은 것이 있으므로 그것을 토대로 실습</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">## [호스트 공유 경로]:[컨테이너 공유 경로]    </span>
+<span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">./www:/var/www</span>
+</code></pre></div></div>
+
+<ul>
+  <li>호스트에 있는 /www/html/test.php 파일을 동일 경로에 복사 후, 컨테이너에서 정상적으로 공유되는지 확인</li>
+  <li>반대로 컨테이너에 있는 /var/www/html/test.php 파일을 동일 경로에 복사 후, 호스트에서 정상적으로 공유되는지 확인</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## /www/html 경로 이동후 test.php 파일 복사</span>
+<span class="o">[</span>root@localhost html]# <span class="nb">cd</span> /www/html
+<span class="o">[</span>root@localhost html]# <span class="nb">cp </span>test.php test2.php
+
+<span class="c">## 실행된 도커 컨테이너 확인 후 접속</span>
+<span class="o">[</span>root@localhost html]# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED       ORTS                               NAMES
+c4aa2a9c4304        dockertest_web      <span class="s2">"/usr/sbin/httpd -D …"</span>   25 minutes ago.0.0.0:4000-&gt;80/tcp                dockertest_web_1
+d15ff45b6a12        dockertest_db       <span class="s2">"/entrypoint.sh --de…"</span>   25 minutes ago.0.0.0:3306-&gt;3306/tcp, 33060/tcp   dockertest_db_1
+<span class="o">[</span>root@localhost html]# docker <span class="nb">exec</span> <span class="nt">-it</span> c4aa2a9c4304 bash
+
+<span class="c">## 볼륨이 공유된 /var/www안의 html 폴더로 이동</span>
+<span class="o">[</span>root@c4aa2a9c4304 www]# <span class="nb">cd</span> /var/www/html
+
+<span class="c">## 파일이 하나 늘어남을 확인할 수 있음</span>
+<span class="o">[</span>root@c4aa2a9c4304 html]# <span class="nb">ls
+</span>test.php  test2.php
+
+<span class="c">## 컨테이너에서 test.php을 복제하여 하나 더 생성</span>
+<span class="o">[</span>root@c4aa2a9c4304 html]# <span class="nb">cp </span>test.php test3.php
+<span class="o">[</span>root@c4aa2a9c4304 html]# <span class="nb">exit</span>
+
+<span class="c">## 호스트에 해당 파일이 생성되었는지 확인</span>
+<span class="o">[</span>root@localhost html]# <span class="nb">ls
+</span>test.php  test2.php  test3.php
+</code></pre></div></div>
+
+<p>※ 참고 사이트</p>
+
+<p><a href="https://hello-bryan.tistory.com/166">https://hello-bryan.tistory.com/166</a></p>
+
+<p><a href="https://nirsa.tistory.com/80">https://nirsa.tistory.com/80</a></p>
+
+<p><a href="https://www.daleseo.com/docker-compose-networks/">https://www.daleseo.com/docker-compose-networks/</a></p>
+:ET
