@@ -1,0 +1,415 @@
+I"w^<ul>
+  <li>쿠버네티스는 컨테이너화된 워크로드와 서비스를 관리하기 위한 이식성이 있고 확장가능한 오픈소스 플랫폼</li>
+</ul>
+
+<h1 id="여정-돌아보기">여정 돌아보기</h1>
+
+<ul>
+  <li>전통적인 배포 시대 : 여러 물리 서버에서 각 애플리케이션을 실행</li>
+  <li>가상화된 배포 시대 : 단일 물리 서버에서 VM간의 애플리케이션 격리 실행</li>
+  <li>컨테이너 개발 시대 : VM과 유사하지만 격리 속성을 완화하여 운영체제를 공유 (클라우드나 OS 배포본에 모두 이식 가능)</li>
+</ul>
+
+<h1 id="쿠버네티스의-필요성">쿠버네티스의 필요성</h1>
+
+<ul>
+  <li>분산 시스템을 탄력적으로 실행하기 위한 프레임워크로 애플리케이션의 확장과 장애 조치를 처리하고, 배포 패턴 등을 제공
+ex) 컨테이너가 다운되면 다른 컨테이너를 다시 시작</li>
+</ul>
+
+<h1 id="쿠버네티스의-기능">쿠버네티스의 기능</h1>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">서비스 디스커버리와 로드 밸런싱</code> : DND 이름 사용하거나 자체 IP 주소 사용하여 컨테이너 노출 가능, 네트워크 트래픽을 로드 밸렁신하고 배포함</li>
+  <li><code class="language-plaintext highlighter-rouge">스토리지 오케스트레이션</code> : 원하는 저장소 시스템을 자동으로 탑재 가능</li>
+  <li><code class="language-plaintext highlighter-rouge">자동화된 롤아웃과 롤백</code> : 배포된 컨테이너의 원하는 상태 서술가능, 설정한 속도에 따라 변경 가능</li>
+  <li><code class="language-plaintext highlighter-rouge">자동화된 빈 패킹(bin packing)</code> : 컨테이너를 노드에 맞추어서 리소스를 잘 사용할 수 있도록 해줌</li>
+  <li><code class="language-plaintext highlighter-rouge">자동화된 복구(self-healing)</code> : 실패한 컨테이너 다시 시작, 교체, 응답하지 않는 컨테이너 죽임</li>
+  <li><code class="language-plaintext highlighter-rouge">시크릿과 구성 관리</code> : 암호, OAuth 토큰 및 SSH 키와 같은 중요 정보 저장 관리 가능</li>
+</ul>
+
+<h1 id="쿠버네티스가-아닌-것">쿠버네티스가 아닌 것</h1>
+
+<ul>
+  <li>모든 것이 포함된 PaaS(Platform as a Service)가 아님</li>
+  <li>모놀리식이 아니어서 기본 솔루션이 선택적 (사용자의 선택권과 유연성을 지켜줌)
+    <ol>
+      <li>지원하는 애플리케이션의 유형을 제약하지 않는다.</li>
+      <li>소스 코드를 배포하지 않으며 애플리케이션을 빌드하지 않는다.</li>
+      <li>애플리케이션 레벨의 서비스를 제공하지 않는다.</li>
+      <li>로깅, 모니터링 또는 경보 솔루션을 포함하지 않는다.</li>
+      <li>기본 설정 언어/시스템(예, Jsonnet)을 제공하거나 요구하지 않는다.</li>
+      <li>포괄적인 머신 설정, 유지보수, 관리, 자동 복구 시스템을 제공하거나 채택하지 않는다.</li>
+      <li>쿠버네티스는 단순한 오케스트레이션 시스템이 아니다.</li>
+    </ol>
+  </li>
+</ul>
+
+<h1 id="쿠버네티스-컴포넌트">쿠버네티스 컴포넌트</h1>
+
+<h2 id="쿠버네티스-클러스터">쿠버네티스 클러스터</h2>
+
+<ul>
+  <li>쿠버네티스 클러스터는 컨테이너화된 애플리케이션을 실행하는 노드라고 하는 워커 머신의 집합 (모든 클러스터는 최소 한개 이상의 워커 노드를 가짐)</li>
+  <li>워커 노드는 애플리케이션의 구성요소인 파드를 이끔(호스트 함)</li>
+  <li>컨트롤 플레인은 워커 노드와 클러스터 내 파드를 관리</li>
+</ul>
+
+<h2 id="컨트롤-플레인-컴포넌트">컨트롤 플레인 컴포넌트</h2>
+
+<ul>
+  <li>컨트롤 플레인 컴포넌트는 클러스터에 관한 전반적인 결정(스케줄링 등)을 수행하고 클러스터 이벤트를 감지하고 반응
+    <ol>
+      <li>kube-apiserver : API 서버는 쿠버네티스 API를 노출하는 쿠버네티스 컨트롤 플레인 컴포넌트</li>
+      <li>etcd : 모든 클러스터 데이터를 담는 쿠버네티스 뒷단의 저장소</li>
+      <li>kube-scheduler : 노드가 배정되지 않은 새로 생성된 파드 를 감지하고, 실행할 노드를 선택하는 컨트롤 플레인 컴포넌트</li>
+      <li>kube-controller-manage : 컨트롤러를 구동하는 마스터 상의 컴포넌트</li>
+      <li>cloud-controller-manager : 클라우드별 컨트롤 로직을 포함하는 쿠버네티스 컨트롤 플레인 컴포넌트</li>
+    </ol>
+  </li>
+</ul>
+
+<h2 id="노드-컴포넌트">노드 컴포넌트</h2>
+
+<ul>
+  <li>동작 중인 파드를 유지시키고 쿠버네티스 런타임 환경을 제공하며, 모든 노드 상에서 동작
+    <ol>
+      <li>kubelet : 클러스터의 각 노드에서 실행되는 에이전트</li>
+      <li>kube-proxy : 클러스터의 각 노드에서 실행되는 네트워크 프록시</li>
+      <li>컨테이너 런타임 : 컨테이너 실행을 담당하는 소프트웨어</li>
+    </ol>
+  </li>
+</ul>
+
+<h2 id="애드온">애드온</h2>
+
+<ul>
+  <li>애드온은 쿠버네티스 리소스(데몬셋, 디플로이먼트 등)를 이용하여 클러스터 기능을 구현
+    <ol>
+      <li>DNS : 쿠버네티스 서비스를 위해 DNS 레코드를 제공해주는 DNS 서버</li>
+      <li>웹 UI (대시보드) : 쿠버네티스 클러스터를 위한 범용의 웹 기반 UI</li>
+      <li>컨테이너 리소스 모니터링 : 중앙 데이터베이스 내의 컨테이너들에 대한 포괄적인 시계열 매트릭스를 기록하고 그 데이터를 열람하기 위한 UI를 제공</li>
+      <li>클러스터 레벨 로깅 : 중앙 로그 저장소에 컨테이너 로그를 저장하는 책임을 짐</li>
+    </ol>
+  </li>
+</ul>
+
+<h1 id="쿠버네티스-api">쿠버네티스 API</h1>
+
+<ul>
+  <li>최종 사용자, 클러스터의 다른 부분 그리고 외부 컴포넌트가 서로 통신할 수 있도록 HTTP API를 제공</li>
+</ul>
+
+<h2 id="api-변경">API 변경</h2>
+
+<ul>
+  <li>API를 지속적으로 변경하고 성장시킬 수 있는 디자인 기능 보유</li>
+  <li>프로젝트의 호환성을 유지하는 것을 목표로 함</li>
+</ul>
+
+<h2 id="openapi-명세">OpenAPI 명세</h2>
+
+<ul>
+  <li>OpenAPI를 활용해서 문서화</li>
+</ul>
+
+<h2 id="api-버전-규칙">API 버전 규칙</h2>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">/api/v1</code>이나 <code class="language-plaintext highlighter-rouge">/apis/rbac.authorization.k8s.io/v1alpha1</code>과 같이 각각 다른 API 경로에서 복수의 API 버전을 지원</li>
+  <li><code class="language-plaintext highlighter-rouge">알파(Alpha)</code>, <code class="language-plaintext highlighter-rouge">베타(beta)</code>, <code class="language-plaintext highlighter-rouge">안정화(stable)</code> 수준의 버전이 있다.</li>
+</ul>
+
+<h2 id="api-그룹">API 그룹</h2>
+
+<ul>
+  <li>쉽게 확장하기 위해서 API 그룹을 구현 (REST 경로와 직렬화된 객체의 apiVersion 필드에 명시)</li>
+</ul>
+
+<h2 id="api-그룹-활성화-또는-비활성화-하기">API 그룹 활성화 또는 비활성화 하기</h2>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">kube-apiserver</code>에서 커맨드 라인 옵션으로 <code class="language-plaintext highlighter-rouge">--runtime-config</code> 를 설정해서 활성화하거나 비활성화</li>
+</ul>
+
+<h2 id="지속성">지속성</h2>
+
+<ul>
+  <li>API 리소스에 대한 직렬화된 상태를 etcd에 기록하고 저장</li>
+</ul>
+
+<h1 id="쿠버네티스-오브젝트-이해">쿠버네티스 오브젝트 이해</h1>
+
+<ul>
+  <li>쿠버네티스 시스템에서 영속성을 가지는 개체</li>
+  <li>클러스터의 상태를 나타내기 위해 이용</li>
+  <li>동작시키려면 쿠버네티스 API를 이용해야 함</li>
+</ul>
+
+<h2 id="오브젝트-spec과-status">오브젝트 spec과 status</h2>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">spac</code> : 오브젝트를 생성할 때 리소스의 원하는 특징을 설명</li>
+  <li><code class="language-plaintext highlighter-rouge">status</code> : 쿠버네티스 시스템과 컴포넌트에 의해 제공되고 업데이트 된 오브젝트의 현재 상태를 설명</li>
+</ul>
+
+<h2 id="쿠버네티스-오브젝트-기술하기">쿠버네티스 오브젝트 기술하기</h2>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">apiVersion</code> : 오브젝트를 생성하기 위해 사용하고 있는 쿠버네티스 API 버전</li>
+  <li><code class="language-plaintext highlighter-rouge">kind</code> : 어떤 종류의 오브젝트를 생성하고자 하는지</li>
+  <li><code class="language-plaintext highlighter-rouge">metadata</code> : 이름, 문자열, UID, 네임스페이스를 포함하여 오브젝트를 구분지어 줄 데이터</li>
+  <li><code class="language-plaintext highlighter-rouge">spec</code> : 오브젝트에 대해 어떤 상태를 의도하는지</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">apps/v1</span> <span class="c1"># for versions before 1.9.0 use apps/v1beta2</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Deployment</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">nginx-deployment</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">selector</span><span class="pi">:</span>
+    <span class="na">matchLabels</span><span class="pi">:</span>
+      <span class="na">app</span><span class="pi">:</span> <span class="s">nginx</span>
+  <span class="na">replicas</span><span class="pi">:</span> <span class="m">2</span> <span class="c1"># tells deployment to run 2 pods matching the template</span>
+  <span class="na">template</span><span class="pi">:</span>
+    <span class="na">metadata</span><span class="pi">:</span>
+      <span class="na">labels</span><span class="pi">:</span>
+        <span class="na">app</span><span class="pi">:</span> <span class="s">nginx</span>
+    <span class="na">spec</span><span class="pi">:</span>
+      <span class="na">containers</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">nginx</span>
+        <span class="na">image</span><span class="pi">:</span> <span class="s">nginx:1.14.2</span>
+        <span class="na">ports</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">containerPort</span><span class="pi">:</span> <span class="m">80</span>
+</code></pre></div></div>
+
+<h3 id="yaml-파일을-이용하여-디플로먼트-생성하는-방식">.yaml 파일을 이용하여 디플로먼트 생성하는 방식</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">kubectl apply</code> 커맨드 이용</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl apply <span class="nt">-f</span> https://k8s.io/examples/application/deployment.yaml <span class="nt">--record</span>
+</code></pre></div></div>
+
+<h1 id="쿠버네티스-오브젝트-관리">쿠버네티스 오브젝트 관리</h1>
+
+<h2 id="관리-기법">관리 기법</h2>
+
+<ul>
+  <li>명령형 커맨드 : 활성 오브젝트를 커맨드로 관리</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## nginx 컨테이너의 인스턴스를 구동</span>
+kubectl create deployment nginx <span class="nt">--image</span> nginx
+</code></pre></div></div>
+
+<ul>
+  <li>명령형 오브젝트 구성 : 개별 파일로 관리</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## 구성파일에 정의된 오브젝트 생성</span>
+kubectl create <span class="nt">-f</span> nginx.yaml
+<span class="c">## 구성파일에 정의된 오브젝트 삭제</span>
+kubectl delete <span class="nt">-f</span> nginx.yaml <span class="nt">-f</span> redis.yaml
+<span class="c">## 구성을 덮어씀으로써 구성파일에 정의된 오브젝트를 업데이트</span>
+kubectl replace <span class="nt">-f</span> nginx.yaml
+</code></pre></div></div>
+
+<ul>
+  <li>선언형 오브젝트 구성 : 파일이 있는 디렉터리로 관리</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## 디렉터리 내 모든 오브젝트 구성파일을 처리하고 활성 오브젝트를 생성 또는 패치</span>
+kubectl diff <span class="nt">-f</span> configs/
+kubectl apply <span class="nt">-f</span> configs/
+
+<span class="c">## 재귀적으로 디렉터리를 처리</span>
+kubectl diff <span class="nt">-R</span> <span class="nt">-f</span> configs/
+kubectl apply <span class="nt">-R</span> <span class="nt">-f</span> configs/
+</code></pre></div></div>
+
+<h1 id="오브젝트-이름과-id">오브젝트 이름과 ID</h1>
+
+<h2 id="이름">이름</h2>
+
+<ul>
+  <li>DNS 서브도메인 이름</li>
+  <li>DNS 레이블 이름</li>
+  <li>경로 세그먼트 이름</li>
+</ul>
+
+<h2 id="uid">UID</h2>
+
+<ul>
+  <li>오브젝트를 중복 없이 식별하기 위해 쿠버네티스 시스템이 생성하는 문자열</li>
+  <li>모든 오브젝트는 서로 구분되는 UID를 가짐</li>
+</ul>
+
+<h1 id="네임스페이스">네임스페이스</h1>
+
+<ul>
+  <li>가상 클러스터를 네임스페이스라고 함</li>
+</ul>
+
+<h2 id="여러-개의-네임스페이스-사용">여러 개의 네임스페이스 사용</h2>
+
+<ul>
+  <li>사용자가 거의 없거나 적을 때는 네임스페이스를 고려할 필요 없음</li>
+  <li>클러스터 자원을 여러 사용자 사이에서 나누는 방법</li>
+  <li>네임스페이스의 오브젝트는 동일한 접근 제어 정책을 가짐</li>
+  <li>리소스를 구별하기 위해 레이블 사용</li>
+</ul>
+
+<h2 id="네임스페이스-다루기">네임스페이스 다루기</h2>
+
+<h3 id="네임스페이스-조회">네임스페이스 조회</h3>
+
+<ul>
+  <li>사용 중인 클러스터의 현재 네임스페이스 나열</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl get namespace
+
+NAME              STATUS   AGE
+<span class="c">## 다른 네임스페이스가 없는 오브젝트를 위한 기본 네임스페이스</span>
+default           Active   1d
+<span class="c">## 쿠버네티스 시스템에서 생성한 오브젝트를 위한 네임스페이스</span>
+kube-node-lease   Active   1d
+<span class="c">## 자동으로 생성되며, 모든 사용자가 읽기 권한으로 접근 가능</span>
+kube-public       Active   1d
+<span class="c">## 클러스터가 스케일링될 때 노드 하트비트 성능을 향상 시키는 각 노드와 관련된 리스 오브젝트에 대한 네임스페이스</span>
+kube-system       Active   1d
+</code></pre></div></div>
+
+<h3 id="요청에-네임스페이스-설정">요청에 네임스페이스 설정</h3>
+
+<ul>
+  <li>현재 요청에 대한 네임스페이스 설정 : <code class="language-plaintext highlighter-rouge">--namespace</code> 플래그 사용</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl run nginx <span class="nt">--image</span><span class="o">=</span>nginx <span class="nt">--namespace</span><span class="o">=</span>&lt;insert-namespace-name-here&gt;
+kubectl get pods <span class="nt">--namespace</span><span class="o">=</span>&lt;insert-namespace-name-here&gt;
+</code></pre></div></div>
+
+<h3 id="선호하는-네임스페이스-설정">선호하는 네임스페이스 설정</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl config set-context <span class="nt">--current</span> <span class="nt">--namespace</span><span class="o">=</span>&lt;insert-namespace-name-here&gt;
+<span class="c"># 확인하기</span>
+kubectl config view <span class="nt">--minify</span> | <span class="nb">grep </span>namespace:
+</code></pre></div></div>
+
+<h2 id="네임스페이스와-dns">네임스페이스와 DNS</h2>
+
+<ul>
+  <li>서비스를 생성하면 <code class="language-plaintext highlighter-rouge">&lt;서비스-이름&gt;.&lt;네임스페이스-이름&gt;.svc.cluster.local</code> 형식의 엔트리 생성</li>
+  <li>개발, 스테이징, 운영과 같이 여러 네임스페이스 내에서 동일한 설정을 사용하는 경우에 유용</li>
+</ul>
+
+<h1 id="레이블과-셀렉터">레이블과 셀렉터</h1>
+
+<ul>
+  <li>레이블 : 파드와 같은 오브젝트에 첨부된 키와 값의 쌍</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nl">"metadata"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="nl">"labels"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"key1"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"value1"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"key2"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"value2"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>레이블 셀렉터 : 클라이언트와 사용자는 오브젝트를 식별 (레이블은 이름과 UID처럼 고유하지 않음)</li>
+</ul>
+
+<h1 id="어노테이션">어노테이션</h1>
+
+<ul>
+  <li>임의의 비-식별 메타데이터를 오브젝트에 첨부가능</li>
+  <li>어노테이션은 레이블과 같이 키/값 맵</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nl">"metadata"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="nl">"annotations"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"key1"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"value1"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"key2"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"value2"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h1 id="필드-셀렉터">필드 셀렉터</h1>
+
+<ul>
+  <li>쿠버네티스 리소스를 선택하기 위해 사용
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">metadata.name=my-service</code></li>
+      <li><code class="language-plaintext highlighter-rouge">metadata.namespace!=default</code></li>
+      <li><code class="language-plaintext highlighter-rouge">status.phase=Pending</code></li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## status.phase 필드의 값이 Running 인 모든 파드를 선택</span>
+kubectl get pods <span class="nt">--field-selector</span> status.phase<span class="o">=</span>Running
+
+<span class="c">## 사용할 수 없는 필드 셀렉터를 사용할 경우</span>
+kubectl get ingress <span class="nt">--field-selector</span> foo.bar<span class="o">=</span>baz
+Error from server <span class="o">(</span>BadRequest<span class="o">)</span>: Unable to find <span class="s2">"ingresses"</span> that match label selector <span class="s2">""</span>, field selector <span class="s2">"foo.bar=baz"</span>: <span class="s2">"foo.bar"</span> is not a known field selector: only <span class="s2">"metadata.name"</span>, <span class="s2">"metadata.namespace"</span>
+
+<span class="c">## =, ==, != 연산자 사용가능</span>
+<span class="c">## 디폴트 네임스페이스에 속해있지 않은 모든 쿠버네티스 서비스를 선택</span>
+kubectl get services  <span class="nt">--all-namespaces</span> <span class="nt">--field-selector</span> metadata.namespace!<span class="o">=</span>default
+
+<span class="c">## 필드 셀렉터를 연계해서 사용</span>
+<span class="c">## status.phase 필드가 Running이 아니고 spec.restartPolicy 필드가 Always인 모든 파드 선택</span>
+kubectl get pods <span class="nt">--field-selector</span><span class="o">=</span>status.phase!<span class="o">=</span>Running,spec.restartPolicy<span class="o">=</span>Always
+
+<span class="c">## 여러개의 리소스 종류에서 사용</span>
+<span class="c">## 디폴트 네임스페이스에 속해있지 않은 모든 스테이트풀센과 서비스를 선택</span>
+kubectl get statefulsets,services <span class="nt">--all-namespaces</span> <span class="nt">--field-selector</span> metadata.namespace!<span class="o">=</span>default
+</code></pre></div></div>
+
+<h1 id="권장-레이블">권장 레이블</h1>
+
+<ul>
+  <li>지원 도구 외에도 쿼리하는 방식으로 애플리케이션을 식별</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/name: mysql
+    app.kubernetes.io/instance: mysql-abcxzy
+    app.kubernetes.io/version: <span class="s2">"5.7.21"</span>
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: wordpress
+    app.kubernetes.io/managed-by: helm
+</code></pre></div></div>
+
+<h3 id="-용어-정리">※ 용어 정리</h3>
+
+<p><code class="language-plaintext highlighter-rouge">서비스 디스커버리(Service discovery)</code> : 서비스 검색은 컴퓨터 네트워크에서 이러한 장치가 제공하는 장치 및 서비스를 자동으로 감지하는 것</p>
+
+<p><code class="language-plaintext highlighter-rouge">로드 밸런싱(Load balancing)</code> : 둘 혹은 셋이상의 중앙처리장치 혹은 저장장치와 같은 컴퓨터 자원들에게 작업을 나누는 것</p>
+
+<p><code class="language-plaintext highlighter-rouge">워크로드</code> : 워크로드란 고객 대면 애플리케이션이나 백엔드 프로세스 같이 비즈니스 가치를 창출하는 리소스 및 코드 모음</p>
+
+<p><code class="language-plaintext highlighter-rouge">파드(Pod)</code> : 쿠버네티스에서 생성하고 관리할 수 있는 배포 가능한 가장 작은 컴퓨팅 단위</p>
+
+<p><code class="language-plaintext highlighter-rouge">노드</code> : 쿠버네티스의 작업 장비(worker machine)</p>
+
+<p><code class="language-plaintext highlighter-rouge">컨트롤 플레인(Control Plane)</code> : 컨테이너의 라이프사이클을 정의, 배포, 관리하기 위한 API와 인터페이스들을 노출하는 컨테이너 오케스트레이션 레이어</p>
+
+<p><code class="language-plaintext highlighter-rouge">데몬셋</code> : 파드의 복제본을 클러스터 노드 집합에서 동작하게 한다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">디플로이먼트</code> : 클러스터에서 복제된 애플리케이션을 관리한다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">엔드포인트</code> : 엔드 포인트 보안 또는 엔드 포인트 보호는 클라이언트 장치에 원격으로 브리지 된 컴퓨터 네트워크를 보호하는 접근 방식</p>
+
+<p><code class="language-plaintext highlighter-rouge">etcd</code> : 모든 클러스터 데이터를 담는 쿠버네티스 뒷단의 저장소</p>
+
+<p><code class="language-plaintext highlighter-rouge">레이블</code> : 파드와 같은 오브젝트에 첨부된 키와 값의 쌍</p>
+:ET
