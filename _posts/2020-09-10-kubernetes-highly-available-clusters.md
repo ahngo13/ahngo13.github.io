@@ -25,7 +25,7 @@ tags:
     - HDD : 20GB
     - CPU : 2
 
-![/assets/img/kubernetes-highly-available-clusters.png](/assets/img/kubernetes-highly-available-clusters.png)
+![/assets/img/kuberneteshighlyavailableclusters.png](/assets/img/kuberneteshighlyavailableclusters.png)
 
 ### 마스터, 워커에 대한 가상머신 최소 요구 사항
 
@@ -143,7 +143,7 @@ rm -rf /root/.kube
 
 - 쿠버네티스가 사용하는 포트들이므로 비워둬야 하며 모두 열려있어야 한다.
 
-![/assets/img/kubernetes-highly-available-clusters1.png](/assets/img/kubernetes-highly-available-clusters1.png)
+![/assets/img/kuberneteshighlyavailableclusters1.png](/assets/img/kuberneteshighlyavailableclusters1.png)
 
 # kubeadm, kubelet 및 kubectl 설치하기
 
