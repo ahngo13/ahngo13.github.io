@@ -176,6 +176,7 @@ Created symlink from /etc/systemd/system/multi-user.target.wants/kubelet.service
 ## 호스트네임 설정
 
 - 각각의 가상머신 마다 hostname을 다르게 설정
+- 재부팅을 하지 않으면 이후 진행시 문제가 생길 수 있음
 
 ```bash
 ## CentOS1

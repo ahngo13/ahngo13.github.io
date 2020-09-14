@@ -1,4 +1,4 @@
-I"�B<h1 id="구성목표">구성목표</h1>
+I"'C<h1 id="구성목표">구성목표</h1>
 
 <ul>
   <li>마스터 노드 3개의 클러스터 구성</li>
@@ -180,6 +180,7 @@ Created symlink from /etc/systemd/system/multi-user.target.wants/kubelet.service
 
 <ul>
   <li>각각의 가상머신 마다 hostname을 다르게 설정</li>
+  <li>재부팅을 하지 않으면 이후 진행시 문제가 생길 수 있음</li>
 </ul>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## CentOS1</span>
