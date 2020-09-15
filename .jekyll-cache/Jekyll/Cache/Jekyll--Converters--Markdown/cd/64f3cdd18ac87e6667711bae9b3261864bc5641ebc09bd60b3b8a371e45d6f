@@ -1,0 +1,365 @@
+I"�k<h2 id="rook">Rook</h2>
+
+<ul>
+  <li>Ceph 설치에 필요한 도구</li>
+  <li>오픈소스 클라우드 네이티브 스토리지 오케스트레이터</li>
+  <li>라우드 네이티브 환경과 기본적으로 통합할 수 있는 다양한 스토리지 솔루션 세트에 대한 플랫폼, 프레임 워크 및 지원</li>
+  <li>쿠버네티스 POD에서 실행되며, Ceph(공유 확장에 특화), EdgeFS(데이터베이스 처럼 대용량의 스트로지가 필요할 때)등 가상솔루션을 POD로 배포하여 관리하는 도구</li>
+</ul>
+
+<h1 id="ceph란">Ceph란?</h1>
+
+<ul>
+  <li>
+    <p>오픈 소스 소프트웨어 스토리지 플랫폼으로, 단일 분산 컴퓨터 클러스터에서 오브젝트 스토리지를 구현하고 오브젝트, 블록 및 파일 레벨 스토리지를위한 3in1 인터페이스를 제공</p>
+  </li>
+  <li><strong>모니터</strong> : <a href="https://docs.ceph.com/docs/master/glossary/#term-Ceph-Monitor">Ceph 모니터</a> ( <code class="language-plaintext highlighter-rouge">ceph-mon</code>)는 모니터 맵, 관리자 맵, OSD 맵, MDS 맵 및 CRUSH 맵을 포함하여 클러스터 상태의 맵을 유지합니다. 이러한 맵은 Ceph 데몬이 서로 조정하는 데 필요한 중요한 클러스터 상태입니다. 모니터는 데몬과 클라이언트 간의 인증 관리도 담당합니다. 이중화 및 고 가용성을 위해 일반적으로 최소 3 개의 모니터가 필요합니다.</li>
+  <li><strong>관리자</strong> : <a href="https://docs.ceph.com/docs/master/glossary/#term-Ceph-Manager">Ceph Manager</a> 데몬 ( <code class="language-plaintext highlighter-rouge">ceph-mgr</code>)은 스토리지 사용률, 현재 성능 메트릭 및 시스템로드를 포함하여 Ceph 클러스터의 현재 상태 및 런타임 메트릭을 추적합니다. Ceph Manager 데몬은 또한 Python 기반 모듈을 호스팅하여 웹 기반 <a href="https://docs.ceph.com/docs/master/mgr/dashboard/#mgr-dashboard">Ceph Dashboard</a> 및 <a href="https://docs.ceph.com/docs/master/mgr/restful">REST API를</a> 포함하여 Ceph 클러스터 정보를 관리하고 노출 <a href="https://docs.ceph.com/docs/master/mgr/restful">합니다</a> . 고 가용성을 위해 일반적으로 두 개 이상의 관리자가 필요합니다.</li>
+  <li><strong>Ceph OSD</strong> : <a href="https://docs.ceph.com/docs/master/glossary/#term-Ceph-OSD">Ceph OSD</a> (개체 저장 데몬 <code class="language-plaintext highlighter-rouge">ceph-osd</code>)는 데이터를 저장하고, 데이터 복제, 복구, 재조정을 처리하고 다른 Ceph OSD 데몬에서 하트 비트를 확인하여 일부 모니터링 정보를 Ceph 모니터 및 관리자에 제공합니다. 이중화 및 고 가용성을 위해 일반적으로 최소 3 개의 Ceph OSD가 필요합니다.</li>
+  <li><strong>MDS</strong> : <a href="https://docs.ceph.com/docs/master/glossary/#term-Ceph-Metadata-Server">Ceph Metadata Server</a> (MDS, <code class="language-plaintext highlighter-rouge">ceph-mds</code>)는 <a href="https://docs.ceph.com/docs/master/glossary/#term-Ceph-File-System">Ceph 파일 시스템</a> 을 대신하여 메타 데이터를 저장 <a href="https://docs.ceph.com/docs/master/glossary/#term-Ceph-File-System">합니다</a> (즉, Ceph Block Devices 및 Ceph Object Storage는 MDS를 사용하지 않음). Ceph Metadata Server를 사용하면 POSIX 파일 시스템 사용자가 Ceph Storage Cluster에 큰 부담을주지 않고 기본 명령 (예 <code class="language-plaintext highlighter-rouge">ls</code>: <code class="language-plaintext highlighter-rouge">find</code>, 등) 을 실행할 수 있습니다.</li>
+</ul>
+
+<h2 id="ceph-주요-기능">Ceph 주요 기능</h2>
+
+<ul>
+  <li>다수의 Region에서 운영하는 클러스터 사이의 싱글 네임 스페이스와 데이터 동기화 기능 제공</li>
+  <li>액티브 디렉토리, LDAP 및 Keystone v3 등을 포함하는 openstack 인증시스템과 통합해 향상한 보안기능지원</li>
+  <li>AWS v4 클라이언트 시그니처, object versioning 등에 대한 지원을 포함하는 향상된 아마존 s3 및 openstack swift와 호환성 지원</li>
+  <li>간단한 UI를 통해 스토리지 관리 및 모니터링을 지원하는 시스템인 redhat storage 콘솔 2를 포함해 구축, 운영 및 관리를 간소화 지원</li>
+  <li>용량을 페타바이트 수준으로 손쉽게 확장 가능</li>
+</ul>
+
+<h2 id="ceph-스토리지-유형">Ceph 스토리지 유형</h2>
+
+<ul>
+  <li>Block Storage : 단일 POD에 스토리지 제공함.</li>
+  <li>Object Storage : 애플리케이션이 쿠버네티스 클러스터 내부 또는 외부에서 액세스 할수있는 데이터를 입출력 할수있고, S3 API를 스토리지 클러스터에 노출을 제공함</li>
+  <li>Shared Stroage : 여러 POD에서 공유할 수 있는 파일 시스템 기반 스토리지</li>
+</ul>
+
+<h1 id="ceph-설치">Ceph 설치</h1>
+
+<h2 id="테스트-환경">테스트 환경</h2>
+
+<ul>
+  <li>쿠버네티스 고가용성 클러스터 구성이 완료된 상태로 진행한다.</li>
+</ul>
+
+<p><a href="https://ahngo13.github.io/kubernetes-highly-available-clusters/">https://ahngo13.github.io/kubernetes-highly-available-clusters/</a></p>
+
+<h2 id="ceph-소스-다운로드-및-실습-환경-세팅">Ceph 소스 다운로드 및 실습 환경 세팅</h2>
+
+<ul>
+  <li>지우고 다시 작업할 경우 각 node별로  <code class="language-plaintext highlighter-rouge">rm -rf /var/lib/rook</code> 필요</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## git이 없을 경우 git 설치</span>
+yum <span class="nb">install</span> <span class="nt">-y</span> git
+
+<span class="c">## git 레파지토리에서 root-ceph 다운</span>
+git clone <span class="nt">--single-branch</span> <span class="nt">--branch</span> v1.4.3 https://github.com/rook/rook.git
+
+<span class="c">## pod 배포하기</span>
+<span class="c"># Rook 배포에 필요한 공통 리소스를 생성</span>
+<span class="nb">cd </span>rook/cluster/examples/kubernetes/ceph
+
+kubectl create <span class="nt">-f</span> common.yaml
+namespace/rook-ceph created
+
+kubectl create <span class="nt">-f</span> operator.yaml
+configmap/rook-ceph-operator-config created
+deployment.apps/rook-ceph-operator created
+
+kubectl create <span class="nt">-f</span> cluster-test.yaml
+cephcluster.ceph.rook.io/rook-ceph created
+
+<span class="c">## pod의 osd가 모두 Running 상태가 되어있는지 확인 (일정시간 소요)</span>
+<span class="c"># 실시간으로 반복적인 명령어를 실행시키고 싶을 때 (1초 단위)</span>
+watch <span class="nt">-n</span> 1 kubectl get pod <span class="nt">-n</span> rook-ceph
+<span class="c"># 그냥 모니터링용</span>
+<span class="o">[</span>root@node1 ~]# kubectl get pod <span class="nt">-n</span> rook-ceph <span class="nt">-w</span>
+NAME                                            READY   STATUS      RESTARTS   AGE
+csi-cephfsplugin-9zw6k                          3/3     Running     0          23m
+csi-cephfsplugin-provisioner-7468b6bf56-v499m   6/6     Running     0          23m
+csi-cephfsplugin-provisioner-7468b6bf56-w4zmn   0/6     Pending     0          23m
+csi-rbdplugin-jwb66                             3/3     Running     0          24m
+csi-rbdplugin-provisioner-77459cc496-597m8      6/6     Running     0          23m
+csi-rbdplugin-provisioner-77459cc496-vwl9k      0/6     Pending     0          23m
+rook-ceph-mgr-a-c4cfbbcf7-59r8k                 1/1     Running     0          23m
+rook-ceph-mon-a-f5fd779c6-bdjhs                 1/1     Running     0          23m
+rook-ceph-operator-68679ff94-7sz59              1/1     Running     0          24m
+rook-ceph-osd-0-7d44c46f8c-mdn9w                1/1     Running     0          23m
+rook-ceph-osd-prepare-node1-dx62h               0/1     Completed   0          23m
+rook-discover-ckbj9                             1/1     Running     0          24m
+
+<span class="c">## keyring 오류 발생시 생성</span>
+kubectl <span class="nt">-n</span> rook-ceph create secret generic rook-ceph-crash-collector-keyring
+</code></pre></div></div>
+
+<h2 id="block-storage-실습">Block Storage 실습</h2>
+
+<ul>
+  <li>스토리지를 프로비저닝 하기 위해 <code class="language-plaintext highlighter-rouge">StroageClass</code> 및 <code class="language-plaintext highlighter-rouge">CephBlockPool</code> 을 생성해야 함</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## 스토리지 클래스 생성</span>
+kubectl create <span class="nt">-f</span> cluster/examples/kubernetes/ceph/csi/rbd/storageclass-test.yaml
+
+<span class="c">## mysql 및 wordpress 샘플 생성</span>
+kubectl create <span class="nt">-f</span> mysql.yaml
+kubectl create <span class="nt">-f</span> wordpress.yaml
+
+<span class="c">## 아래와 같이 pvc가 생성되지 않았다면 실패한 것이다.</span>
+<span class="c">## 필자의 경우 고가용성 클러스터 설정부터 single 노드로 변경하여 재세팅하여 겨우 성공했다.</span>
+kubectl get pvc
+NAME             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS      AGE
+mysql-pv-claim   Bound    pvc-23a395ba-07f8-4b28-936b-86e74e65195e   20Gi       RWO            rook-ceph-block   19m
+wp-pv-claim      Bound    pvc-7d98c164-9bf7-418e-99ee-49259dd2b9a4   20Gi       RWO            rook-ceph-block   8s
+
+<span class="c">## 디스크나 파티션 부분에서도 문제가 발생한다고 하니 필자 기준의 세팅을 참고하기 바란다.</span>
+<span class="o">[</span>root@node1 kubernetes]# fdisk <span class="nt">-l</span>
+
+Disk /dev/sda: 136.4 GB, 136365211648 bytes, 266338304 sectors
+Units <span class="o">=</span> sectors of 1 <span class="k">*</span> 512 <span class="o">=</span> 512 bytes
+Sector size <span class="o">(</span>logical/physical<span class="o">)</span>: 512 bytes / 4096 bytes
+I/O size <span class="o">(</span>minimum/optimal<span class="o">)</span>: 4096 bytes / 4096 bytes
+Disk label <span class="nb">type</span>: dos
+Disk identifier: 0x000c01bb
+
+   Device Boot      Start         End      Blocks   Id  System
+/dev/sda1   <span class="k">*</span>        2048     2099199     1048576   83  Linux
+/dev/sda2         2099200   266338303   132119552   8e  Linux LVM
+
+Disk /dev/sdb: 21.5 GB, 21474836480 bytes, 41943040 sectors
+Units <span class="o">=</span> sectors of 1 <span class="k">*</span> 512 <span class="o">=</span> 512 bytes
+Sector size <span class="o">(</span>logical/physical<span class="o">)</span>: 512 bytes / 4096 bytes
+I/O size <span class="o">(</span>minimum/optimal<span class="o">)</span>: 4096 bytes / 4096 bytes
+
+Disk /dev/mapper/centos-root: 53.7 GB, 53687091200 bytes, 104857600 sectors
+Units <span class="o">=</span> sectors of 1 <span class="k">*</span> 512 <span class="o">=</span> 512 bytes
+Sector size <span class="o">(</span>logical/physical<span class="o">)</span>: 512 bytes / 4096 bytes
+I/O size <span class="o">(</span>minimum/optimal<span class="o">)</span>: 4096 bytes / 4096 bytes
+
+Disk /dev/mapper/centos-swap: 2147 MB, 2147483648 bytes, 4194304 sectors
+Units <span class="o">=</span> sectors of 1 <span class="k">*</span> 512 <span class="o">=</span> 512 bytes
+Sector size <span class="o">(</span>logical/physical<span class="o">)</span>: 512 bytes / 4096 bytes
+I/O size <span class="o">(</span>minimum/optimal<span class="o">)</span>: 4096 bytes / 4096 bytes
+
+Disk /dev/mapper/centos-home: 79.4 GB, 79448506368 bytes, 155172864 sectors
+Units <span class="o">=</span> sectors of 1 <span class="k">*</span> 512 <span class="o">=</span> 512 bytes
+Sector size <span class="o">(</span>logical/physical<span class="o">)</span>: 512 bytes / 4096 bytes
+I/O size <span class="o">(</span>minimum/optimal<span class="o">)</span>: 4096 bytes / 4096 bytes
+
+Disk /dev/mapper/ceph--0e128686--a120--4ee8--835c--88592e12a79c-osd--data--b3800f4f--2c4c--4d82--adf0--93f41f644741: 21.5 GB, 21470642176 bytes, 41934848 sectors
+Units <span class="o">=</span> sectors of 1 <span class="k">*</span> 512 <span class="o">=</span> 512 bytes
+Sector size <span class="o">(</span>logical/physical<span class="o">)</span>: 512 bytes / 4096 bytes
+I/O size <span class="o">(</span>minimum/optimal<span class="o">)</span>: 4096 bytes / 4096 bytes
+
+Disk /dev/rbd0: 21.5 GB, 21474836480 bytes, 41943040 sectors
+Units <span class="o">=</span> sectors of 1 <span class="k">*</span> 512 <span class="o">=</span> 512 bytes
+Sector size <span class="o">(</span>logical/physical<span class="o">)</span>: 512 bytes / 512 bytes
+I/O size <span class="o">(</span>minimum/optimal<span class="o">)</span>: 4194304 bytes / 4194304 bytes
+
+Disk /dev/rbd1: 21.5 GB, 21474836480 bytes, 41943040 sectors
+Units <span class="o">=</span> sectors of 1 <span class="k">*</span> 512 <span class="o">=</span> 512 bytes
+Sector size <span class="o">(</span>logical/physical<span class="o">)</span>: 512 bytes / 512 bytes
+I/O size <span class="o">(</span>minimum/optimal<span class="o">)</span>: 4194304 bytes / 4194304 bytes
+</code></pre></div></div>
+
+<h2 id="shared-file-storage-실습">Shared File Storage 실습</h2>
+
+<h3 id="shared-storage-유형-적용">Shared Storage 유형 적용</h3>
+
+<ul>
+  <li>MDS POD 배포</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@node1 ceph]# kubectl create <span class="nt">-f</span> filesystem-test.yaml
+cephfilesystem.ceph.rook.io/myfs created
+
+<span class="o">[</span>root@node1 ceph]# kubectl <span class="nt">-n</span> rook-ceph get pod <span class="nt">-l</span> <span class="nv">app</span><span class="o">=</span>rook-ceph-mds
+NAME                                    READY   STATUS    RESTARTS   AGE
+rook-ceph-mds-myfs-a-75764466cf-8xsvk   1/1     Running   0          26s
+rook-ceph-mds-myfs-b-574985f789-pnf6b   1/1     Running   0          26s
+</code></pre></div></div>
+
+<h3 id="storageclass-driver-적용">StorageClass Driver 적용</h3>
+
+<ul>
+  <li>Ceph 데이터 풀에 접근하기 위해 사용되는 드라이버</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubectl create <span class="nt">-f</span> storageclass.yaml
+</code></pre></div></div>
+
+<h3 id="shared-storage-확인">Shared Storage 확인</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@node1 ceph]# kubectl get CephFileSystem <span class="nt">-A</span>
+NAMESPACE   NAME   ACTIVEMDS   AGE
+rook-ceph   myfs   1           100s
+</code></pre></div></div>
+
+<h3 id="shared-storage-테스트">Shared Storage 테스트</h3>
+
+<ul>
+  <li>kube-registry를 배포하면 PVC, docker-registry PID가 배포됨</li>
+  <li>컨테이너 내부에 접근하여 <code class="language-plaintext highlighter-rouge">/var/lib/registry</code> 디렉터리에 dummy 파일을 생성하여 다른 pod에서 공유되는지 확인</li>
+  <li><code class="language-plaintext highlighter-rouge">cluster/examples/kubernetes/ceph/csi/cephfs/</code> 경로에 yaml 파일이 위치함</li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">## pvc만 생성한다.</span>
+<span class="c1">## kubectl create kube-registry.yaml</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">PersistentVolumeClaim</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">cephfs-pvc</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">accessModes</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">ReadWriteMany</span>
+  <span class="na">resources</span><span class="pi">:</span>
+    <span class="na">requests</span><span class="pi">:</span>
+      <span class="na">storage</span><span class="pi">:</span> <span class="s">1Gi</span>
+  <span class="na">storageClassName</span><span class="pi">:</span> <span class="s">rook-cephfs</span>
+<span class="nn">---</span>
+
+<span class="c1">## 아래의 디플로이먼트로 테스트할 수도 있지만 새로운 디플로이먼트로 만들어서 실습할 것이다.</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">apps/v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Deployment</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">kube-registry</span>
+  <span class="c1">## 네임 스페이스 필요</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">kube-system</span>
+  <span class="na">labels</span><span class="pi">:</span>
+    <span class="na">k8s-app</span><span class="pi">:</span> <span class="s">kube-registry</span>
+    <span class="s">kubernetes.io/cluster-service</span><span class="pi">:</span> <span class="s2">"</span><span class="s">true"</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">replicas</span><span class="pi">:</span> <span class="m">3</span>
+  <span class="na">selector</span><span class="pi">:</span>
+    <span class="na">matchLabels</span><span class="pi">:</span>
+      <span class="na">k8s-app</span><span class="pi">:</span> <span class="s">kube-registry</span>
+  <span class="na">template</span><span class="pi">:</span>
+    <span class="na">metadata</span><span class="pi">:</span>
+      <span class="na">labels</span><span class="pi">:</span>
+        <span class="na">k8s-app</span><span class="pi">:</span> <span class="s">kube-registry</span>
+        <span class="s">kubernetes.io/cluster-service</span><span class="pi">:</span> <span class="s2">"</span><span class="s">true"</span>
+    <span class="na">spec</span><span class="pi">:</span>
+      <span class="na">containers</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">registry</span>
+        <span class="na">image</span><span class="pi">:</span> <span class="s">registry:2</span>
+        <span class="na">imagePullPolicy</span><span class="pi">:</span> <span class="s">Always</span>
+        <span class="na">resources</span><span class="pi">:</span>
+          <span class="na">limits</span><span class="pi">:</span>
+            <span class="na">cpu</span><span class="pi">:</span> <span class="s">100m</span>
+            <span class="na">memory</span><span class="pi">:</span> <span class="s">100Mi</span>
+        <span class="na">env</span><span class="pi">:</span>
+        <span class="c1"># Configuration reference: https://docs.docker.com/registry/configuration/</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">REGISTRY_HTTP_ADDR</span>
+          <span class="na">value</span><span class="pi">:</span> <span class="s">:5000</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">REGISTRY_HTTP_SECRET</span>
+          <span class="na">value</span><span class="pi">:</span> <span class="s2">"</span><span class="s">Ple4seCh4ngeThisN0tAVerySecretV4lue"</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY</span>
+          <span class="na">value</span><span class="pi">:</span> <span class="s">/var/lib/registry</span>
+       <span class="c1">## 볼륨 마운트 필요</span>
+        <span class="na">volumeMounts</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">image-store</span>
+          <span class="na">mountPath</span><span class="pi">:</span> <span class="s">/var/lib/registry</span>
+        <span class="na">ports</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">containerPort</span><span class="pi">:</span> <span class="m">5000</span>
+          <span class="na">name</span><span class="pi">:</span> <span class="s">registry</span>
+          <span class="na">protocol</span><span class="pi">:</span> <span class="s">TCP</span>
+        <span class="na">livenessProbe</span><span class="pi">:</span>
+          <span class="na">httpGet</span><span class="pi">:</span>
+            <span class="na">path</span><span class="pi">:</span> <span class="s">/</span>
+            <span class="na">port</span><span class="pi">:</span> <span class="s">registry</span>
+        <span class="na">readinessProbe</span><span class="pi">:</span>
+          <span class="na">httpGet</span><span class="pi">:</span>
+            <span class="na">path</span><span class="pi">:</span> <span class="s">/</span>
+            <span class="na">port</span><span class="pi">:</span> <span class="s">registry</span>
+     <span class="c1">## 볼륨 필요</span>
+      <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">image-store</span>
+        <span class="na">persistentVolumeClaim</span><span class="pi">:</span>
+          <span class="na">claimName</span><span class="pi">:</span> <span class="s">cephfs-pvc</span>
+          <span class="na">readOnly</span><span class="pi">:</span> <span class="no">false</span>
+</code></pre></div></div>
+
+<ul>
+  <li>새로운 디플로이먼트 생성
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">kubectl create -f test.yaml</code></li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">apps/v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Deployment</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">nginx-test</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">kube-system</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">replicas</span><span class="pi">:</span> <span class="m">3</span>
+  <span class="na">selector</span><span class="pi">:</span>
+    <span class="na">matchLabels</span><span class="pi">:</span>
+      <span class="na">app</span><span class="pi">:</span> <span class="s">nginx</span>
+  <span class="na">template</span><span class="pi">:</span>
+    <span class="na">metadata</span><span class="pi">:</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">nginx-test</span>
+      <span class="na">namespace</span><span class="pi">:</span> <span class="s">kube-system</span>
+      <span class="na">labels</span><span class="pi">:</span>
+        <span class="na">app</span><span class="pi">:</span> <span class="s">nginx</span>
+        <span class="s">kubernetes.io/cluster-service</span><span class="pi">:</span> <span class="s2">"</span><span class="s">true"</span>
+    <span class="na">spec</span><span class="pi">:</span>
+      <span class="na">containers</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">nginx</span>
+        <span class="na">image</span><span class="pi">:</span> <span class="s">nginx:1.14.2</span>
+        <span class="na">volumeMounts</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">image-store</span>
+          <span class="na">mountPath</span><span class="pi">:</span> <span class="s">/var/lib/registry</span>
+      <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">image-store</span>
+        <span class="na">persistentVolumeClaim</span><span class="pi">:</span>
+          <span class="na">claimName</span><span class="pi">:</span> <span class="s">cephfs-pvc</span>
+          <span class="na">readOnly</span><span class="pi">:</span> <span class="no">false</span>
+</code></pre></div></div>
+
+<ul>
+  <li>다른 pod에서도 파일이 공유되는지 테스트</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@node1 cephfs]# kubectl get pod <span class="nt">-n</span> kube-system
+NAME                             READY   STATUS    RESTARTS   AGE
+coredns-f9fd979d6-l665j          1/1     Running   1          168m
+coredns-f9fd979d6-x2gql          1/1     Running   1          168m
+etcd-node1                       1/1     Running   1          168m
+kube-apiserver-node1             1/1     Running   1          168m
+kube-controller-manager-node1    1/1     Running   1          168m
+kube-proxy-t7r7n                 1/1     Running   1          168m
+kube-registry-66d4c7bf47-8c276   1/1     Running   0          112m
+kube-registry-66d4c7bf47-g7lpq   1/1     Running   0          112m
+kube-registry-66d4c7bf47-rr8pg   1/1     Running   0          112m
+kube-scheduler-node1             1/1     Running   1          168m
+<span class="c">## 정상적으로 3개의 pod가 실행되고 있음을 확인 가능</span>
+nginx-test-76867f8cb7-49f6g      1/1     Running   0          39m
+nginx-test-76867f8cb7-gwq5s      1/1     Running   0          39m
+nginx-test-76867f8cb7-qhkp2      1/1     Running   0          39m
+
+<span class="c">## 3개의 pod 중 하나의 pod에 접속</span>
+<span class="o">[</span>root@node1 cephfs]# kubectl <span class="nb">exec</span> <span class="nt">-it</span> <span class="nt">-n</span> kube-system nginx-test-76867f8cb7-49f6g bash
+kubectl <span class="nb">exec</span> <span class="o">[</span>POD] <span class="o">[</span>COMMAND] is DEPRECATED and will be removed <span class="k">in </span>a future version. Use kubectl <span class="nb">exec</span> <span class="o">[</span>POD] <span class="nt">--</span> <span class="o">[</span>COMMAND] instead.
+
+<span class="c">## 볼륨을 걸어놓은 경로에 test 파일 생성</span>
+root@nginx-test-76867f8cb7-49f6g:/# <span class="nb">cd</span> /var/lib/registry/
+root@nginx-test-76867f8cb7-49f6g:/var/lib/registry# <span class="nb">touch test
+</span>root@nginx-test-76867f8cb7-49f6g:/var/lib/registry# <span class="nb">ls
+test</span>
+
+<span class="c">## 새로운 창을 하나 더 띄워서 다른 pod로 접속</span>
+<span class="o">[</span>root@node1 ~]# kubectl <span class="nb">exec</span> <span class="nt">-it</span> <span class="nt">-n</span> kube-system nginx-test-76867f8cb7-gwq5s bash
+kubectl <span class="nb">exec</span> <span class="o">[</span>POD] <span class="o">[</span>COMMAND] is DEPRECATED and will be removed <span class="k">in </span>a future version. Use kubectl <span class="nb">exec</span> <span class="o">[</span>POD] <span class="nt">--</span> <span class="o">[</span>COMMAND] instead.
+root@nginx-test-76867f8cb7-gwq5s:/# <span class="nb">cd</span> /var/lib/registry
+
+<span class="c">## test 파일이 다른 pod에도 있음을 확인</span>
+root@nginx-test-76867f8cb7-gwq5s:/var/lib/registry# <span class="nb">ls
+test</span>
+</code></pre></div></div>
+:ET

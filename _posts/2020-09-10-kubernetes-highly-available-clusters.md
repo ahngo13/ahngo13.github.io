@@ -132,6 +132,7 @@ systemctl daemon-reload
 systemctl enable docker
 systemctl restart docker
 
+## 쿠버네티스 리셋할 경우 (처음부터 하고싶을 때)
 kubeadm reset -f
 rm -rf /etc/kubernetes
 rm -rf /etc/cni
@@ -139,6 +140,7 @@ rm -rf /var/lib/etcd
 rm -rf /var/lib/kubenet
 rm -rf /var/lib/kubelet
 rm -rf /root/.kube
+rm -rf /var/lib/rook
 ```
 
 - 쿠버네티스가 사용하는 포트들이므로 비워둬야 하며 모두 열려있어야 한다.
@@ -226,6 +228,9 @@ server node3 172.31.220.154:6443 check ## node3
 kubeadm init --control-plane-endpoint "172.31.218.71:26443" \
                 --upload-certs \
                 --pod-network-cidr=192.168.0.0/16 ## container의 아이피 할당 범위 설정 Calico on Kubernetes 기준 
+
+## 싱글로 할 때 (멀티로 하다가 잘 안 될때 그냥 싱글로 테스트하는 용도로 사용함)
+kubeadm init --upload-certs --pod-network-cidr=192.168.0.0/16
 ```
 
 ## node2, node3 image pull
