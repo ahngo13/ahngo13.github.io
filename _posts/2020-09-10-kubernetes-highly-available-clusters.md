@@ -104,8 +104,23 @@ net.bridge.bridge-nf-call-iptables = 1
 br_netfilter           22256  0
 bridge                151336  1 br_netfilter
 
-## 도커 설치
+## 도커 설치 (도커로 인해 진행이 잘 안되는 경우가 있으니 설치되어있을 경우 삭제하고 다시 설치)
+yum remove docker \
+                docker-client \
+                docker-client-latest \
+                docker-common \
+                docker-latest \
+                docker-latest-logrotate \
+                docker-logrotate \
+                docker-selinux \
+                docker-engine-selinux \
+                docker-engine
+
+sudo yum update
+sudo yum install yum-utils device-mapper-persistent-data lvm2
+
 [root@localhost ~]# yum install docker-ec -y
+
 
 ## 부팅시 도커 자동으로 실행하게 설정
 [root@localhost ~]# systemctl start docker.service

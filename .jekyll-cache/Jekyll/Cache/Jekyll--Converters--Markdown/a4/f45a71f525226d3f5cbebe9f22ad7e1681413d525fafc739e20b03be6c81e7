@@ -1,4 +1,4 @@
-I"'C<h1 id="구성목표">구성목표</h1>
+I"H<h1 id="구성목표">구성목표</h1>
 
 <ul>
   <li>마스터 노드 3개의 클러스터 구성</li>
@@ -107,8 +107,23 @@ net.bridge.bridge-nf-call-iptables <span class="o">=</span> 1
 br_netfilter           22256  0
 bridge                151336  1 br_netfilter
 
-<span class="c">## 도커 설치</span>
+<span class="c">## 도커 설치 (도커로 인해 진행이 잘 안되는 경우가 있으니 설치되어있을 경우 삭제하고 다시 설치)</span>
+yum remove docker <span class="se">\</span>
+                docker-client <span class="se">\</span>
+                docker-client-latest <span class="se">\</span>
+                docker-common <span class="se">\</span>
+                docker-latest <span class="se">\</span>
+                docker-latest-logrotate <span class="se">\</span>
+                docker-logrotate <span class="se">\</span>
+                docker-selinux <span class="se">\</span>
+                docker-engine-selinux <span class="se">\</span>
+                docker-engine
+
+<span class="nb">sudo </span>yum update
+<span class="nb">sudo </span>yum <span class="nb">install </span>yum-utils device-mapper-persistent-data lvm2
+
 <span class="o">[</span>root@localhost ~]# yum <span class="nb">install </span>docker-ec <span class="nt">-y</span>
+
 
 <span class="c">## 부팅시 도커 자동으로 실행하게 설정</span>
 <span class="o">[</span>root@localhost ~]# systemctl start docker.service
@@ -134,6 +149,7 @@ bridge                151336  1 br_netfilter
 systemctl <span class="nb">enable </span>docker
 systemctl restart docker
 
+<span class="c">## 쿠버네티스 리셋할 경우 (처음부터 하고싶을 때)</span>
 kubeadm reset <span class="nt">-f</span>
 <span class="nb">rm</span> <span class="nt">-rf</span> /etc/kubernetes
 <span class="nb">rm</span> <span class="nt">-rf</span> /etc/cni
@@ -141,6 +157,7 @@ kubeadm reset <span class="nt">-f</span>
 <span class="nb">rm</span> <span class="nt">-rf</span> /var/lib/kubenet
 <span class="nb">rm</span> <span class="nt">-rf</span> /var/lib/kubelet
 <span class="nb">rm</span> <span class="nt">-rf</span> /root/.kube
+<span class="nb">rm</span> <span class="nt">-rf</span> /var/lib/rook
 </code></pre></div></div>
 
 <ul>
@@ -231,6 +248,9 @@ server node3 172.31.220.154:6443 check <span class="c">## node3</span>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kubeadm init <span class="nt">--control-plane-endpoint</span> <span class="s2">"172.31.218.71:26443"</span> <span class="se">\</span>
                 <span class="nt">--upload-certs</span> <span class="se">\</span>
                 <span class="nt">--pod-network-cidr</span><span class="o">=</span>192.168.0.0/16 <span class="c">## container의 아이피 할당 범위 설정 Calico on Kubernetes 기준 </span>
+
+<span class="c">## 싱글로 할 때 (멀티로 하다가 잘 안 될때 그냥 싱글로 테스트하는 용도로 사용함)</span>
+kubeadm init <span class="nt">--upload-certs</span> <span class="nt">--pod-network-cidr</span><span class="o">=</span>192.168.0.0/16
 </code></pre></div></div>
 
 <h2 id="node2-node3-image-pull">node2, node3 image pull</h2>
