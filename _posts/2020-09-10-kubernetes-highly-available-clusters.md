@@ -116,6 +116,8 @@ yum remove docker \
                 docker-engine-selinux \
                 docker-engine
 
+sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
 sudo yum update
 sudo yum install yum-utils device-mapper-persistent-data lvm2
 
