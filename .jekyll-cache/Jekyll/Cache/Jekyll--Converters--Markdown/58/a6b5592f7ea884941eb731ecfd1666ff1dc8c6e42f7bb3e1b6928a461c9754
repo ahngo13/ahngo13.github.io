@@ -1,4 +1,4 @@
-I"H<h1 id="구성목표">구성목표</h1>
+I"�H<h1 id="구성목표">구성목표</h1>
 
 <ul>
   <li>마스터 노드 3개의 클러스터 구성</li>
@@ -119,10 +119,12 @@ yum remove docker <span class="se">\</span>
                 docker-engine-selinux <span class="se">\</span>
                 docker-engine
 
+<span class="nb">sudo </span>yum-config-manager <span class="nt">--add-repo</span> https://download.docker.com/linux/centos/docker-ce.repo
+
 <span class="nb">sudo </span>yum update
 <span class="nb">sudo </span>yum <span class="nb">install </span>yum-utils device-mapper-persistent-data lvm2
 
-<span class="o">[</span>root@localhost ~]# yum <span class="nb">install </span>docker-ec <span class="nt">-y</span>
+<span class="o">[</span>root@localhost ~]# yum <span class="nb">install </span>docker-ce <span class="nt">-y</span>
 
 
 <span class="c">## 부팅시 도커 자동으로 실행하게 설정</span>

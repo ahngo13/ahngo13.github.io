@@ -121,7 +121,7 @@ sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/dock
 sudo yum update
 sudo yum install yum-utils device-mapper-persistent-data lvm2
 
-[root@localhost ~]# yum install docker-ec -y
+[root@localhost ~]# yum install docker-ce -y
 
 
 ## 부팅시 도커 자동으로 실행하게 설정

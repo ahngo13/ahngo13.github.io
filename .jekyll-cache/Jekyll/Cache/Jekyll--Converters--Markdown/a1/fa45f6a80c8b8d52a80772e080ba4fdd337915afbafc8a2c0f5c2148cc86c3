@@ -1,0 +1,337 @@
+I"�W<ul>
+  <li>DashBoard는 쿠버네티스 사용자 인터페이스(UI)</li>
+  <li>컨테이너화 된 애플리케이션을 클러스터에 배포, 문제 해결, 클러스터 리소스 관리</li>
+</ul>
+
+<h1 id="쿠버네티스-대시보드-설치">쿠버네티스 대시보드 설치</h1>
+
+<ul>
+  <li>VM 환경
+    <ul>
+      <li>OS : CentOS 7</li>
+      <li>HDD : 20Gi</li>
+      <li>CPU : 2 Core</li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml</code></li>
+  <li>공식문서에서 최신버전을 설치하는 것이 좋다.
+    <ul>
+      <li><a href="https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/">https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/</a></li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## 쿠버네티스 대시보드 설치</span>
+<span class="o">[</span>root@localhost ~]# <span class="o">[</span>root@node1 cephfs]# kubectl apply <span class="nt">-f</span> https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
+namespace/kubernetes-dashboard created
+serviceaccount/kubernetes-dashboard created
+service/kubernetes-dashboard created
+secret/kubernetes-dashboard-certs created
+secret/kubernetes-dashboard-csrf created
+secret/kubernetes-dashboard-key-holder created
+configmap/kubernetes-dashboard-settings created
+role.rbac.authorization.k8s.io/kubernetes-dashboard created
+clusterrole.rbac.authorization.k8s.io/kubernetes-dashboard created
+rolebinding.rbac.authorization.k8s.io/kubernetes-dashboard created
+clusterrolebinding.rbac.authorization.k8s.io/kubernetes-dashboard created
+deployment.apps/kubernetes-dashboard created
+service/dashboard-metrics-scraper created
+deployment.apps/dashboard-metrics-scraper created
+
+<span class="c">## 대시보드 네임스페이스 확인</span>
+<span class="o">[</span>root@localhost ~]# kubectl get pod <span class="nt">-A</span>
+NAMESPACE              NAME                                            READY   STATUS     RESTARTS   AGE
+calico-system          calico-kube-controllers-69fbbf7967-wk5sd        0/1     Pending    0          17s
+calico-system          calico-node-ztd2g                               0/1     Init:1/2   0          17s
+calico-system          calico-typha-75c5fd9698-bvqs5                   1/1     Running    0          18s
+kube-system            coredns-f9fd979d6-5fldt                         0/1     Pending    0          7m17s
+kube-system            coredns-f9fd979d6-ggl2r                         0/1     Pending    0          7m17s
+kube-system            etcd-localhost.localdomain                      1/1     Running    0          7m27s
+kube-system            kube-apiserver-localhost.localdomain            1/1     Running    0          7m27s
+kube-system            kube-controller-manager-localhost.localdomain   1/1     Running    0          7m27s
+kube-system            kube-proxy-hcbhk                                1/1     Running    0          7m17s
+kube-system            kube-scheduler-localhost.localdomain            1/1     Running    0          7m27s
+kubernetes-dashboard   dashboard-metrics-scraper-7b59f7d4df-qbrz6      0/1     Pending    0          74s
+kubernetes-dashboard   kubernetes-dashboard-74d688b6bc-9mlxk           0/1     Pending    0          74s
+tigera-operator        tigera-operator-b96747c7d-bt5s4                 1/1     Running    0          26s
+
+<span class="c">## 클러스터 정보 확인</span>
+<span class="o">[</span>root@localhost ~]# kubectl cluster-info
+Kubernetes master is running at https://172.25.29.187:6443
+KubeDNS is running at https://172.25.29.187:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+</code></pre></div></div>
+
+<p>대시보드에 접근 방법은 총 3가지가 있으며 차례대로 <code class="language-plaintext highlighter-rouge">Proxy</code>, <code class="language-plaintext highlighter-rouge">NodePort</code>, <code class="language-plaintext highlighter-rouge">API Server</code> 순으로 진행해보겠다.</p>
+
+<h1 id="proxy를-이용한-세팅-방법">Proxy를 이용한 세팅 방법</h1>
+
+<ul>
+  <li>로컬호스트에서만 접속 가능</li>
+  <li><code class="language-plaintext highlighter-rouge">kubectl proxy --port[접속포트] --address=[대시보드 URL] --accept-hosts='^*$' &amp;</code></li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost ~]# kubectl proxy <span class="nt">--port</span><span class="o">=</span>8001
+<span class="o">[</span>root@localhost ~]# Starting to serve on 127.0.0.1:8001
+</code></pre></div></div>
+
+<p><a href="http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login">http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login</a></p>
+
+<p>(접속은 가능하지만 로그인은 안된다는 것을 확인할 수 있음)</p>
+
+<p><img src="/assets/img/dashboard.png" alt="/assets/img/dashboard.png" /></p>
+
+<ul>
+  <li>Kubernetes Login 인증키 생성 (Token 사용 방법)</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## serviceaccount 생성</span>
+<span class="o">[</span>root@localhost ~]# <span class="nb">cat</span> <span class="o">&lt;&lt;</span><span class="no">EOF</span><span class="sh"> | kubectl create -f -
+&gt;  apiVersion: v1
+&gt;  kind: ServiceAccount
+&gt;  metadata:
+&gt;    name: admin-user
+&gt;    namespace: kube-system
+&gt; EOF
+serviceaccount/admin-user created
+
+## ClusterRoleBinding 생성
+[root@localhost ~]# cat &lt;&lt;EOF | kubectl create -f -
+&gt;  apiVersion: rbac.authorization.k8s.io/v1
+&gt;  kind: ClusterRoleBinding
+&gt;  metadata:
+&gt;    name: admin-user
+&gt;  roleRef:
+&gt;    apiGroup: rbac.authorization.k8s.io
+&gt;    kind: ClusterRole
+&gt;    name: cluster-admin
+&gt;  subjects:
+&gt;  - kind: ServiceAccount
+&gt;    name: admin-user
+&gt;    namespace: kube-system
+&gt; EOF
+clusterrolebinding.rbac.authorization.k8s.io/admin-user created
+
+## 사용자 계정의 토큰을 대시보드에 입력
+[root@localhost ~]# kubectl -n kube-system describe secret </span><span class="si">$(</span>kubectl <span class="nt">-n</span> kube-system get secret | <span class="nb">grep </span>admin-user | <span class="nb">awk</span> <span class="s1">'{print $1}'</span><span class="si">)</span><span class="sh">
+Name:         admin-user-token-994zc
+Namespace:    kube-system
+Labels:       &lt;none&gt;
+Annotations:  kubernetes.io/service-account.name: admin-user
+              kubernetes.io/service-account.uid: 302f8d02-9016-4e33-919b-f6bad094d143
+
+Type:  kubernetes.io/service-account-token
+
+Data
+====
+ca.crt:     1066 bytes
+namespace:  11 bytes
+token:      eyJhbGciOiJSUzI1NiIsImtpZCI6IjZnMVU4d2lVOGhCdHg1ZWRlR1FST0pNMXJ3WXFFN3ktWnc0ZlhtOGlsSFUifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhZG1pbi11c2VyLXRva2VuLTk5NHpjIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImFkbWluLXVzZXIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiIzMDJmOGQwMi05MDE2LTRlMzMtOTE5Yi1mNmJhZDA5NGQxNDMiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06YWRtaW4tdXNlciJ9.lMyKyDNP7KUNgfVv70Ox-QtlbQnNXl1XM6hBQXitSDWZq7Crn0w8PUoqT089OHs7Thmf4E6jYwr1GC8467lEMe-GRJ378RACKBjA_l9o76CibTV2jEeBGJ4f7rWUwD3SUNsZUuBpZATZl4BIgu4dpSLzoEMtc3mTvRM3ag-J7qntWEBkVgvYOJq0q-H6p5lrEdobjIX9j_Zeb9exstHD0VeKMrOIUMfwL2-qk7ofRrkTSiulmPspzv6sSv0_8l0Hqkr16ggO78wTxAokc0_C4V1I1C-cnNy-KUOW07ZgC16TOdGBgXhptqi0K4949p7lDShu5YG2Bqh7r2x2J1yRJQ
+</span></code></pre></div></div>
+
+<ul>
+  <li>토큰으로 로그인 처리 (로컬호스트 기준)</li>
+</ul>
+
+<p><img src="/assets/img/dashboard1.png" alt="/assets/img/dashboard1.png" /></p>
+
+<h1 id="nodeport를-이용한-세팅-방법">NodePort를 이용한 세팅 방법</h1>
+
+<ul>
+  <li>NodePort로 접속하기 위해서는 쿠버네티스 대시보드의 설정을 변경해야함.</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## 쿠버네티스 대시보드 설정 변경</span>
+kubectl <span class="nt">-n</span> kubernetes-dashboard edit service kubernetes-dashboard
+
+<span class="c"># Please edit the object below. Lines beginning with a '#' will be ignored,</span>
+<span class="c"># and an empty file will abort the edit. If an error occurs while saving this file will be</span>
+<span class="c"># reopened with the relevant failures.</span>
+<span class="c">#</span>
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      <span class="o">{</span><span class="s2">"apiVersion"</span>:<span class="s2">"v1"</span>,<span class="s2">"kind"</span>:<span class="s2">"Service"</span>,<span class="s2">"metadata"</span>:<span class="o">{</span><span class="s2">"annotations"</span>:<span class="o">{}</span>,<span class="s2">"labels"</span>:<span class="o">{</span><span class="s2">"k8s-app"</span>:<span class="s2">"kubernetes-dashboard"</span><span class="o">}</span>,<span class="s2">"name"</span>:<span class="s2">"kubernetes-dashboard"</span>,<span class="s2">"namespace"</span>:<span class="s2">"kubernetes-dashboard"</span><span class="o">}</span>,<span class="s2">"spec"</span>:<span class="o">{</span><span class="s2">"ports"</span>:[<span class="o">{</span><span class="s2">"port"</span>:443,<span class="s2">"targetPort"</span>:8443<span class="o">}]</span>,<span class="s2">"selector"</span>:<span class="o">{</span><span class="s2">"k8s-app"</span>:<span class="s2">"kubernetes-dashboard"</span><span class="o">}}}</span>
+  creationTimestamp: <span class="s2">"2020-09-16T01:58:42Z"</span>
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+  resourceVersion: <span class="s2">"1231"</span>
+  selfLink: /api/v1/namespaces/kubernetes-dashboard/services/kubernetes-dashboard
+  uid: 1706f4b9-439a-4a91-8520-9de11005e71c
+spec:
+  clusterIP: 10.109.32.134
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 8443
+  selector:
+    k8s-app: kubernetes-dashboard
+  sessionAffinity: None
+  <span class="nb">type</span>: ClusterIP <span class="c">## 이 부분을 NodePort로 변경</span>
+status:
+  loadBalancer: <span class="o">{}</span>
+
+<span class="c">## 변경된 내용 확인</span>
+<span class="o">[</span>root@localhost ~]# kubectl <span class="nt">-n</span> kubernetes-dashboard get service kubernetes-dashboard
+NAME                   TYPE       CLUSTER-IP      EXTERNAL-IP   PORT<span class="o">(</span>S<span class="o">)</span>         AGE
+kubernetes-dashboard   NodePort   10.109.32.134   &lt;none&gt;        443:30186/TCP   107m
+
+</code></pre></div></div>
+
+<h1 id="api-server를-이용한-세팅-방법">API Server를 이용한 세팅 방법</h1>
+
+<ul>
+  <li>가장 효과적인 방법 (외부에서 접근 가능)</li>
+  <li>인증서를 생성하고 클라이언트 브라우저에 적용하여 접근</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## .kube/config 파일의 client certificate와 client 키를 추출하여 kubecfg.crt와 kubecfg.key 파일 생성</span>
+<span class="o">[</span>root@node1 ~]# <span class="nb">grep</span> <span class="s1">'client-certificate-data'</span> ~/.kube/config | <span class="nb">head</span> <span class="nt">-n</span> 1 | <span class="nb">awk</span> <span class="s1">'{print $2}'</span> | <span class="nb">base64</span> <span class="nt">-d</span> <span class="o">&gt;&gt;</span> kubecfg.crt
+<span class="o">[</span>root@node1 ~]# <span class="nb">cat </span>kubecfg.crt
+<span class="nt">-----BEGIN</span> CERTIFICATE-----
+MIIDEzCCAfugAwIBAgIIcr2D9qvsSBwwDQYJKoZIhvcNAQELBQAwFTETMBEGA1UE
+AxMKa3ViZXJuZXRlczAeFw0yMDA5MTYwNDI0MDVaFw0yMTA5MTYwNDI0MDdaMDQx
+FzAVBgNVBAoTDnN5c3RlbTptYXN0ZXJzMRkwFwYDVQQDExBrdWJlcm5ldGVzLWFk
+bWluMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5f6Mn0LMYlvnwghv
+M2638uSwOFRlaIEhgnyB7+KI9XvhesQuEJB/+8wEILutuxq0wA95MCVSxMFgXKB7
+h9/VJwxINFg//vKSESzBeHESkMbncFfC2sUNoXa1sHCDKlKAWPEbUeg+cgo0E7R/
+EdxCbx9KXCDLr3W17RoR99/Y+2HABQrfWMV8K61HJ3tZu084rd1Lt4gh6kinJJXJ
+gJRBX3wRMQ0hIVMhYTGqDiT7nxTa69zSTM3Sz64xoB19WxRDdFw0fc9g/qE4NWW6
+otAuP1+phwpb8gwtpBCdsLVw9xyOSFaMj9RGpI9dD/31v5zK1WZj0ZWUniEO7X2D
+bgq+7wIDAQABo0gwRjAOBgNVHQ8BAf8EBAMCBaAwEwYDVR0lBAwwCgYIKwYBBQUH
+AwIwHwYDVR0jBBgwFoAUzS0xveexOOV9pTixafrsi+MFiIEwDQYJKoZIhvcNAQEL
+BQADggEBAHH3PDVCxPugy5ZaqIVJRF1chtAcctVt6slHxgKrOlO7kkHGU6srEG8R
+QPdsXKaqBBlZG4Qir+Gf/9l83zZuR8aNZDTea6O96Y8Aef6JS396z6JV7118d311
+gS6USLER+fsG/dyOGw0y3/DYPbyIVzpuGQ607KbaG55m6vainNVrKbqbXn86Lraz
+Yy1wFZRTJ/rnVGpBscPY6AV3ITXjvGkDNGnQ2bxjHLbXyqYAgMN/dkjWb8z0IDh5
+RRekqIY2PBRncHq6zWS2Xak85Rm7h3Ka9QYUugHBZXROleizG1CCD3Gf7XEzRiaU
+<span class="nv">faF32UNPKheJ1CCSstaTwiH891kPGhs</span><span class="o">=</span>
+<span class="nt">-----END</span> CERTIFICATE-----
+
+<span class="o">[</span>root@node1 ~]# <span class="nb">grep</span> <span class="s1">'client-key-data'</span> ~/.kube/config | <span class="nb">head</span> <span class="nt">-n</span> 1 | <span class="nb">awk</span> <span class="s1">'{print $2}'</span> | <span class="nb">base64</span> <span class="nt">-d</span> <span class="o">&gt;&gt;</span> kubecfg.key
+<span class="o">[</span>root@node1 ~]# <span class="nb">cat </span>kubecfg.key
+<span class="nt">-----BEGIN</span> RSA PRIVATE KEY-----
+MIIEpQIBAAKCAQEA5f6Mn0LMYlvnwghvM2638uSwOFRlaIEhgnyB7+KI9XvhesQu
+EJB/+8wEILutuxq0wA95MCVSxMFgXKB7h9/VJwxINFg//vKSESzBeHESkMbncFfC
+2sUNoXa1sHCDKlKAWPEbUeg+cgo0E7R/EdxCbx9KXCDLr3W17RoR99/Y+2HABQrf
+WMV8K61HJ3tZu084rd1Lt4gh6kinJJXJgJRBX3wRMQ0hIVMhYTGqDiT7nxTa69zS
+TM3Sz64xoB19WxRDdFw0fc9g/qE4NWW6otAuP1+phwpb8gwtpBCdsLVw9xyOSFaM
+j9RGpI9dD/31v5zK1WZj0ZWUniEO7X2Dbgq+7wIDAQABAoIBAQC9SuMMFRtIfOHj
+VbPIPgER3VyYEAYim90rmzQKboVQnfP3ac2L/pIHeGORWUZkr1dCl7mjgaR8obeg
+pMjnDLdPWxF2W4fYWmcT0aUubsnb9Ij5cpHCItrUIHLrU77wr1RJX6+fmykCDRnN
+egn3djQLZ1J5PtjFgXkJOyK8wzS/t6Vjnm34/+KGKvSISNQtm1IzvpfFP+6yNb3M
+i3Rkq0sFnt/j123/xndic3SdAh0FfjP+uGNofWzr1Y7aiS0q4gMFwkSq+U364hk0
+yS4r3Kx7O9XtBKZYifmSvpAwSNRtpU5oRFaYDAHvK2H+UDTWQR8mOtRSGmVrcTLI
+5WjWRNGZAoGBAPzR8XgiyueyFTJYhGCXaP7zoZ5KwRIz6E9453IFG/PHDQwbFMx0
++HcZLFr864DDXqMUwsgTcc4bPx8DU3+WN4yhVb+90qjVkbtOUw6A07yW95aK5aWa
+Ok2n2NQect7ONT/I0+pvv7DSRgGB4AF4Yy4YBv8PQiiUdC2gYMjaK+MjAoGBAOjj
+G/o9AivXl9THFGpzi8jhDDbHIWr9H9j+7SvBgUF2/j2Vs0tyJBk1JqeYGIcP9edc
+Z1bOyCH0LS8d+lAQ7VXgdI8Q4T/Iu7WTjc9qQq9FrTbxLVuieED2spL5D36n4cvQ
+8fL0UFHcdLjU7FQIjFgqmEN18/Oie42CIn8hJQfFAoGBAMYeS0imkzTgA+ZRIWOE
+I15vUz51PDlkfe8RQuXCBTaSzLGo4zKZkz/ZdT3UJ0TfVOEdWsppGmy2Q0+tTpiU
+AfHtWAIK4fM2cZ5DcajS4ZpO/7R0IiQU6Q2Ds9H+Dmx1UZsraI21hpUtInj56q2c
+RrSPVaQ4s9KTCzvaCx46gdvbAoGBALp4ln9AeEuYfcbufIdb61I1+CyoNzbOZMDA
+JjFB6Hf9ikbPZdeEFilk6IWLACCtA+1zjH7yZUbil4dBjpqrYw2/AjVHg8QpuzsB
+YavxXmGu/amfZP0ZUwZZQdTyvZhhXidvLzukqedSCNeyDWSfz5gMywxBFss+j4VX
+7L00Uc0tAoGAZ147wKkgH8hxvjvdyqyDTtyI9a0e7Zp5f0OmRl0CtDoGt8AmNmlw
+OAhsbXBatguL0XAvivgfMhopAM10PrgCR4FD/Mm0iGz1AUIB+OKlRpG/fxiNVwcz
+/pQ9A73XS5nFJfRF8aEjPP366cl0Wk7uMNnUyo5x/A5FXeQxS2WAxmg<span class="o">=</span>
+<span class="nt">-----END</span> RSA PRIVATE KEY-----
+
+<span class="c">## 이 키들을 기반으로 인증서 파일 생성 (비밀번호도 설정)</span>
+<span class="o">[</span>root@node1 ~]# openssl pkcs12 <span class="nt">-export</span> <span class="nt">-clcerts</span> <span class="nt">-inkey</span> kubecfg.key <span class="nt">-in</span> kubecfg.crt <span class="nt">-out</span> kubecfg.p12 <span class="nt">-name</span> <span class="s2">"kubernetes-admin"</span>
+Enter Export Password:
+Verifying - Enter Export Password:
+
+<span class="c">## 키 생성 확인 (kubecfg.p12가 있음을 확인할 수 있다)</span>
+root@node1 ~]# <span class="nb">ls
+</span>anaconda-ks.cfg       kubecfg.key  다운로드  비디오  스크린샷, 2020-09-16 12-58-12.png
+initial-setup-ks.cfg  kubecfg.p12  문서      사진    음악
+kubecfg.crt           공개         바탕화면  서식
+
+<span class="c">## kubecfg.p12 파일과 /etc/kubernetes/pki/ca.crt 2개의 파일을 외부로 옮겨준다.</span>
+<span class="c">## 필자는 메일로 보내보려 했으나 잘 안되서 슬랙으로 보냈다.</span>
+
+<span class="c">## ca.crt 파일과 따로 찾기 번거로울 것 같아서 홈디렉토리로 복사한 후 슬랙으로 보냈다.</span>
+<span class="o">[</span>root@node1 ~]# <span class="nb">cd</span> /etc/kubernetes/pki/
+<span class="o">[</span>root@node1 pki]# <span class="nb">ls
+</span>apiserver-etcd-client.crt     apiserver.crt  etcd                    front-proxy-client.key
+apiserver-etcd-client.key     apiserver.key  front-proxy-ca.crt      sa.key
+apiserver-kubelet-client.crt  ca.crt         front-proxy-ca.key      sa.pub
+apiserver-kubelet-client.key  ca.key         front-proxy-client.crt
+<span class="o">[</span>root@node1 pki]# <span class="nb">cp </span>ca.crt ~/
+</code></pre></div></div>
+
+<ul>
+  <li>필자의 경우 <code class="language-plaintext highlighter-rouge">kubecfg.p12</code> 파일과 <code class="language-plaintext highlighter-rouge">/etc/kubernetes/pki/ca.crt</code> 2개의 파일을 D드라이브의 cert라는 폴더를 만들어서 옮겨놓음.</li>
+  <li>호스트 컴퓨터는 Window10 이므로 명령 프롬프트 창 관리자 권한으로 띄워서 인증서 적용</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## 관리자 권한으로 명령프롬프트를 띄움</span>
+<span class="c">## 루트 인증 기관 인증서 적용</span>
+C:<span class="se">\W</span>INDOWS<span class="se">\s</span>ystem32&gt;certutil.exe <span class="nt">-addstore</span> <span class="s2">"Root"</span> D:<span class="se">\c</span>ert<span class="se">\c</span>a.crt
+Root <span class="s2">"신뢰할 수 있는 루트 인증 기관"</span>
+서명이 공개 키와 일치합니다.
+<span class="s2">"kubernetes"</span> 인증서가 저장소에 추가되었습니다.
+CertUtil: <span class="nt">-addstore</span> 명령이 성공적으로 완료되었습니다.
+
+<span class="c">## 개인용 인증서 적용</span>
+C:<span class="se">\W</span>INDOWS<span class="se">\s</span>ystem32&gt;certutil.exe <span class="nt">-p</span> <span class="o">[</span>인증키 생성시 PW] <span class="nt">-user</span> <span class="nt">-importPFX</span> D:<span class="se">\c</span>ert<span class="se">\k</span>ubecfg.p12
+<span class="s2">"kubernetes-admin"</span> 인증서가 저장소에 추가되었습니다.
+
+CertUtil: <span class="nt">-importPFX</span> 명령이 성공적으로 완료되었습니다.
+
+<span class="c">## 적용된 인증서 확인</span>
+C:<span class="se">\W</span>INDOWS<span class="se">\s</span>ystem32&gt;certmgr.msc
+</code></pre></div></div>
+
+<p>정상적으로 발급이 되었다면 아래의 화면처럼 개인용 인증서와 기관용 인증서를 확인할 수 있다.</p>
+
+<ul>
+  <li>개인용 인증서</li>
+</ul>
+
+<p><img src="/assets/img/dashboard2.png" alt="/assets/img/dashboard2.png" /></p>
+
+<ul>
+  <li>신뢰할 수 있는 루트 인증 기관용 인증서</li>
+</ul>
+
+<p><img src="/assets/img/dashboard3.png" alt="/assets/img/dashboard3.png" /></p>
+
+<ul>
+  <li>대시보드에 접근 : https://[마스터 IP]:6443/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login</li>
+  <li>필자의 경우 : <a href="https://172.25.22.153:6443/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login">https://172.25.22.153:6443/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login</a></li>
+  <li>아래와 같이 인증서 여부를 확인함.</li>
+</ul>
+
+<p><img src="/assets/img/2020-09-16_16h10_20.png" alt="/assets/img/2020-09-16_16h10_20.png" /></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep admin-user | awk '{print $1}')</code> 명령어를 통해 이전에 발급받은 토큰을 확인</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## 토큰을 확인하고 호스트 컴퓨터에서 입력하여 로그인 해본다.</span>
+<span class="o">[</span>root@node1 pki]# kubectl <span class="nt">-n</span> kube-system describe secret <span class="si">$(</span>kubectl <span class="nt">-n</span> kube-system get secret | <span class="nb">grep </span>admin-user | <span class="nb">awk</span> <span class="s1">'{print $1}'</span><span class="si">)</span>
+Name:         admin-user-token-rxq76
+Namespace:    kube-system
+Labels:       &lt;none&gt;
+Annotations:  kubernetes.io/service-account.name: admin-user
+              kubernetes.io/service-account.uid: 000b89cc-5d60-435c-9c46-ec057620f806
+Type:  kubernetes.io/service-account-token
+Data
+<span class="o">====</span>
+namespace:  11 bytes
+token:      eyJhbGciOiJSUzI1NiIsImtpZCI6IkNkWDM2dG1fQWp0WU1ncUlHZXNaa05PQ0taV3M1UF9lNEtRMXZ4MWlhQVUifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhZG1pbi11c2VyLXRva2VuLXJ4cTc2Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImFkbWluLXVzZXIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiIwMDBiODljYy01ZDYwLTQzNWMtOWM0Ni1lYzA1NzYyMGY4MDYiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06YWRtaW4tdXNlciJ9.V-tHFDfhz1p5982M2HzYooGS2AeNjaEM4DvLDMvbxTuGdFPH1v5_i1-CN6z9Ql3Wg7KvSOroACB53ZBqNmUuhdOAfU4kQY_IacLJSVYtCN6KCt9mwrYmPh9uYBBd_33aK4gTUpyoC139eHfp7dt2BQoh7K_c_DjvggmuPhnBH6BG9VO0kJElqJ09a6UqaRB6EFNKABSyKOewndNm01fOhlcjn5WKR6-s01HnC_laDBCYIC8b8hJ3_EztqMWAi3ki4ck2hRcadnwNeZLJvjnWWf54Nf-ue8gGIPeDEK7m0Fcrme3g4-VQiElEFHcu4EN7-dJxN0OcwNkIjYQk2zyUEA
+ca.crt:     1066 bytes
+</code></pre></div></div>
+
+<ul>
+  <li>아래와 같이 정상적으로 로그인이 되면 성공</li>
+</ul>
+
+<p><img src="/assets/img/2020-09-16_16h16_27.png" alt="/assets/img/2020-09-16_16h16_27.png" /></p>
+:ET
