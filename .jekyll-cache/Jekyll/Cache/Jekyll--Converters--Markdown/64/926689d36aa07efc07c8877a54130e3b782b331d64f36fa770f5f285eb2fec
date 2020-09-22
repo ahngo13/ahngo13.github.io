@@ -1,0 +1,81 @@
+I"�<p><a href="https://golang.org/">https://golang.org/</a></p>
+
+<p>다운로드에 들어가서 본인의 운영체제에 맞는 것으로 설치한다.</p>
+
+<p>(필자는 Windows 운영체제 기준으로 설치)</p>
+
+<p><img src="/assets/img/2020-09-21_09h22_52.png" alt="/assets/img/2020-09-21_09h22_52.png" /></p>
+
+<p>윈도우 버전 기준 msi 파일을 받아 설치하게 되는데 여기에서 기본적으로 <code class="language-plaintext highlighter-rouge">C:\go\bin</code> 기준으로 환경변수를 추가한다. (경로를 기본으로 설정하지 않을 경우 환경변수를 따로 변경해주어야할 수 있다고 함)</p>
+
+<p>진짜 환경변수를 설정해주는게 맞는지 궁금해서 한번 들어가봤더니 아래와 같이 맨 끝에 설정 되어있는 것을 확인할 수 있었다.</p>
+
+<p><img src="/assets/img/2020-09-21_09h31_04.png" alt="/assets/img/2020-09-21_09h31_04.png" /></p>
+
+<p>그러면 go가 정상적으로 동작하는지 작업 폴더를 만들어 테스트 하도록 하겠다.</p>
+
+<p>필자는 <code class="language-plaintext highlighter-rouge">C:\GoApp</code> 에 <code class="language-plaintext highlighter-rouge">bin, pkg, src</code> 3가지 폴더를 만들어주었다.</p>
+
+<ul>
+  <li>bin : go에서 사용하는 명령어 저장</li>
+  <li>pkg : go get으로 다운받은 패키지 저장</li>
+  <li>src : go 파일 소스</li>
+</ul>
+
+<p>작업 폴더를 만들어 주었다면 사용자 환경변수를 수정해주자. 기존에 <code class="language-plaintext highlighter-rouge">C:\Users\admin\go</code> 로 되어있으니 이것을 변경해서 사용하도록 하자. 필자는 물론 <code class="language-plaintext highlighter-rouge">C:\GoApp</code> 로 변경해주었다.</p>
+
+<p><img src="/assets/img/2020-09-21_09h41_35.png" alt="/assets/img/2020-09-21_09h41_35.png" /></p>
+
+<p>수정을 완료했다면 잘 세팅이 되었는지 확인해준다. 명령 프롬프트 창을 열어서 <code class="language-plaintext highlighter-rouge">go env</code> 명령어를 입력하면 GO 관련된 환경 변수 설정 리스트를 확인할 수 있다.</p>
+
+<p><img src="/assets/img/2020-09-21_09h48_48.png" alt="/assets/img/2020-09-21_09h48_48.png" /></p>
+
+<p>아래와 같이 시스템 환경변수에서 path에 <code class="language-plaintext highlighter-rouge">%GOPATH%</code> 처럼 하나 더 추가해준다.</p>
+
+<p><img src="/assets/img/2020-09-21_10h47_11.png" alt="/assets/img/2020-09-21_10h47_11.png" /></p>
+
+<p>필자는 IDE를 Microsoft Visual Studio Code를 사용하도록 하겠다. 편집기를 열어 해당 작업 폴더를 열어주고 src 폴더 안에 <code class="language-plaintext highlighter-rouge">hello.go</code> 파일을 만들어 주면 우측 하단에 뭔가 설치하라고 뜬다. 모두 설치해주자. (2번 정도 설치할거냐고 물어볼 것이다)</p>
+
+<p><img src="/assets/img/2020-09-21_09h52_34.png" alt="/assets/img/2020-09-21_09h52_34.png" /></p>
+
+<p>아래의 필요한 go tool과 코드들을 설치해준다. (물론 git이 설치되어있어야 설치가능하다)</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>go get <span class="nt">-u</span> <span class="nt">-v</span> github.com/nsf/gocode
+go get <span class="nt">-u</span> <span class="nt">-v</span> github.com/rogpeppe/godef
+go get <span class="nt">-u</span> <span class="nt">-v</span> github.com/zmb3/gogetdoc
+go get <span class="nt">-u</span> <span class="nt">-v</span> github.com/golang/lint/golint
+go get <span class="nt">-u</span> <span class="nt">-v</span> github.com/lukehoban/go-outline
+go get <span class="nt">-u</span> <span class="nt">-v</span> sourcegraph.com/sqs/goreturns
+go get <span class="nt">-u</span> <span class="nt">-v</span> golang.org/x/tools/cmd/gorename
+go get <span class="nt">-u</span> <span class="nt">-v</span> github.com/tpng/gopkgs
+go get <span class="nt">-u</span> <span class="nt">-v</span> github.com/newhook/go-symbols
+go get <span class="nt">-u</span> <span class="nt">-v</span> golang.org/x/tools/cmd/guru
+go get <span class="nt">-u</span> <span class="nt">-v</span> github.com/cweill/gotests/...
+go get <span class="nt">-u</span> <span class="nt">-v</span> golang.org/x/tools/cmd/godoc
+go get <span class="nt">-u</span> <span class="nt">-v</span> github.com/fatih/gomodifytags
+
+<span class="c">## go debugger 설치</span>
+go get github.com/derekparker/delve/cmd/dlv
+</code></pre></div></div>
+
+<p>설치가 완료되었으면 <code class="language-plaintext highlighter-rouge">hello.go</code> 파일에 아래와 같이 작성해준다.</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">main</span>
+
+<span class="k">import</span> <span class="s">"fmt"</span>
+
+<span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"Hello, World!!!"</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"안녕! Go 언어야!!"</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">go run hello.go</code> 로 실행한 후 결과를 확인한다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>S C:<span class="se">\G</span>oApp<span class="se">\s</span>rc<span class="se">\h</span>ello&gt; go run .<span class="se">\h</span>ello.go
+Hello, World!!!
+안녕! Go 언어야!
+</code></pre></div></div>
+
+<p><img src="/assets/img/2020-09-21_11h05_20.png" alt="/assets/img/2020-09-21_11h05_20.png" /></p>
+:ET
