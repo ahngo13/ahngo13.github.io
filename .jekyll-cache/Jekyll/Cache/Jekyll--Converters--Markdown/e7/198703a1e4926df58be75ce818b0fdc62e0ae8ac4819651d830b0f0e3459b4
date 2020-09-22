@@ -108,7 +108,7 @@
 
 <h2 id="gitlab-재시작">gitlab 재시작</h2>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>gitlat-ctl restart
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>gitlab-ctl restart
 </code></pre></div></div>
 
 <h2 id="gitlab-삭제">gitlab 삭제</h2>

@@ -1,0 +1,783 @@
+I"�<h1 id="패키지">패키지</h1>
+
+<ul>
+  <li>작업폴더의 src폴더 하위에 위치함</li>
+  <li>폴더명과 패키지 이름은 동일하게 하는 것을 권장</li>
+  <li><code class="language-plaintext highlighter-rouge">main</code> 이라는 이름으로 생성할 경우 실행 프로그램으로 인식</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">main</span>
+
+<span class="c">//패키지 import</span>
+<span class="k">import</span> <span class="s">"fmt"</span>
+<span class="c">//아래와 같이도 선언 가능</span>
+<span class="k">import</span> <span class="p">(</span>
+	<span class="s">"math/rand"</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<h1 id="변수--자료형">변수 &amp; 자료형</h1>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">var</code> 키워드로 변수 선언</li>
+  <li><code class="language-plaintext highlighter-rouge">var [변수명] [자료형]</code></li>
+  <li>자료형은 사용하지 않아도 타입추론 가능</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">// 변수 선언 및 초기화</span>
+<span class="k">var</span> <span class="n">s</span> <span class="kt">string</span> <span class="o">=</span> <span class="s">"Hamletshu"</span>
+<span class="c">// 자료형 없이 변수 선언 및 초기화</span>
+<span class="k">var</span> <span class="n">s2</span> <span class="o">=</span> <span class="s">"자료형 선언 안했음"</span>
+<span class="c">// 여러 개의 변수를 한꺼번에 선언 및 초기화 방법1</span>
+<span class="k">var</span> <span class="n">s3</span><span class="p">,</span> <span class="n">su</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="s">"Hamletshu"</span><span class="p">,</span> <span class="m">123</span><span class="p">,</span> <span class="m">3.14</span>
+<span class="c">// 해당 값 출력</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">s2</span><span class="p">)</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">s3</span><span class="p">,</span> <span class="n">su</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
+<span class="c">//여러개의 변수를 한꺼번에 선언 및 초기화 방법2</span>
+<span class="k">var</span> <span class="p">(</span>
+	<span class="n">a1</span> <span class="o">=</span> <span class="s">"Hamletshu"</span>
+	<span class="n">a2</span> <span class="o">=</span> <span class="m">123</span>
+	<span class="n">a3</span> <span class="o">=</span> <span class="m">3.14</span>
+<span class="p">)</span>
+<span class="c">//해당값 출력</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">,</span> <span class="n">a3</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h1 id="포인터">포인터</h1>
+
+<ul>
+  <li>C언어에서 쓰는 포인터와 동일</li>
+  <li>변수 메모리의 주소값을 나타냄</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">var</span> <span class="n">x</span> <span class="o">=</span> <span class="m">5</span>
+<span class="k">var</span> <span class="n">address</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">x</span><span class="c">//x변수의 주소값 넣기 </span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="c">//주소가 표시됨 ex) 0xc0000120a0</span>
+<span class="k">var</span> <span class="n">y</span> <span class="o">=</span> <span class="o">*</span><span class="n">address</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="c">//역참조 주소안에 있는 값을 가져옴 5</span>
+</code></pre></div></div>
+
+<h1 id="함수">함수</h1>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">//함수 기본 구조</span>
+<span class="k">func</span> <span class="n">add</span><span class="p">(</span><span class="n">a</span> <span class="kt">int</span><span class="p">,</span> <span class="n">b</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+	<span class="c">//a와 b를 더한 값 출력</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c">//함수 호출 (main 함수에서 호출한다고 가정, 이하 동일)</span>
+<span class="n">add</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
+
+<span class="c">//a, b의 자료형이 같으므로 이렇게 자료형을 선언해도 됨</span>
+<span class="k">func</span> <span class="n">add2</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="n">add2</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
+
+<span class="c">//다중 반환이 가능하고 아래와 같이 리턴 자료형을 선언해주면 됨</span>
+<span class="k">func</span> <span class="n">add3</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">-</span> <span class="n">b</span>
+<span class="p">}</span>
+
+<span class="c">//다중 반환된 결과값을 각각의 변수에 저장 후 출력</span>
+<span class="k">var</span> <span class="n">return1</span><span class="p">,</span> <span class="n">return2</span> <span class="o">=</span> <span class="n">add3</span><span class="p">(</span><span class="m">3</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">return1</span><span class="p">,</span> <span class="n">return2</span><span class="p">)</span>
+
+<span class="c">//네임드 리턴이 가능함 (반환하는 값의 이름을 미리 헤더에 명시함 add, sub)</span>
+<span class="k">func</span> <span class="n">add4</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="n">add</span><span class="p">,</span> <span class="n">sub</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">add</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+	<span class="n">sub</span> <span class="o">=</span> <span class="n">a</span> <span class="o">-</span> <span class="n">b</span>
+	<span class="k">return</span>
+<span class="p">}</span>
+
+<span class="c">//다중 반환된 결과값을 각각의 변수에 저장 후 출력</span>
+<span class="k">var</span> <span class="n">return3</span><span class="p">,</span> <span class="n">return4</span> <span class="o">=</span> <span class="n">add4</span><span class="p">(</span><span class="m">100</span><span class="p">,</span> <span class="m">50</span><span class="p">)</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">return3</span><span class="p">,</span> <span class="n">return4</span><span class="p">)</span>
+
+<span class="c">// 변수에 함루슷 바인드하고 값처럼 사용 가능</span>
+<span class="k">var</span> <span class="n">adder</span> <span class="o">=</span> <span class="k">func</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+<span class="p">}</span>
+
+<span class="c">//익명 함수를 변수에 바인드하고 값처럼 사용 가능</span>
+<span class="k">var</span> <span class="n">moon</span> <span class="o">=</span> <span class="k">func</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="n">str1</span><span class="p">,</span> <span class="n">str2</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">str1</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="s">"12341234"</span>
+	<span class="n">str2</span> <span class="o">=</span> <span class="n">b</span> <span class="o">+</span> <span class="s">"43214321"</span>
+	<span class="k">return</span>
+<span class="p">}</span>
+
+<span class="k">var</span> <span class="n">asdf1</span><span class="p">,</span> <span class="n">asdf2</span> <span class="o">=</span> <span class="n">moon</span><span class="p">(</span><span class="s">"asdf"</span><span class="p">,</span> <span class="s">"asdf"</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">asdf1</span><span class="p">,</span> <span class="n">asdf2</span><span class="p">)</span>
+
+<span class="c">//함수를 다른 함수의 인자로 사용 가능</span>
+<span class="k">func</span> <span class="n">exec</span><span class="p">(</span><span class="n">oper</span> <span class="k">func</span><span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="n">oper</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="k">var</span> <span class="n">asdf3</span> <span class="o">=</span> <span class="n">exec</span><span class="p">(</span><span class="n">adder</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">asdf3</span><span class="p">)</span>
+
+<span class="c">//가변함수 지원</span>
+<span class="k">func</span> <span class="n">roopAdder</span><span class="p">(</span><span class="n">inputs</span> <span class="o">...</span><span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="n">sum</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">inputs</span> <span class="p">{</span>
+		<span class="n">sum</span> <span class="o">+=</span> <span class="n">v</span>
+	<span class="p">}</span>
+	<span class="k">return</span>
+<span class="p">}</span>
+
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">roopAdder</span><span class="p">(</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">4</span><span class="p">,</span> <span class="m">6</span><span class="p">,</span> <span class="m">7</span><span class="p">,</span> <span class="m">87</span><span class="p">,</span> <span class="m">8</span><span class="p">,</span> <span class="m">8</span><span class="p">,</span> <span class="m">8</span><span class="p">,</span> <span class="m">8</span><span class="p">,</span> <span class="m">8</span><span class="p">,</span> <span class="m">8</span><span class="p">,</span> <span class="m">8</span><span class="p">,</span> <span class="m">8</span><span class="p">))</span>
+
+<span class="c">//클로저는 함수 밖 변수를 참조하는 함수값</span>
+<span class="k">func</span> <span class="n">closureAdder</span><span class="p">()</span> <span class="k">func</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+	<span class="n">sum</span> <span class="o">:=</span> <span class="m">0</span> <span class="c">// 클로저</span>
+	<span class="k">return</span> <span class="k">func</span><span class="p">(</span><span class="n">x</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+		<span class="n">sum</span> <span class="o">+=</span> <span class="n">x</span>
+		<span class="k">return</span> <span class="n">sum</span> <span class="c">//클로저 반환</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">sumClosure</span> <span class="o">:=</span> <span class="n">closerAdder</span><span class="p">()</span>
+<span class="c">//클로저를 통해 sum변수에 접근가능하고 최신값을 기억함</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">sumClosure</span><span class="p">(</span><span class="m">1</span><span class="p">))</span> <span class="c">//1</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">sumClosure</span><span class="p">(</span><span class="m">2</span><span class="p">))</span> <span class="c">//3</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">sumClosure</span><span class="p">(</span><span class="m">3</span><span class="p">))</span> <span class="c">//6</span>
+</code></pre></div></div>
+
+<h1 id="배열">배열</h1>
+
+<h2 id="배열-1">배열</h2>
+
+<ul>
+  <li>크기가 정해진 동일한 자료형의 집합</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">//배열 선언 (3개의 크기의 int 자료형 배열)</span>
+<span class="k">var</span> <span class="n">arr</span> <span class="p">[</span><span class="m">3</span><span class="p">]</span><span class="kt">int</span>
+
+<span class="c">//배열 번지별 값 세팅</span>
+<span class="n">arr</span><span class="p">[</span><span class="m">0</span><span class="p">]</span> <span class="o">=</span> <span class="m">1</span>
+<span class="n">arr</span><span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="o">=</span> <span class="m">2</span>
+<span class="n">arr</span><span class="p">[</span><span class="m">2</span><span class="p">]</span> <span class="o">=</span> <span class="m">3</span>
+<span class="c">// 값 출력</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"arr :"</span><span class="p">,</span> <span class="n">arr</span><span class="p">[</span><span class="m">0</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="m">1</span><span class="p">],</span> <span class="n">arr</span><span class="p">[</span><span class="m">2</span><span class="p">])</span>
+
+<span class="c">//배열 선언과 동시에 번지별 값 초기화</span>
+<span class="k">var</span> <span class="n">arr2</span> <span class="o">=</span> <span class="p">[</span><span class="m">3</span><span class="p">]</span><span class="kt">int</span><span class="p">{</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">}</span>
+<span class="c">//값 출력</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"arr2 :"</span><span class="p">,</span> <span class="n">arr2</span><span class="p">[</span><span class="m">0</span><span class="p">],</span> <span class="n">arr2</span><span class="p">[</span><span class="m">1</span><span class="p">],</span> <span class="n">arr2</span><span class="p">[</span><span class="m">2</span><span class="p">])</span>
+
+<span class="c">//배열의 길이 구하기</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">))</span>
+
+<span class="c">//배열의 지정된 범위 구하기</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="m">0</span><span class="o">:</span><span class="m">3</span><span class="p">])</span>
+
+<span class="c">//처음 번지부터 선택</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="o">:</span><span class="m">3</span><span class="p">])</span>
+
+<span class="c">//끝번지까지 선택</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="p">])</span>
+</code></pre></div></div>
+
+<h2 id="슬라이스">슬라이스</h2>
+
+<ul>
+  <li>크기가 정해지지 않은 동일한 자료형의 집합</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">//슬라이스 (동적배열)</span>
+<span class="k">var</span> <span class="n">sli</span><span class="o">=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="m">4</span><span class="p">,</span> <span class="m">5</span><span class="p">}</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">sli</span><span class="p">)</span>
+<span class="k">var</span> <span class="n">sli2</span><span class="o">=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{}</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">sli2</span><span class="p">)</span>
+
+<span class="c">//초기값이 비어있는 슬라이스 생성(갯수 지정)</span>
+<span class="k">var</span> <span class="n">sli3</span> <span class="o">=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span> <span class="m">5</span><span class="p">)</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">sli3</span><span class="p">)</span>
+
+<span class="c">//배열의 용량 확인</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="nb">cap</span><span class="p">(</span><span class="n">sli3</span><span class="p">))</span>
+
+<span class="c">//배열 크기 늘리기</span>
+<span class="n">sli3</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">sli3</span><span class="p">,</span> <span class="m">1</span><span class="p">,</span><span class="m">2</span><span class="p">,</span><span class="m">3</span><span class="p">)</span> <span class="c">// [1 0 0 0 0 1 2 3]</span>
+</code></pre></div></div>
+
+<h1 id="맵">맵</h1>
+
+<ul>
+  <li>키-값의 집합</li>
+  <li><code class="language-plaintext highlighter-rouge">map[키 자료형]값 자료형</code> : map 선언</li>
+  <li><code class="language-plaintext highlighter-rouge">map[키 자료형]값 자료형{키:값}</code> : map 선언과 동시에 초기화</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">//map 선언 </span>
+<span class="k">var</span> <span class="n">suMap</span> <span class="o">=</span> <span class="k">map</span><span class="p">[</span><span class="kt">int</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span><span class="m">1</span><span class="o">:</span> <span class="s">"one"</span><span class="p">,</span> <span class="m">2</span><span class="o">:</span> <span class="s">"two"</span><span class="p">,</span> <span class="m">3</span><span class="o">:</span> <span class="s">"three"</span><span class="p">}</span>
+
+<span class="c">//map 값이 있으면 해당값, 없으면 ok에 false가 들어옴</span>
+<span class="k">var</span> <span class="n">asdf4</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">suMap</span><span class="p">[</span><span class="m">5</span><span class="p">]</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">asdf4</span><span class="p">,</span> <span class="n">ok</span><span class="p">)</span> <span class="c">// false</span>
+
+<span class="c">//map 5라는 키값에 five라는 값 초기화</span>
+<span class="n">myMap</span><span class="p">[</span><span class="m">5</span><span class="p">]</span> <span class="o">=</span> <span class="s">"five"</span>
+<span class="n">asdf4</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">suMap</span><span class="p">[</span><span class="m">5</span><span class="p">]</span> 
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">asdf4</span><span class="p">,</span> <span class="n">ok</span><span class="p">)</span> <span class="c">// five</span>
+
+<span class="c">//맵의 5라는 키값에 저장되어 있는 값 삭제</span>
+<span class="nb">delete</span><span class="p">(</span><span class="n">suMap</span><span class="p">,</span> <span class="m">5</span><span class="p">)</span>
+<span class="n">asdf4</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">suMap</span><span class="p">[</span><span class="m">5</span><span class="p">]</span> <span class="c">// false</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">asdf4</span><span class="p">,</span> <span class="n">ok</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h1 id="구조체">구조체</h1>
+
+<ul>
+  <li>여러 자료형의 집합</li>
+  <li>구조체나 필드를 다른 패키지에서 접근하려면 구조체 명과 필드의 첫글자가 대문자여야 함.</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">//구조체 선언</span>
+<span class="k">type</span> <span class="n">member</span> <span class="k">struct</span><span class="p">{</span>
+	<span class="n">id</span> <span class="kt">int</span>
+	<span class="n">name</span> <span class="kt">string</span>
+	<span class="n">hobby</span> <span class="p">[]</span><span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="c">//구조체 초기화 방법1</span>
+<span class="k">var</span> <span class="n">s</span> <span class="o">=</span> <span class="n">member</span><span class="p">{</span>
+	<span class="n">id</span> <span class="o">:</span> <span class="m">1</span><span class="p">,</span>
+	<span class="n">name</span> <span class="o">:</span> <span class="s">"hamletshu"</span><span class="p">,</span>
+	<span class="n">hobby</span> <span class="o">:</span> <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"축구"</span><span class="p">,</span><span class="s">"농구"</span><span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c">//구조체 초기화 방법2</span>
+<span class="k">var</span> <span class="n">s</span> <span class="o">=</span> <span class="n">member</span><span class="p">{</span><span class="m">1</span><span class="p">,</span><span class="s">"hamletshu"</span><span class="p">,[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"축구"</span><span class="p">,</span><span class="s">"농구"</span><span class="p">}}</span>
+
+<span class="c">//구조체 초기화 방법3</span>
+<span class="k">var</span> <span class="n">s</span> <span class="o">=</span> <span class="n">member</span><span class="p">{}</span>
+<span class="n">s</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="m">1</span>
+<span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">"hamletshu"</span>
+<span class="n">s</span><span class="o">.</span><span class="n">hobby</span> <span class="o">=</span> <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">"축구"</span><span class="p">,</span><span class="s">"농구"</span><span class="p">}</span>
+</code></pre></div></div>
+
+<h1 id="메서드">메서드</h1>
+
+<ul>
+  <li>타입에 연결하는 함수</li>
+  <li>getter 와 setter 처럼 연결해서 사용할 수 있음</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">//member 패키지 (외부 패키지라서 구조체명과 필드 첫문자가 대문자임)</span>
+<span class="k">type</span> <span class="n">Member</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">Id</span>    <span class="kt">int</span>
+	<span class="n">Name</span>  <span class="kt">string</span>
+	<span class="n">Hobby</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="p">(</span><span class="n">m</span> <span class="n">Member</span><span class="p">)</span> <span class="n">GetId</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="n">m</span><span class="o">.</span><span class="n">Id</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="p">(</span><span class="n">m</span> <span class="n">Member</span><span class="p">)</span> <span class="n">GetName</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="n">m</span><span class="o">.</span><span class="n">Name</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="p">(</span><span class="n">m</span> <span class="n">Member</span><span class="p">)</span> <span class="n">GetHobby</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="n">m</span><span class="o">.</span><span class="n">Hobby</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="p">(</span><span class="n">m</span> <span class="o">*</span><span class="n">Member</span><span class="p">)</span> <span class="n">SetId</span><span class="p">(</span><span class="n">id</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">m</span><span class="o">.</span><span class="n">Id</span> <span class="o">=</span> <span class="n">id</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="p">(</span><span class="n">m</span> <span class="o">*</span><span class="n">Member</span><span class="p">)</span> <span class="n">SetName</span><span class="p">(</span><span class="n">name</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">m</span><span class="o">.</span><span class="n">Name</span> <span class="o">=</span> <span class="n">name</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="p">(</span><span class="n">m</span> <span class="o">*</span><span class="n">Member</span><span class="p">)</span> <span class="n">SetHobby</span><span class="p">(</span><span class="n">hobby</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">m</span><span class="o">.</span><span class="n">Hobby</span> <span class="o">=</span> <span class="n">hobby</span>
+<span class="p">}</span>
+
+<span class="c">//main 패키지</span>
+<span class="k">import</span> <span class="s">"member"</span>
+<span class="k">var</span> <span class="n">m</span> <span class="o">=</span> <span class="n">member</span><span class="o">.</span><span class="n">Member</span><span class="p">{</span>
+	<span class="n">Id</span><span class="o">:</span>    <span class="m">1</span><span class="p">,</span>
+	<span class="n">Name</span><span class="o">:</span>  <span class="s">"hamletshu"</span><span class="p">,</span>
+	<span class="n">Hobby</span><span class="o">:</span> <span class="s">"축구"</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">GetId</span><span class="p">())</span><span class="c">//1</span>
+<span class="n">m</span><span class="o">.</span><span class="n">SetId</span><span class="p">(</span><span class="m">2</span><span class="p">)</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">GetId</span><span class="p">())</span><span class="c">//2</span>
+
+<span class="c">//임베딩 : 상속받은 메서드와 필드에 바로 접근 가능</span>
+<span class="c">//vip 패키지</span>
+<span class="k">package</span> <span class="n">vip</span>
+<span class="k">import</span> <span class="s">"member"</span>
+
+<span class="k">type</span> <span class="n">Vip</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">member</span><span class="o">.</span><span class="n">Member</span>
+	<span class="n">vipId</span> <span class="kt">int</span>
+<span class="p">}</span>
+
+<span class="c">//main 패키지</span>
+<span class="k">import</span> <span class="s">"vip"</span>
+<span class="k">var</span> <span class="n">v</span> <span class="o">=</span> <span class="n">vip</span><span class="o">.</span><span class="n">Vip</span><span class="p">{}</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">GetId</span><span class="p">())</span> <span class="c">// 0</span>
+</code></pre></div></div>
+
+<h1 id="인터페이스">인터페이스</h1>
+
+<ul>
+  <li>메서드의 집합</li>
+  <li>상속 받으려면 메서드만 구현을 하면 됨 (확장성)</li>
+  <li>타입 단언 : 인터페이스 타입의 값을 특정 타입으로 변환</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">type</span> <span class="n">MemberInterface</span> <span class="k">interface</span><span class="p">{</span>
+	<span class="n">GetId</span><span class="p">()</span><span class="kt">int</span>
+	<span class="n">GetName</span><span class="p">()</span> <span class="kt">string</span>
+	<span class="n">GetHobby</span><span class="p">()</span> <span class="kt">string</span>
+<span class="p">}</span>
+
+<span class="k">var</span> <span class="n">memberInterface</span> <span class="n">MemberInterface</span>
+<span class="k">var</span> <span class="n">m</span> <span class="o">=</span> <span class="n">Member</span><span class="p">{}</span>
+<span class="n">m</span><span class="o">.</span><span class="n">Id</span> <span class="o">=</span> <span class="m">1</span>
+<span class="n">m</span><span class="o">.</span><span class="n">Name</span> <span class="o">=</span> <span class="s">"hamletshu"</span>
+<span class="n">m</span><span class="o">.</span><span class="n">Hobby</span> <span class="o">=</span> <span class="s">"축구"</span>
+
+<span class="c">//인터페이스 사용 방법1</span>
+<span class="n">memberInterface</span> <span class="o">=</span> <span class="n">m</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">memberInterface</span><span class="o">.</span><span class="n">GetId</span><span class="p">())</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">memberInterface</span><span class="o">.</span><span class="n">GetName</span><span class="p">())</span>
+<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">memberInterface</span><span class="o">.</span><span class="n">GetHobby</span><span class="p">())</span>
+
+<span class="c">//인터페이스 사용 방법2</span>
+<span class="k">func</span> <span class="n">printLnGetId</span><span class="p">(</span><span class="n">i</span> <span class="n">memberInterface</span><span class="p">){</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">GetId</span><span class="p">())</span>
+<span class="p">}</span>
+<span class="k">func</span> <span class="n">printLnGetName</span><span class="p">(</span><span class="n">i</span> <span class="n">memberInterface</span><span class="p">){</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">GetName</span><span class="p">())</span>
+<span class="p">}</span>
+<span class="k">func</span> <span class="n">printLnGetName</span><span class="p">(</span><span class="n">i</span> <span class="n">memberInterface</span><span class="p">){</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="o">.</span><span class="n">GetName</span><span class="p">())</span>
+<span class="p">}</span>
+
+<span class="c">//타입 단언</span>
+<span class="n">member</span><span class="p">,</span> <span class="n">ok</span> <span class="o">:=</span> <span class="n">memberinterface</span><span class="o">.</span><span class="p">(</span><span class="n">Member</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h1 id="조건문">조건문</h1>
+
+<h2 id="if문">if문</h2>
+
+<ul>
+  <li>소괄호 없는 것과 변수 초기화 하는 것이 있다는 것 빼고는 java랑 비슷해보임</li>
+  <li><code class="language-plaintext highlighter-rouge">if</code> , <code class="language-plaintext highlighter-rouge">else if</code> , <code class="language-plaintext highlighter-rouge">else</code> 가 있음</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">var</span> <span class="n">math</span> <span class="o">=</span> <span class="m">100</span>
+<span class="k">if</span> <span class="n">math</span> <span class="o">==</span> <span class="m">100</span> <span class="p">{</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"수학 점수가 만점입니다."</span><span class="p">)</span>
+<span class="p">}</span><span class="k">else</span> <span class="k">if</span> <span class="n">math</span> <span class="o">&gt;</span> <span class="m">90</span> <span class="p">{</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"수학 점수가 우수한 학생입니다"</span><span class="p">)</span>
+<span class="p">}</span><span class="k">else</span><span class="p">{</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"수학 점수가 애매한 학생입니다"</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c">//변수 초기화하고 조건 주기</span>
+<span class="k">if</span> <span class="n">math</span> <span class="o">:=</span> <span class="m">100</span><span class="p">;</span> <span class="n">math</span> <span class="o">==</span> <span class="m">100</span> <span class="p">{</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"수학 점수가 만점입니다."</span><span class="p">)</span>
+<span class="p">}</span><span class="k">else</span> <span class="k">if</span> <span class="n">math</span> <span class="o">&gt;</span> <span class="m">90</span> <span class="p">{</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"수학 점수가 우수한 학생입니다"</span><span class="p">)</span>
+<span class="p">}</span><span class="k">else</span><span class="p">{</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"수학 점수가 애매한 학생입니다"</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="switch문">switch문</h2>
+
+<ul>
+  <li>go는 break가 따로 없다 (자동으로 멈춤)</li>
+  <li>break 하지 않으려면 <code class="language-plaintext highlighter-rouge">fallthrough</code> 사용</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">switch</span> <span class="n">math</span> <span class="p">{</span>
+	<span class="k">case</span> <span class="m">100</span><span class="o">:</span>
+		<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"수학 점수가 만점입니다."</span><span class="p">)</span>
+	<span class="k">default</span><span class="o">:</span>
+		<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"수학 점수가 만점이 아닙니다."</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c">//초기화와 동시에 조건 주기</span>
+<span class="k">switch</span> <span class="n">math</span> <span class="o">:=</span> <span class="m">90</span><span class="p">;</span> <span class="n">math</span> <span class="p">{</span>
+	<span class="k">case</span> <span class="m">100</span><span class="o">:</span>
+		<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"수학 점수가 만점입니다."</span><span class="p">)</span>
+	<span class="k">default</span><span class="o">:</span>
+		<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"수학 점수가 만점이 아닙니다."</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c">//if문 처럼 사용</span>
+<span class="k">switch</span> <span class="n">math</span> <span class="o">:=</span> <span class="m">80</span><span class="p">;</span> <span class="p">{</span>
+	<span class="k">case</span> <span class="m">100</span> <span class="o">==</span> <span class="n">math</span><span class="o">:</span>
+		<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"수학 점수가 만점입니다."</span><span class="p">)</span>
+	<span class="k">case</span> <span class="n">math</span> <span class="o">&gt;=</span> <span class="m">90</span><span class="o">:</span>
+		<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"수학 점수가 우수합니다."</span><span class="p">)</span>
+	<span class="k">case</span> <span class="n">math</span> <span class="o">&gt;=</span> <span class="m">80</span><span class="o">:</span>
+		<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"수학 점수가 평범합니다."</span><span class="p">)</span>
+	<span class="k">case</span> <span class="n">math</span> <span class="o">&gt;=</span> <span class="m">70</span><span class="o">:</span>
+		<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"수학 점수가 그닥입니다."</span><span class="p">)</span>
+	<span class="k">default</span><span class="o">:</span>
+		<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"수학 점수를 모르는게 낫습니다"</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h1 id="반복문">반복문</h1>
+
+<ul>
+  <li>while문 없으며 <code class="language-plaintext highlighter-rouge">for</code>로 모든 반복문 사용</li>
+  <li>슬라이스나 배열의 경우 <code class="language-plaintext highlighter-rouge">for range</code> 문 사용</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">//1부터 10까지 출력하는 반복문</span>
+<span class="k">for</span> <span class="n">i</span><span class="o">:=</span><span class="m">1</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;=</span><span class="m">10</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">{</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c">//슬라이스나 배열 반복문 </span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">list</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">sli</span> <span class="p">{</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="s">"번째 값:"</span><span class="p">,</span> <span class="n">list</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c">//인덱스가 필요 없을 때 _처리</span>
+<span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">list</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">mySlice</span> <span class="p">{</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">list</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c">//인덱스만 필요할 때</span>
+<span class="k">for</span> <span class="n">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">mySlice</span> <span class="p">{</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h1 id="panic-recover-defer">panic, recover, defer</h1>
+
+<h2 id="panic">panic</h2>
+
+<ul>
+  <li>프로그램이 종료될 때까지 작업을 중단하는 함수</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">main</span>
+
+<span class="k">import</span> <span class="p">(</span>
+	<span class="s">"fmt"</span>
+<span class="p">)</span>
+
+<span class="k">func</span> <span class="n">panicStart</span><span class="p">(</span><span class="n">p</span> <span class="kt">bool</span><span class="p">){</span>
+	<span class="k">if</span> <span class="n">p</span> <span class="p">{</span>
+		<span class="nb">panic</span><span class="p">(</span><span class="s">"panic!!!"</span><span class="p">)</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="nb">panic</span><span class="p">(</span><span class="no">true</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"Hello, playground"</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c">//작업을 중지하면서 아래와 같은 에러가 발생함</span>
+<span class="o">./</span><span class="n">prog</span><span class="o">.</span><span class="k">go</span><span class="o">:</span><span class="m">15</span><span class="o">:</span><span class="m">2</span><span class="o">:</span> <span class="n">unreachable</span> <span class="n">code</span>
+<span class="n">Go</span> <span class="n">vet</span> <span class="n">exited</span><span class="o">.</span>
+
+<span class="nb">panic</span><span class="o">:</span> <span class="no">true</span>
+
+<span class="n">goroutine</span> <span class="m">1</span> <span class="p">[</span><span class="n">running</span><span class="p">]</span><span class="o">:</span>
+<span class="n">main</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+	<span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">sandbox353976549</span><span class="o">/</span><span class="n">prog</span><span class="o">.</span><span class="k">go</span><span class="o">:</span><span class="m">14</span> <span class="o">+</span><span class="m">0x39</span>
+</code></pre></div></div>
+
+<h2 id="recover-defer">recover, defer</h2>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">recover</code> : 함수가 종료되기 시작했을 때 정상 작동하도록 만드는 함수</li>
+  <li><code class="language-plaintext highlighter-rouge">defer</code> : LIFO 방식으로 실행한 함수가 끝날 경우 순서대로 실행하게 해주는 예약어</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">main</span>
+
+<span class="k">import</span> <span class="p">(</span>
+	<span class="s">"fmt"</span>
+<span class="p">)</span>
+
+<span class="k">func</span> <span class="n">testPanic</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">defer</span> <span class="k">func</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">r</span> <span class="o">:=</span> <span class="nb">recover</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">r</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+            <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"Recovered in test_panic : "</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}()</span>
+ 
+    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"Hello"</span><span class="p">)</span>
+		<span class="c">//panic 함수로 인해 함수가 종료되기 시작했을 때 defer 함수가 실행됨</span>
+    <span class="nb">panic</span><span class="p">(</span><span class="s">"Panic Error :D"</span><span class="p">)</span>
+    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"World!"</span><span class="p">)</span>
+<span class="p">}</span>
+ 
+<span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">testPanic</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="c">//결과 값</span>
+<span class="o">./</span><span class="n">prog</span><span class="o">.</span><span class="k">go</span><span class="o">:</span><span class="m">17</span><span class="o">:</span><span class="m">5</span><span class="o">:</span> <span class="n">unreachable</span> <span class="n">code</span>
+<span class="n">Go</span> <span class="n">vet</span> <span class="n">exited</span><span class="o">.</span>
+
+<span class="n">Hello</span>
+<span class="n">Recovered</span> <span class="n">in</span> <span class="n">test_panic</span> <span class="o">:</span>  <span class="n">Panic</span> <span class="n">Error</span> <span class="o">:</span><span class="n">D</span>
+</code></pre></div></div>
+
+<h1 id="고루틴">고루틴</h1>
+
+<ul>
+  <li>경량 스레드</li>
+  <li>함수 앞에 <code class="language-plaintext highlighter-rouge">go</code> 만 붙여주면 됨</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">main</span>
+
+<span class="k">import</span> <span class="p">(</span>
+	<span class="s">"fmt"</span>
+	<span class="s">"time"</span>
+<span class="p">)</span>
+
+<span class="k">func</span> <span class="n">sumLoop</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="n">i</span><span class="o">:=</span><span class="m">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="m">10</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">{</span>
+		<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+ 
+<span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">go</span> <span class="n">sumLoop</span><span class="p">()</span>
+	<span class="c">// sumLoop가 작업을 끝낼 수 있도록 1초 기다려 줌.</span>
+	<span class="n">time</span><span class="o">.</span><span class="n">Sleep</span><span class="p">(</span><span class="m">1</span> <span class="o">*</span> <span class="n">time</span><span class="o">.</span><span class="n">Second</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"main end"</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h1 id="go-채널">Go 채널</h1>
+
+<ul>
+  <li>고루틴 간의 연결 (고루틴이 다른 고루틴으로 값을 보내기 위한 통신 메커니즘)</li>
+</ul>
+
+<h2 id="일반-채널">일반 채널</h2>
+
+<ul>
+  <li>일반 채널 생성 : <code class="language-plaintext highlighter-rouge">ch := make(chan int)</code></li>
+  <li>채널을 통해 전달 받은 값 : <code class="language-plaintext highlighter-rouge">su := &lt;-ch</code></li>
+  <li>채널에 값을 보낼 때 : <code class="language-plaintext highlighter-rouge">ch &lt;- 10</code></li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">main</span>
+
+<span class="k">import</span> <span class="p">(</span>
+	<span class="s">"fmt"</span>
+	<span class="s">"time"</span>
+<span class="p">)</span>
+
+<span class="k">func</span> <span class="n">send</span><span class="p">(</span><span class="n">ch</span> <span class="k">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="n">i</span><span class="o">:=</span><span class="m">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="m">10</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">{</span>
+		<span class="n">ch</span> <span class="o">&lt;-</span> <span class="n">i</span>
+	<span class="p">}</span>
+	<span class="nb">close</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="n">get</span><span class="p">(</span><span class="n">ch</span> <span class="k">chan</span> <span class="kt">int</span><span class="p">){</span>
+	<span class="k">for</span><span class="p">{</span>
+		<span class="c">//채널이 닫혔는지 확인</span>
+		<span class="n">i</span><span class="p">,</span> <span class="n">ok</span> <span class="o">:=</span> <span class="o">&lt;-</span> <span class="n">ch</span>
+		<span class="k">if</span> <span class="o">!</span><span class="n">ok</span><span class="p">{</span>
+			<span class="k">break</span>
+		<span class="p">}</span>
+		<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"send에서 전달 받은 값:"</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+ 
+<span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="n">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="k">chan</span> <span class="kt">int</span><span class="p">)</span>
+	<span class="k">go</span> <span class="n">send</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span>
+	<span class="k">go</span> <span class="n">get</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span>
+	<span class="c">//1초 대기</span>
+	<span class="n">time</span><span class="o">.</span><span class="n">Sleep</span><span class="p">(</span><span class="m">1</span> <span class="o">*</span> <span class="n">time</span><span class="o">.</span><span class="n">Second</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"main end"</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c">//결과 값</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">0</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">1</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">2</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">3</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">4</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">5</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">6</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">7</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">8</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">9</span>
+<span class="n">main</span> <span class="n">end</span>
+</code></pre></div></div>
+
+<h2 id="버퍼-채널">버퍼 채널</h2>
+
+<ul>
+  <li>버퍼 채널 생성 : <code class="language-plaintext highlighter-rouge">ch := make(chan int, 10)</code></li>
+  <li>채널을 통해 전달 받은 값 (일반 채널과 동일) : <code class="language-plaintext highlighter-rouge">su := &lt;-ch</code></li>
+  <li>채널에 값을 보낼 때(일반 채널과 동일) : <code class="language-plaintext highlighter-rouge">ch &lt;- 10</code></li>
+  <li>여러 값들을 버퍼에 저장 가능</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">main</span>
+ 
+<span class="k">import</span> <span class="s">"fmt"</span>
+ 
+<span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">c</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="k">chan</span> <span class="kt">int</span><span class="p">,</span> <span class="m">2</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">&lt;-</span> <span class="m">1</span>
+    <span class="n">c</span> <span class="o">&lt;-</span> <span class="m">2</span>
+    <span class="n">c</span> <span class="o">&lt;-</span> <span class="m">3</span>
+    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="o">&lt;-</span><span class="n">c</span><span class="p">)</span>
+    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="o">&lt;-</span><span class="n">c</span><span class="p">)</span>
+    <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="o">&lt;-</span><span class="n">c</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c">//출력 값 (버퍼가 가득찼는데도 메시지를 계속 전송해서 에러 발생)</span>
+<span class="n">fatal</span> <span class="kt">error</span><span class="o">:</span> <span class="n">all</span> <span class="n">goroutines</span> <span class="n">are</span> <span class="n">asleep</span> <span class="o">-</span> <span class="n">deadlock</span><span class="o">!</span>
+
+<span class="n">goroutine</span> <span class="m">1</span> <span class="p">[</span><span class="k">chan</span> <span class="n">send</span><span class="p">]</span><span class="o">:</span>
+<span class="n">main</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+	<span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">sandbox297177109</span><span class="o">/</span><span class="n">prog</span><span class="o">.</span><span class="k">go</span><span class="o">:</span><span class="m">9</span> <span class="o">+</span><span class="m">0x9f</span>
+
+<span class="n">Program</span> <span class="n">exited</span><span class="o">:</span> <span class="n">status</span> <span class="m">2.</span>
+</code></pre></div></div>
+
+<h1 id="select">select</h1>
+
+<ul>
+  <li>여러 채널을 동시에 제어 가능</li>
+  <li><code class="language-plaintext highlighter-rouge">default</code>도 사용 가능</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">main</span>
+
+<span class="k">import</span> <span class="p">(</span>
+    <span class="s">"fmt"</span>
+    <span class="s">"time"</span>
+<span class="p">)</span>
+
+<span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+    <span class="n">c1</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="k">chan</span> <span class="kt">string</span><span class="p">)</span>
+    <span class="n">c2</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="k">chan</span> <span class="kt">string</span><span class="p">)</span>
+    
+    <span class="k">go</span> <span class="k">func</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">Sleep</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">Second</span> <span class="o">*</span> <span class="m">1</span><span class="p">)</span>
+        <span class="n">c1</span> <span class="o">&lt;-</span> <span class="s">"first GoRoutine"</span>
+    <span class="p">}()</span>
+    <span class="k">go</span> <span class="k">func</span><span class="p">()</span> <span class="p">{</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">Sleep</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">Second</span> <span class="o">*</span> <span class="m">2</span><span class="p">)</span>
+        <span class="n">c1</span> <span class="o">&lt;-</span> <span class="s">"second GoRoutine"</span>
+    <span class="p">}()</span>
+    
+    <span class="k">for</span> <span class="n">i</span><span class="o">:=</span><span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="m">2</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span> <span class="p">{</span>
+        <span class="k">select</span> <span class="p">{</span>
+        <span class="k">case</span> <span class="n">msg1</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="n">c1</span><span class="o">:</span>
+            <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"Received: "</span><span class="p">,</span> <span class="n">msg1</span><span class="p">)</span>
+        <span class="k">case</span> <span class="n">msg2</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="n">c2</span><span class="o">:</span>
+            <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"Received: "</span><span class="p">,</span> <span class="n">msg2</span><span class="p">)</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h1 id="sync-패키지">Sync 패키지</h1>
+
+<ul>
+  <li>잠금이 필요할 경우 사용</li>
+  <li><code class="language-plaintext highlighter-rouge">mutex</code> : 여러 스레드의 접근을 제어하는 객체</li>
+  <li><code class="language-plaintext highlighter-rouge">WaitGroup</code> : 실행 중인 고루틴을 기다렸다가 다름 코드를 실행</li>
+</ul>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">//일반 mutex</span>
+<span class="k">var</span> <span class="n">mutex</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">sync</span><span class="o">.</span><span class="n">Mutex</span><span class="p">{}</span>
+
+<span class="n">mutex</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+<span class="c">//logic ...</span>
+<span class="n">mutex</span><span class="o">.</span><span class="n">Unlock</span><span class="p">()</span>
+
+<span class="c">//읽기/쓰기 mutex</span>
+<span class="k">var</span> <span class="n">rwMutex</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">sync</span><span class="o">.</span><span class="n">RWMutex</span><span class="p">{}</span>
+
+<span class="c">//읽기일 경우</span>
+<span class="n">rwMutex</span><span class="o">.</span><span class="n">RLock</span><span class="p">()</span>
+<span class="c">//읽기 로직...</span>
+<span class="n">rwMutex</span><span class="o">.</span><span class="n">RUnLock</span><span class="p">()</span>
+
+<span class="c">//쓰기일 경우</span>
+<span class="n">rwMutex</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+<span class="c">//쓰기 로직...</span>
+<span class="n">rwMutex</span><span class="o">.</span><span class="n">Unlock</span><span class="p">()</span>
+</code></pre></div></div>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">//WaitGroup</span>
+<span class="k">package</span> <span class="n">main</span>
+
+<span class="k">import</span> <span class="p">(</span>
+  <span class="s">"fmt"</span>
+	<span class="s">"sync"</span>
+<span class="p">)</span>
+
+<span class="k">func</span> <span class="n">send</span><span class="p">(</span><span class="n">ch</span> <span class="k">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c">//내부 카운터 1 감소</span>
+	<span class="k">defer</span> <span class="n">wg</span><span class="o">.</span><span class="n">Done</span><span class="p">()</span>
+	<span class="k">for</span> <span class="n">i</span><span class="o">:=</span><span class="m">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="m">10</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">{</span>
+		<span class="n">ch</span> <span class="o">&lt;-</span> <span class="n">i</span>
+	<span class="p">}</span>
+	<span class="nb">close</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="n">get</span><span class="p">(</span><span class="n">ch</span> <span class="k">chan</span> <span class="kt">int</span><span class="p">){</span>
+  <span class="c">//내부 카운터 1 감소</span>
+	<span class="k">defer</span> <span class="n">wg</span><span class="o">.</span><span class="n">Done</span><span class="p">()</span>
+	<span class="k">for</span><span class="p">{</span>
+		<span class="c">//채널이 닫혔는지 확인</span>
+		<span class="n">i</span><span class="p">,</span> <span class="n">ok</span> <span class="o">:=</span> <span class="o">&lt;-</span> <span class="n">ch</span>
+		<span class="k">if</span> <span class="o">!</span><span class="n">ok</span><span class="p">{</span>
+			<span class="k">break</span>
+		<span class="p">}</span>
+		<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"send에서 전달 받은 값:"</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">var</span> <span class="n">wg</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">sync</span><span class="o">.</span><span class="n">WaitGroup</span><span class="p">{}</span>
+
+<span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="n">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="k">chan</span> <span class="kt">int</span><span class="p">)</span>
+  <span class="c">//내부 카운터 2로 설정</span>
+	<span class="n">wg</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="m">2</span><span class="p">)</span>
+	<span class="k">go</span> <span class="n">send</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span>
+	<span class="k">go</span> <span class="n">get</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span>
+	<span class="n">wg</span><span class="o">.</span><span class="n">Wait</span><span class="p">()</span>
+	
+<span class="p">}</span>
+
+<span class="c">//결과 값</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">0</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">1</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">2</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">3</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">4</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">5</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">6</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">7</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">8</span>
+<span class="n">send에서</span> <span class="n">전달</span> <span class="n">받은</span> <span class="n">값</span><span class="o">:</span> <span class="m">9</span>
+</code></pre></div></div>
+:ET

@@ -128,7 +128,7 @@ sudo gitlab-ctl stop
 ## gitlab 재시작
 
 ```bash
-sudo gitlat-ctl restart
+sudo gitlab-ctl restart
 ```
 
 ## gitlab 삭제

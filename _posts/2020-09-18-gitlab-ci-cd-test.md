@@ -1,8 +1,8 @@
 ---
-title: Gitlab CI/CD로 자동 배포 세팅하기
+title: CentOS 7에서 Gitlab CI/CD로 환경 구축하기
 layout: post
 date: '2020-09-18 17:58:00 +0300'
-description: Gitlab CI/CD로 자동 배포 세팅하기
+description: CentOS 7에서 Gitlab CI/CD로 환경 구축하기
 img: null
 fig-caption: null
 tags:
