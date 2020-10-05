@@ -1,0 +1,320 @@
+I"aJ<ul>
+  <li>참고 공식사이트 (한글 번역 되어있으나 버전이 5.4 버전인 관계로 명령어는 현재와 다를 수 있음)</li>
+</ul>
+
+<p><a href="https://www.elastic.co/guide/kr/index.html">https://www.elastic.co/guide/kr/index.html</a></p>
+
+<p>초기에는 kibana 명령어를 사용할지 몰라 bash 창에서 명령어를 입력하여 활용하다가 키바나 명령어 사용법을 알게되어 편하게 쓰게 되었다. 혹시 독자분들도 아무것도 모르고 bash 창을 이용하여 명령어를 입력해서 테스트 하고 있다면 <code class="language-plaintext highlighter-rouge">[localhost:5601](http://localhost:5601)</code> 로 접속하여 <code class="language-plaintext highlighter-rouge">Dev Tools</code> 에서 활용해보자.</p>
+
+<h2 id="클러스터-상태-확인">클러스터 상태 확인</h2>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">GET /_cat/health?v</code></li>
+  <li>녹색 : 모두 양호한 상태</li>
+  <li>노란색 : 모든 데이터가 사용 가능한 상태이지만 일부 리플리카가 아직 배정되지 않은 상태</li>
+  <li>빨간색 : 어떤 이유로 일부 데이터가 사용할 수 없는 상태를 의미</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@node1 ~]# curl <span class="nt">-GET</span> <span class="s1">'localhost:9200/_cat/health?v'</span>
+epoch      timestamp cluster           status node.total node.data shards pri relo init unassign pending_tasks max_task_wait_time active_shards_percent
+1601862088 01:41:28  es-docker-cluster green           3         3     22  11    0    0        0             0                  -                100.0%
+</code></pre></div></div>
+
+<h2 id="노드의-목록-표시">노드의 목록 표시</h2>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">GET /_cat/nodes?v</code></li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@node1 ~]# curl <span class="nt">-GET</span> <span class="s1">'localhost:9200/_cat/nodes?v'</span>
+ip           heap.percent ram.percent cpu load_1m load_5m load_15m node.role master name
+192.168.96.2           39          58  10    0.24    0.24     0.44 dilmrt    -      es03
+192.168.96.4           18          58  10    0.24    0.24     0.44 dilmrt    -      es01
+192.168.96.3           40          58  10    0.24    0.24     0.44 dilmrt    <span class="k">*</span>      es02
+</code></pre></div></div>
+
+<h2 id="모든-index-나열">모든 index 나열</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@node1 ~]# curl <span class="nt">-GET</span> <span class="s1">'localhost:9200/_cat/indices?v'</span>
+health status index                          uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+green  open   .kibana-event-log-7.9.2-000001 fr2XopZHRzuJcm9pCvPqAA   1   1          3            0     32.5kb         16.2kb
+green  open   .apm-custom-link               CzinLMWrRe-S-LDpILSc6w   1   1          0            0       416b           208b
+green  open   .kibana_task_manager_2         DEn7MKdTQviDvaSZ56NBDA   1   1          6          263      1.2mb        684.2kb
+green  open   .kibana_task_manager_1         f8ibyRa5Qc-msi2MA55Pqg   1   1          5            2     55.4kb         27.7kb
+green  open   index_test                     np_2WyhCSTaBWlGiqBmHWw   1   1          1            0      9.7kb          4.8kb
+green  open   .apm-agent-configuration       cTW1RYPFRG6cYP4Wg_Gwxw   1   1          0            0       416b           208b
+green  open   customer2                      xmXw2qqdTnegGjBHNmH-BQ   1   1          2            0     14.9kb          7.4kb
+green  open   .kibana_2                      ec72UHa5TQSyIWMT87PW8Q   1   1         17            0     20.8mb         10.4mb
+green  open   .kibana_1                      YRg6LxJKQf6DEUebuGCtBg   1   1          4            0     65.4kb         32.7kb
+</code></pre></div></div>
+
+<h2 id="index-생성-및-조회">index 생성 및 조회</h2>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">PUT /customer?pretty</code> (끝에 pretty를 추가할 경우 결과 값을 예쁘게 표현)</li>
+  <li><code class="language-plaintext highlighter-rouge">GET /_cat/indices?v</code></li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## 색인 생성 후 조회 결과</span>
+<span class="o">[</span>root@node1 ~]# curl <span class="nt">-GET</span> <span class="s1">'localhost:9200/_cat/indices?v'</span>
+health status index                          uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+green  open   .kibana-event-log-7.9.2-000001 fr2XopZHRzuJcm9pCvPqAA   1   1          3            0     32.5kb         16.2kb
+green  open   .apm-custom-link               CzinLMWrRe-S-LDpILSc6w   1   1          0            0       416b           208b
+green  open   .kibana_task_manager_2         DEn7MKdTQviDvaSZ56NBDA   1   1          6          272      1.3mb        653.3kb
+green  open   .kibana_task_manager_1         f8ibyRa5Qc-msi2MA55Pqg   1   1          5            2     55.4kb         27.7kb
+green  open   index_test                     np_2WyhCSTaBWlGiqBmHWw   1   1          1            0      9.7kb          4.8kb
+green  open   .apm-agent-configuration       cTW1RYPFRG6cYP4Wg_Gwxw   1   1          0            0       416b           208b
+green  open   customer2                      xmXw2qqdTnegGjBHNmH-BQ   1   1          2            0     14.9kb          7.4kb
+green  open   .kibana_2                      ec72UHa5TQSyIWMT87PW8Q   1   1         17            0     20.8mb         10.4mb
+green  open   .kibana_1                      YRg6LxJKQf6DEUebuGCtBg   1   1          4            0     65.4kb         32.7kb
+green  open   customer                       _CovbT7iQ_mE_TAI-Exiiw   1   1          0            0       416b           208b
+</code></pre></div></div>
+
+<h2 id="문서-index-및-데이터-삽입">문서 index 및 데이터 삽입</h2>
+
+<ul>
+  <li>한글 공식 문서를 보고 명령어를 입력하였더니 Deprecation이 발생한 것을 알 수 있었다. type은 현재 사용하지 않으므로 다른 방식의 명령어를 입력해주어야 한다.</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PUT /customer/external/1?pretty
+<span class="o">{</span>
+  <span class="s2">"name"</span>: <span class="s2">"John Doe"</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#! Deprecation: [types removal] Specifying types in document index requests is deprecated, use the typeless endpoints instead (/{index}/_doc/{id}, /{index}/_doc, or /{index}/_create/{id}).</span>
+<span class="o">{</span>
+  <span class="s2">"_index"</span> : <span class="s2">"customer"</span>,
+  <span class="s2">"_type"</span> : <span class="s2">"external"</span>,
+  <span class="s2">"_id"</span> : <span class="s2">"1"</span>,
+  <span class="s2">"_version"</span> : 1,
+  <span class="s2">"result"</span> : <span class="s2">"created"</span>,
+  <span class="s2">"_shards"</span> : <span class="o">{</span>
+    <span class="s2">"total"</span> : 2,
+    <span class="s2">"successful"</span> : 2,
+    <span class="s2">"failed"</span> : 0
+  <span class="o">}</span>,
+  <span class="s2">"_seq_no"</span> : 0,
+  <span class="s2">"_primary_term"</span> : 1
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>아래와 같이 <code class="language-plaintext highlighter-rouge">PUT /customer/_doc/3?pretty</code> 로 명령어를 변경한다. type이 불필요하여 타입 대신 <code class="language-plaintext highlighter-rouge">_doc</code> 을 넣는 것으로 변경된 듯 하다.</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PUT /customer/_doc/3?pretty
+<span class="o">{</span>
+  <span class="s2">"name"</span>: <span class="s2">"John Doe"</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"_index"</span> : <span class="s2">"customer"</span>,
+  <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+  <span class="s2">"_id"</span> : <span class="s2">"3"</span>,
+  <span class="s2">"_version"</span> : 1,
+  <span class="s2">"result"</span> : <span class="s2">"created"</span>,
+  <span class="s2">"_shards"</span> : <span class="o">{</span>
+    <span class="s2">"total"</span> : 2,
+    <span class="s2">"successful"</span> : 2,
+    <span class="s2">"failed"</span> : 0
+  <span class="o">}</span>,
+  <span class="s2">"_seq_no"</span> : 3,
+  <span class="s2">"_primary_term"</span> : 1
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>방금 색인화한 문서를 검색하는 것도 명령어가 달라져서 아래와 같이 입력하면 된다. (역시 중간에 _doc를 넣어서 type을 사용하지 않음을 알 수 있다)</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /customer/_doc/1?pretty
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"_index"</span> : <span class="s2">"customer"</span>,
+  <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+  <span class="s2">"_id"</span> : <span class="s2">"1"</span>,
+  <span class="s2">"_version"</span> : 2,
+  <span class="s2">"_seq_no"</span> : 1,
+  <span class="s2">"_primary_term"</span> : 1,
+  <span class="s2">"found"</span> : <span class="nb">true</span>,
+  <span class="s2">"_source"</span> : <span class="o">{</span>
+    <span class="s2">"name"</span> : <span class="s2">"John Doe"</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="index-삭제">index 삭제</h2>
+
+<ul>
+  <li>아래의 DELETE 명령어로 customer 색인을 삭제하고 다시 모든 색인을 조회하면 아래와 같이 customer 색인이 보이지 않는 것을 확인할 수 있다.</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DELETE /customer?pretty
+GET /_cat/indices?v
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>health status index                          uuid                   pri rep docs.count docs.deleted store.size pri.store.size
+green  open   .kibana-event-log-7.9.2-000001 fr2XopZHRzuJcm9pCvPqAA   1   1          3            0     32.5kb         16.2kb
+green  open   .apm-custom-link               CzinLMWrRe-S-LDpILSc6w   1   1          0            0       416b           208b
+green  open   .kibana_task_manager_2         DEn7MKdTQviDvaSZ56NBDA   1   1          6          395      1.2mb        680.7kb
+green  open   .kibana_task_manager_1         f8ibyRa5Qc-msi2MA55Pqg   1   1          5            2     55.4kb         27.7kb
+green  open   index_test                     np_2WyhCSTaBWlGiqBmHWw   1   1          1            0      9.7kb          4.8kb
+green  open   .apm-agent-configuration       cTW1RYPFRG6cYP4Wg_Gwxw   1   1          0            0       416b           208b
+green  open   .kibana_2                      ec72UHa5TQSyIWMT87PW8Q   1   1         30           11     20.8mb         10.4mb
+green  open   .kibana_1                      YRg6LxJKQf6DEUebuGCtBg   1   1          4            0     65.4kb         32.7kb
+</code></pre></div></div>
+
+<h2 id="index-데이터-대체">index 데이터 대체</h2>
+
+<ul>
+  <li>동일한 명령어로 내용만 바꿔서 실행했을 경우 기존 문서가 새 문서를 대체</li>
+  <li><code class="language-plaintext highlighter-rouge">John Doe</code>가 <code class="language-plaintext highlighter-rouge">Jane Doe</code> 로 변경된 것을 알 수 있음</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PUT /customer/_doc/1?pretty
+<span class="o">{</span>
+  <span class="s2">"name"</span>: <span class="s2">"Jane Doe"</span>
+<span class="o">}</span>
+GET /customer/_doc/1?pretty
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"_index"</span> : <span class="s2">"customer"</span>,
+  <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+  <span class="s2">"_id"</span> : <span class="s2">"1"</span>,
+  <span class="s2">"_version"</span> : 3,
+  <span class="s2">"_seq_no"</span> : 2,
+  <span class="s2">"_primary_term"</span> : 1,
+  <span class="s2">"found"</span> : <span class="nb">true</span>,
+  <span class="s2">"_source"</span> : <span class="o">{</span>
+    <span class="s2">"name"</span> : <span class="s2">"Jane Doe"</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="문서-업데이트">문서 업데이트</h2>
+
+<ul>
+  <li>이 명령어도 기존 명령어와 변경된 것을 확인할 수 있음</li>
+  <li>업데이트를 명령하면 기존 문서 삭제, 새 문서를 색인화, 업데이트 적용</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 기존 명령어</span>
+POST /customer/external/1/_update?pretty
+<span class="o">{</span>
+  <span class="s2">"doc"</span>: <span class="o">{</span> <span class="s2">"name"</span>: <span class="s2">"Jane Doe"</span> <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="c"># 변경된 명령어</span>
+POST /customer/_update/1?pretty
+<span class="o">{</span>
+  <span class="s2">"doc"</span>: <span class="o">{</span> <span class="s2">"name"</span>: <span class="s2">"John Doe"</span> <span class="o">}</span>
+<span class="o">}</span>
+GET /customer/_doc/1?pretty
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"_index"</span> : <span class="s2">"customer"</span>,
+  <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+  <span class="s2">"_id"</span> : <span class="s2">"1"</span>,
+  <span class="s2">"_version"</span> : 4,
+  <span class="s2">"_seq_no"</span> : 3,
+  <span class="s2">"_primary_term"</span> : 1,
+  <span class="s2">"found"</span> : <span class="nb">true</span>,
+  <span class="s2">"_source"</span> : <span class="o">{</span>
+    <span class="s2">"name"</span> : <span class="s2">"John Doe"</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>이름을 <code class="language-plaintext highlighter-rouge">Jane Doe</code> 로 변경하고 <code class="language-plaintext highlighter-rouge">age</code> 필드를 추가</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 기존 명령어</span>
+POST /customer/external/1/_update?pretty
+<span class="o">{</span>
+  <span class="s2">"doc"</span>: <span class="o">{</span> <span class="s2">"name"</span>: <span class="s2">"Jane Doe"</span>, <span class="s2">"age"</span>: 20 <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="c"># 변경된 명령어</span>
+POST /customer/_update/1?pretty
+<span class="o">{</span>
+  <span class="s2">"doc"</span>: <span class="o">{</span> <span class="s2">"name"</span>: <span class="s2">"Jane Doe"</span>, <span class="s2">"age"</span> : 20 <span class="o">}</span>
+<span class="o">}</span>
+
+GET /customer/_doc/1?pretty
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"_index"</span> : <span class="s2">"customer"</span>,
+  <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+  <span class="s2">"_id"</span> : <span class="s2">"1"</span>,
+  <span class="s2">"_version"</span> : 6,
+  <span class="s2">"result"</span> : <span class="s2">"updated"</span>,
+  <span class="s2">"_shards"</span> : <span class="o">{</span>
+    <span class="s2">"total"</span> : 2,
+    <span class="s2">"successful"</span> : 2,
+    <span class="s2">"failed"</span> : 0
+  <span class="o">}</span>,
+  <span class="s2">"_seq_no"</span> : 5,
+  <span class="s2">"_primary_term"</span> : 1
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>스크립트를 사용하여 나이를 5만큼 늘리기</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 기존 명령어</span>
+POST /customer/external/1/_update?pretty
+<span class="o">{</span>
+  <span class="s2">"script"</span> : <span class="s2">"ctx._source.age += 5"</span>
+<span class="o">}</span>
+
+<span class="c"># 변경된 명령어</span>
+POST /customer/_update/1?pretty
+<span class="o">{</span>
+  <span class="s2">"script"</span>: <span class="s2">"ctx._source.age += 5"</span> 
+<span class="o">}</span>
+
+GET /customer/_doc/1?pretty
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"_index"</span> : <span class="s2">"customer"</span>,
+  <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+  <span class="s2">"_id"</span> : <span class="s2">"1"</span>,
+  <span class="s2">"_version"</span> : 7,
+  <span class="s2">"_seq_no"</span> : 6,
+  <span class="s2">"_primary_term"</span> : 1,
+  <span class="s2">"found"</span> : <span class="nb">true</span>,
+  <span class="s2">"_source"</span> : <span class="o">{</span>
+    <span class="s2">"name"</span> : <span class="s2">"Jane Doe"</span>,
+    <span class="s2">"age"</span> : 25
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="문서-삭제">문서 삭제</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 기존 명령어</span>
+DELETE /customer/external/2?pretty
+
+<span class="c"># 변경된 명령어</span>
+DELETE /customer/_doc/1?pretty
+
+GET /customer/_doc/1?pretty
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"_index"</span> : <span class="s2">"customer"</span>,
+  <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+  <span class="s2">"_id"</span> : <span class="s2">"1"</span>,
+  <span class="s2">"found"</span> : <span class="nb">false</span>
+<span class="o">}</span>
+</code></pre></div></div>
+:ET

@@ -1,0 +1,436 @@
+I"$V<h1 id="single-document-apis">Single document APIs</h1>
+
+<h2 id="index">Index</h2>
+
+<p><code class="language-plaintext highlighter-rouge">PUT /&lt;target&gt;/_doc/&lt;_id&gt;</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">POST /&lt;target&gt;/_doc/</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">PUT /&lt;target&gt;/_create/&lt;_id&gt;</code> : 덮어쓰기 방지</p>
+
+<p><code class="language-plaintext highlighter-rouge">POST /&lt;target&gt;/_create/&lt;_id&gt;</code> : 덮어쓰기 방지</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PUT test_index/_doc/1
+<span class="o">{</span>
+  <span class="s2">"name"</span>:<span class="s2">"Siu Ahn"</span>,
+  <span class="s2">"message"</span>:<span class="s2">"Hello Elasticsearch"</span>
+<span class="o">}</span>
+
+PUT test_index/_create/1
+<span class="o">{</span>
+  <span class="s2">"name"</span>:<span class="s2">"Siu Ahn"</span>,
+  <span class="s2">"message"</span>:<span class="s2">"Hello Elasticsearch"</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="get">Get</h2>
+
+<p><code class="language-plaintext highlighter-rouge">GET &lt;index&gt;/_doc/&lt;_id&gt;</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">HEAD &lt;index&gt;/_doc/&lt;_id&gt;</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">GET &lt;index&gt;/_source/&lt;_id&gt;</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">HEAD &lt;index&gt;/_source/&lt;_id&gt;</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET test_index/_doc/1
+HEAD test_index/_doc/1
+GET test_index/_source/1
+HEAD test_index/_source/1
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"_index"</span> : <span class="s2">"test_index"</span>,
+  <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+  <span class="s2">"_id"</span> : <span class="s2">"1"</span>,
+  <span class="s2">"_version"</span> : 3,
+  <span class="s2">"_seq_no"</span> : 2,
+  <span class="s2">"_primary_term"</span> : 1,
+  <span class="s2">"found"</span> : <span class="nb">true</span>,
+  <span class="s2">"_source"</span> : <span class="o">{</span>
+    <span class="s2">"name"</span> : <span class="s2">"Siu Ahn"</span>,
+    <span class="s2">"message"</span> : <span class="s2">"Hello Elasticsearch"</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+200 - OK
+
+<span class="o">{</span>
+  <span class="s2">"name"</span> : <span class="s2">"Siu Ahn"</span>,
+  <span class="s2">"message"</span> : <span class="s2">"Hello Elasticsearch"</span>
+<span class="o">}</span>
+
+200 - OK
+</code></pre></div></div>
+
+<h2 id="delete">Delete</h2>
+
+<p><code class="language-plaintext highlighter-rouge">DELETE /&lt;index&gt;/_doc/&lt;_id&gt;</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DELETE /test_index/_doc/1
+GET test_index/_source/1
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"error"</span> : <span class="o">{</span>
+    <span class="s2">"root_cause"</span> : <span class="o">[</span>
+      <span class="o">{</span>
+        <span class="s2">"type"</span> : <span class="s2">"resource_not_found_exception"</span>,
+        <span class="s2">"reason"</span> : <span class="s2">"Document not found [test_index]/[_doc]/[1]"</span>
+      <span class="o">}</span>
+    <span class="o">]</span>,
+    <span class="s2">"type"</span> : <span class="s2">"resource_not_found_exception"</span>,
+    <span class="s2">"reason"</span> : <span class="s2">"Document not found [test_index]/[_doc]/[1]"</span>
+  <span class="o">}</span>,
+  <span class="s2">"status"</span> : 404
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="delete-by-query">Delete by query</h2>
+
+<p><code class="language-plaintext highlighter-rouge">POST /&lt;target&gt;/_delete_by_query</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PUT test_index/_doc/1
+<span class="o">{</span>
+  <span class="s2">"name"</span>:<span class="s2">"Siu Ahn"</span>,
+  <span class="s2">"message"</span>:<span class="s2">"Hello Elasticsearch"</span>
+<span class="o">}</span>
+
+POST /test_index/_delete_by_query
+<span class="o">{</span>
+  <span class="s2">"query"</span>: <span class="o">{</span>
+    <span class="s2">"match"</span>: <span class="o">{</span>
+      <span class="s2">"name"</span>: <span class="s2">"Siu Ahn"</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+HEAD test_index/_source/1
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span><span class="s2">"statusCode"</span>:404,<span class="s2">"error"</span>:<span class="s2">"Not Found"</span>,<span class="s2">"message"</span>:<span class="s2">"404 - Not Found"</span><span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="update">Update</h2>
+
+<p><code class="language-plaintext highlighter-rouge">POST /&lt;index&gt;/_update/&lt;_id&gt;</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PUT test_index/_doc/1
+<span class="o">{</span>
+  <span class="s2">"name"</span>:<span class="s2">"Siu Ahn"</span>,
+  <span class="s2">"message"</span>:<span class="s2">"Hello Elasticsearch"</span>
+<span class="o">}</span>
+
+POST /test_index/_update/1
+<span class="o">{</span>
+  <span class="s2">"doc"</span>:<span class="o">{</span>
+    <span class="s2">"name"</span> : <span class="s2">"SiWoo Ahn"</span>  
+  <span class="o">}</span>
+<span class="o">}</span>
+
+GET test_index/_source/1
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"name"</span> : <span class="s2">"SiWoo Ahn"</span>,
+  <span class="s2">"message"</span> : <span class="s2">"Hello Elasticsearch"</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h1 id="multi-document-apis">Multi-document APIs</h1>
+
+<h2 id="multi-get">Multi get</h2>
+
+<p><code class="language-plaintext highlighter-rouge">GET /&lt;index&gt;/_mget</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /test_index/_mget
+<span class="o">{</span>
+  <span class="s2">"docs"</span>: <span class="o">[</span>
+    <span class="o">{</span>
+      <span class="s2">"_id"</span>: <span class="s2">"1"</span>
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"_id"</span>: <span class="s2">"2"</span>
+    <span class="o">}</span>
+  <span class="o">]</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"docs"</span> : <span class="o">[</span>
+    <span class="o">{</span>
+      <span class="s2">"_index"</span> : <span class="s2">"test_index"</span>,
+      <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+      <span class="s2">"_id"</span> : <span class="s2">"1"</span>,
+      <span class="s2">"_version"</span> : 2,
+      <span class="s2">"_seq_no"</span> : 9,
+      <span class="s2">"_primary_term"</span> : 1,
+      <span class="s2">"found"</span> : <span class="nb">true</span>,
+      <span class="s2">"_source"</span> : <span class="o">{</span>
+        <span class="s2">"name"</span> : <span class="s2">"SiWoo Ahn"</span>,
+        <span class="s2">"message"</span> : <span class="s2">"Hello Elasticsearch"</span>
+      <span class="o">}</span>
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"_index"</span> : <span class="s2">"test_index"</span>,
+      <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+      <span class="s2">"_id"</span> : <span class="s2">"2"</span>,
+      <span class="s2">"found"</span> : <span class="nb">false</span>
+    <span class="o">}</span>
+  <span class="o">]</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="bulk">Bulk</h2>
+
+<p><code class="language-plaintext highlighter-rouge">POST /_bulk</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">POST /&lt;target&gt;/_bulk</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST /_bulk?pretty
+<span class="o">{</span> <span class="s2">"index"</span> : <span class="o">{</span> <span class="s2">"_index"</span> : <span class="s2">"test"</span>, <span class="s2">"_id"</span> : <span class="s2">"1"</span> <span class="o">}</span> <span class="o">}</span>
+<span class="o">{</span> <span class="s2">"field1"</span> : <span class="s2">"value1"</span> <span class="o">}</span>
+<span class="o">{</span> <span class="s2">"delete"</span> : <span class="o">{</span> <span class="s2">"_index"</span> : <span class="s2">"test"</span>, <span class="s2">"_id"</span> : <span class="s2">"2"</span> <span class="o">}</span> <span class="o">}</span>
+<span class="o">{</span> <span class="s2">"create"</span> : <span class="o">{</span> <span class="s2">"_index"</span> : <span class="s2">"test"</span>, <span class="s2">"_id"</span> : <span class="s2">"3"</span> <span class="o">}</span> <span class="o">}</span>
+<span class="o">{</span> <span class="s2">"field1"</span> : <span class="s2">"value3"</span> <span class="o">}</span>
+<span class="o">{</span> <span class="s2">"update"</span> : <span class="o">{</span><span class="s2">"_id"</span> : <span class="s2">"1"</span>, <span class="s2">"_index"</span> : <span class="s2">"test"</span><span class="o">}</span> <span class="o">}</span>
+<span class="o">{</span> <span class="s2">"doc"</span> : <span class="o">{</span><span class="s2">"field2"</span> : <span class="s2">"value2"</span><span class="o">}</span> <span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"took"</span> : 287,
+  <span class="s2">"errors"</span> : <span class="nb">false</span>,
+  <span class="s2">"items"</span> : <span class="o">[</span>
+    <span class="o">{</span>
+      <span class="s2">"index"</span> : <span class="o">{</span>
+        <span class="s2">"_index"</span> : <span class="s2">"test"</span>,
+        <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+        <span class="s2">"_id"</span> : <span class="s2">"1"</span>,
+        <span class="s2">"_version"</span> : 7,
+        <span class="s2">"result"</span> : <span class="s2">"updated"</span>,
+        <span class="s2">"_shards"</span> : <span class="o">{</span>
+          <span class="s2">"total"</span> : 2,
+          <span class="s2">"successful"</span> : 2,
+          <span class="s2">"failed"</span> : 0
+        <span class="o">}</span>,
+        <span class="s2">"_seq_no"</span> : 8,
+        <span class="s2">"_primary_term"</span> : 7,
+        <span class="s2">"status"</span> : 200
+      <span class="o">}</span>
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"delete"</span> : <span class="o">{</span>
+        <span class="s2">"_index"</span> : <span class="s2">"test"</span>,
+        <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+        <span class="s2">"_id"</span> : <span class="s2">"2"</span>,
+        <span class="s2">"_version"</span> : 2,
+        <span class="s2">"result"</span> : <span class="s2">"deleted"</span>,
+        <span class="s2">"_shards"</span> : <span class="o">{</span>
+          <span class="s2">"total"</span> : 2,
+          <span class="s2">"successful"</span> : 2,
+          <span class="s2">"failed"</span> : 0
+        <span class="o">}</span>,
+        <span class="s2">"_seq_no"</span> : 9,
+        <span class="s2">"_primary_term"</span> : 7,
+        <span class="s2">"status"</span> : 200
+      <span class="o">}</span>
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"create"</span> : <span class="o">{</span>
+        <span class="s2">"_index"</span> : <span class="s2">"test"</span>,
+        <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+        <span class="s2">"_id"</span> : <span class="s2">"3"</span>,
+        <span class="s2">"_version"</span> : 1,
+        <span class="s2">"result"</span> : <span class="s2">"created"</span>,
+        <span class="s2">"_shards"</span> : <span class="o">{</span>
+          <span class="s2">"total"</span> : 2,
+          <span class="s2">"successful"</span> : 2,
+          <span class="s2">"failed"</span> : 0
+        <span class="o">}</span>,
+        <span class="s2">"_seq_no"</span> : 10,
+        <span class="s2">"_primary_term"</span> : 7,
+        <span class="s2">"status"</span> : 201
+      <span class="o">}</span>
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"update"</span> : <span class="o">{</span>
+        <span class="s2">"_index"</span> : <span class="s2">"test"</span>,
+        <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+        <span class="s2">"_id"</span> : <span class="s2">"1"</span>,
+        <span class="s2">"_version"</span> : 8,
+        <span class="s2">"result"</span> : <span class="s2">"updated"</span>,
+        <span class="s2">"_shards"</span> : <span class="o">{</span>
+          <span class="s2">"total"</span> : 2,
+          <span class="s2">"successful"</span> : 2,
+          <span class="s2">"failed"</span> : 0
+        <span class="o">}</span>,
+        <span class="s2">"_seq_no"</span> : 11,
+        <span class="s2">"_primary_term"</span> : 7,
+        <span class="s2">"status"</span> : 200
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">]</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="reindex">Reindex</h2>
+
+<ul>
+  <li>존재하는 인덱스의 문서 복사</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST _reindex
+<span class="o">{</span>
+  <span class="s2">"source"</span>: <span class="o">{</span>
+    <span class="s2">"index"</span>: <span class="s2">"test_index"</span>
+  <span class="o">}</span>,
+  <span class="s2">"dest"</span>: <span class="o">{</span>
+    <span class="s2">"index"</span>: <span class="s2">"test_new_index"</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+GET /test_new_index/_doc/1
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"_index"</span> : <span class="s2">"test_new_index"</span>,
+  <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+  <span class="s2">"_id"</span> : <span class="s2">"1"</span>,
+  <span class="s2">"_version"</span> : 1,
+  <span class="s2">"_seq_no"</span> : 0,
+  <span class="s2">"_primary_term"</span> : 1,
+  <span class="s2">"found"</span> : <span class="nb">true</span>,
+  <span class="s2">"_source"</span> : <span class="o">{</span>
+    <span class="s2">"name"</span> : <span class="s2">"SiWoo Ahn"</span>,
+    <span class="s2">"message"</span> : <span class="s2">"Hello Elasticsearch"</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="term-vectors">Term vectors</h2>
+
+<p><code class="language-plaintext highlighter-rouge">GET /&lt;index&gt;/_termvectors/&lt;_id&gt;</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /test_index/_termvectors/1?fields<span class="o">=</span>name
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"_index"</span> : <span class="s2">"test_index"</span>,
+  <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+  <span class="s2">"_id"</span> : <span class="s2">"1"</span>,
+  <span class="s2">"_version"</span> : 2,
+  <span class="s2">"found"</span> : <span class="nb">true</span>,
+  <span class="s2">"took"</span> : 13,
+  <span class="s2">"term_vectors"</span> : <span class="o">{</span>
+    <span class="s2">"name"</span> : <span class="o">{</span>
+      <span class="s2">"field_statistics"</span> : <span class="o">{</span>
+        <span class="s2">"sum_doc_freq"</span> : 4,
+        <span class="s2">"doc_count"</span> : 2,
+        <span class="s2">"sum_ttf"</span> : 4
+      <span class="o">}</span>,
+      <span class="s2">"terms"</span> : <span class="o">{</span>
+        <span class="s2">"ahn"</span> : <span class="o">{</span>
+          <span class="s2">"term_freq"</span> : 1,
+          <span class="s2">"tokens"</span> : <span class="o">[</span>
+            <span class="o">{</span>
+              <span class="s2">"position"</span> : 1,
+              <span class="s2">"start_offset"</span> : 6,
+              <span class="s2">"end_offset"</span> : 9
+            <span class="o">}</span>
+          <span class="o">]</span>
+        <span class="o">}</span>,
+        <span class="s2">"siwoo"</span> : <span class="o">{</span>
+          <span class="s2">"term_freq"</span> : 1,
+          <span class="s2">"tokens"</span> : <span class="o">[</span>
+            <span class="o">{</span>
+              <span class="s2">"position"</span> : 0,
+              <span class="s2">"start_offset"</span> : 0,
+              <span class="s2">"end_offset"</span> : 5
+            <span class="o">}</span>
+          <span class="o">]</span>
+        <span class="o">}</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="multi-term-vectors">Multi term vectors</h2>
+
+<p><code class="language-plaintext highlighter-rouge">POST /_mtermvectors</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">POST /&lt;index&gt;/_mtermvectors</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST /_mtermvectors?pretty
+<span class="o">{</span>
+   <span class="s2">"docs"</span>: <span class="o">[</span>
+      <span class="o">{</span>
+         <span class="s2">"_index"</span>: <span class="s2">"test_index"</span>,
+         <span class="s2">"_id"</span>: <span class="s2">"2"</span>,
+         <span class="s2">"term_statistics"</span>: <span class="nb">true</span>
+      <span class="o">}</span>,
+      <span class="o">{</span>
+         <span class="s2">"_index"</span>: <span class="s2">"test_index"</span>,
+         <span class="s2">"_id"</span>: <span class="s2">"2"</span>,
+         <span class="s2">"fields"</span>: <span class="o">[</span>
+            <span class="s2">"name"</span>
+         <span class="o">]</span>
+      <span class="o">}</span>
+   <span class="o">]</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"docs"</span> : <span class="o">[</span>
+    <span class="o">{</span>
+      <span class="s2">"_index"</span> : <span class="s2">"test_index"</span>,
+      <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+      <span class="s2">"_id"</span> : <span class="s2">"2"</span>,
+      <span class="s2">"_version"</span> : 1,
+      <span class="s2">"found"</span> : <span class="nb">true</span>,
+      <span class="s2">"took"</span> : 0,
+      <span class="s2">"term_vectors"</span> : <span class="o">{</span> <span class="o">}</span>
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"_index"</span> : <span class="s2">"test_index"</span>,
+      <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+      <span class="s2">"_id"</span> : <span class="s2">"2"</span>,
+      <span class="s2">"_version"</span> : 1,
+      <span class="s2">"found"</span> : <span class="nb">true</span>,
+      <span class="s2">"took"</span> : 0,
+      <span class="s2">"term_vectors"</span> : <span class="o">{</span>
+        <span class="s2">"name"</span> : <span class="o">{</span>
+          <span class="s2">"field_statistics"</span> : <span class="o">{</span>
+            <span class="s2">"sum_doc_freq"</span> : 8,
+            <span class="s2">"doc_count"</span> : 4,
+            <span class="s2">"sum_ttf"</span> : 8
+          <span class="o">}</span>,
+          <span class="s2">"terms"</span> : <span class="o">{</span>
+            <span class="s2">"ahn"</span> : <span class="o">{</span>
+              <span class="s2">"term_freq"</span> : 1,
+              <span class="s2">"tokens"</span> : <span class="o">[</span>
+                <span class="o">{</span>
+                  <span class="s2">"position"</span> : 1,
+                  <span class="s2">"start_offset"</span> : 4,
+                  <span class="s2">"end_offset"</span> : 7
+                <span class="o">}</span>
+              <span class="o">]</span>
+            <span class="o">}</span>,
+            <span class="s2">"siu"</span> : <span class="o">{</span>
+              <span class="s2">"term_freq"</span> : 1,
+              <span class="s2">"tokens"</span> : <span class="o">[</span>
+                <span class="o">{</span>
+                  <span class="s2">"position"</span> : 0,
+                  <span class="s2">"start_offset"</span> : 0,
+                  <span class="s2">"end_offset"</span> : 3
+                <span class="o">}</span>
+              <span class="o">]</span>
+            <span class="o">}</span>
+          <span class="o">}</span>
+        <span class="o">}</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">]</span>
+<span class="o">}</span>
+</code></pre></div></div>
+:ET

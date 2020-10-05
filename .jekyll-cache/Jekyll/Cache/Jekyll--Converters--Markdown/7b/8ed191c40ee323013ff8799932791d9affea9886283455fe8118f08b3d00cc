@@ -1,0 +1,731 @@
+I"?}<h1 id="기본-개념">기본 개념</h1>
+
+<h2 id="클러스터">클러스터</h2>
+
+<ul>
+  <li>클러스터는 하나 이상의 노드(서버)가 모인 것</li>
+</ul>
+
+<h2 id="노드">노드</h2>
+
+<ul>
+  <li>노드는 클러스터에 포함된 단일 서버로서 데이터를 저장하고 클러스터의 색인화 및 검색 기능에 참여 (이름으로 식별)</li>
+</ul>
+
+<h2 id="인덱스">인덱스</h2>
+
+<ul>
+  <li>색인은 다소 비슷한 특성을 가진 문서의 모음</li>
+</ul>
+
+<h2 id="타입">타입</h2>
+
+<ul>
+  <li>하나의 색인에서 하나 이상의 유형을 정의할 수 있음</li>
+</ul>
+
+<h2 id="도큐먼트">도큐먼트</h2>
+
+<ul>
+  <li>문서는 색인화할 수 있는 기본 정보 단위</li>
+</ul>
+
+<h2 id="샤드">샤드</h2>
+
+<ul>
+  <li>색인은 방대한 양의 데이터를 저장할 수 있는데, 이 데이터가 단일 노드의 하드웨어 한도를 초과할 수도 있으므로 이러한 문제를 해결하고자 색인을 이른바 샤드(shard)라는 조각으로 분할하는 기능을 제공</li>
+</ul>
+
+<h2 id="레플리카">레플리카</h2>
+
+<ul>
+  <li>복제본</li>
+  <li>샤드/노드 오류가 발생하더라도 고가용성을 제공</li>
+  <li>모든 리플리카에서 병렬 방식으로 검색을 실행할 수 있으므로 검색 볼륨/처리량을 확장할 수 있음</li>
+</ul>
+
+<h1 id="인덱스-관리index-management">인덱스 관리(Index Management)</h1>
+
+<h2 id="인덱스-생성create-index">인덱스 생성(Create Index)</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PUT /my-index-000001
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"acknowledged"</span> : <span class="nb">true</span>,
+  <span class="s2">"shards_acknowledged"</span> : <span class="nb">true</span>,
+  <span class="s2">"index"</span> : <span class="s2">"my-index-000001"</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="인덱스-세팅index-settings">인덱스 세팅(Index Settings)</h2>
+
+<ul>
+  <li>샤드와 레플리카 갯수 세팅</li>
+  <li>샤드 설정은 생성할 때 한번 지정하면 변경 불가</li>
+  <li>레플리카는 다이나믹하게 변경 가능</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PUT /my-index-000001
+<span class="o">{</span>
+  <span class="s2">"settings"</span>: <span class="o">{</span>
+    <span class="s2">"index"</span>: <span class="o">{</span>
+      <span class="s2">"number_of_shards"</span>: 3,  
+      <span class="s2">"number_of_replicas"</span>: 2 
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="c">## 간단한 명령어</span>
+PUT /my-index-000001
+<span class="o">{</span>
+  <span class="s2">"settings"</span>: <span class="o">{</span>
+    <span class="s2">"number_of_shards"</span>: 3,
+    <span class="s2">"number_of_replicas"</span>: 2
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="인덱스-맵핑mappings">인덱스 맵핑(Mappings)</h2>
+
+<ul>
+  <li>데이터의 매핑이 자동으로 생성되기 전에 매핑을 정의해놓으면 매핑에 맞추어서 데이터 입력 가능</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PUT /test
+<span class="o">{</span>
+  <span class="s2">"settings"</span>: <span class="o">{</span>
+    <span class="s2">"number_of_shards"</span>: 1
+  <span class="o">}</span>,
+  <span class="s2">"mappings"</span>: <span class="o">{</span>
+    <span class="s2">"properties"</span>: <span class="o">{</span>
+      <span class="s2">"field1"</span>: <span class="o">{</span> <span class="s2">"type"</span>: <span class="s2">"text"</span> <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="인덱스-별명-aliases">인덱스 별명 (Aliases)</h2>
+
+<ul>
+  <li>index에 별명을 붙여주는 것</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PUT /test
+<span class="o">{</span>
+  <span class="s2">"aliases"</span>: <span class="o">{</span>
+    <span class="s2">"alias_1"</span>: <span class="o">{}</span>,
+    <span class="s2">"alias_2"</span>: <span class="o">{</span>
+      <span class="s2">"filter"</span>: <span class="o">{</span>
+        <span class="s2">"term"</span>: <span class="o">{</span> <span class="s2">"user.id"</span>: <span class="s2">"kimchy"</span> <span class="o">}</span>
+      <span class="o">}</span>,
+      <span class="s2">"routing"</span>: <span class="s2">"shard-1"</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+GET /test
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"test"</span> : <span class="o">{</span>
+    <span class="s2">"aliases"</span> : <span class="o">{</span>
+      <span class="s2">"alias_1"</span> : <span class="o">{</span> <span class="o">}</span>,
+      <span class="s2">"alias_2"</span> : <span class="o">{</span>
+        <span class="s2">"filter"</span> : <span class="o">{</span>
+          <span class="s2">"term"</span> : <span class="o">{</span>
+            <span class="s2">"user.id"</span> : <span class="s2">"kimchy"</span>
+          <span class="o">}</span>
+        <span class="o">}</span>,
+        <span class="s2">"index_routing"</span> : <span class="s2">"shard-1"</span>,
+        <span class="s2">"search_routing"</span> : <span class="s2">"shard-1"</span>
+      <span class="o">}</span>
+    <span class="o">}</span>,
+    <span class="s2">"mappings"</span> : <span class="o">{</span> <span class="o">}</span>,
+    <span class="s2">"settings"</span> : <span class="o">{</span>
+      <span class="s2">"index"</span> : <span class="o">{</span>
+        <span class="s2">"creation_date"</span> : <span class="s2">"1601873312529"</span>,
+        <span class="s2">"number_of_shards"</span> : <span class="s2">"1"</span>,
+        <span class="s2">"number_of_replicas"</span> : <span class="s2">"1"</span>,
+        <span class="s2">"uuid"</span> : <span class="s2">"0SoRYG7ySPuin83QjgDbYQ"</span>,
+        <span class="s2">"version"</span> : <span class="o">{</span>
+          <span class="s2">"created"</span> : <span class="s2">"7090299"</span>
+        <span class="o">}</span>,
+        <span class="s2">"provided_name"</span> : <span class="s2">"test"</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="인덱스-삭제delete-index">인덱스 삭제(Delete Index)</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DELETE /test
+</code></pre></div></div>
+
+<h2 id="인덱스-별명-삭제delete-index-alias">인덱스 별명 삭제(Delete Index alias)</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DELETE /test/_alias/alias_2
+GET /test
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"test"</span> : <span class="o">{</span>
+    <span class="s2">"aliases"</span> : <span class="o">{</span>
+      <span class="s2">"alias_1"</span> : <span class="o">{</span> <span class="o">}</span>
+    <span class="o">}</span>,
+    <span class="s2">"mappings"</span> : <span class="o">{</span> <span class="o">}</span>,
+    <span class="s2">"settings"</span> : <span class="o">{</span>
+      <span class="s2">"index"</span> : <span class="o">{</span>
+        <span class="s2">"creation_date"</span> : <span class="s2">"1601873897961"</span>,
+        <span class="s2">"number_of_shards"</span> : <span class="s2">"1"</span>,
+        <span class="s2">"number_of_replicas"</span> : <span class="s2">"1"</span>,
+        <span class="s2">"uuid"</span> : <span class="s2">"BIbcBFRVSBKDyly1SiIwjA"</span>,
+        <span class="s2">"version"</span> : <span class="o">{</span>
+          <span class="s2">"created"</span> : <span class="s2">"7090299"</span>
+        <span class="o">}</span>,
+        <span class="s2">"provided_name"</span> : <span class="s2">"test"</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="인덱스-조회get-index">인덱스 조회(Get Index)</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /test
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"test"</span> : <span class="o">{</span>
+    <span class="s2">"aliases"</span> : <span class="o">{</span>
+      <span class="s2">"alias_1"</span> : <span class="o">{</span> <span class="o">}</span>
+    <span class="o">}</span>,
+    <span class="s2">"mappings"</span> : <span class="o">{</span> <span class="o">}</span>,
+    <span class="s2">"settings"</span> : <span class="o">{</span>
+      <span class="s2">"index"</span> : <span class="o">{</span>
+        <span class="s2">"creation_date"</span> : <span class="s2">"1601873897961"</span>,
+        <span class="s2">"number_of_shards"</span> : <span class="s2">"1"</span>,
+        <span class="s2">"number_of_replicas"</span> : <span class="s2">"1"</span>,
+        <span class="s2">"uuid"</span> : <span class="s2">"BIbcBFRVSBKDyly1SiIwjA"</span>,
+        <span class="s2">"version"</span> : <span class="o">{</span>
+          <span class="s2">"created"</span> : <span class="s2">"7090299"</span>
+        <span class="o">}</span>,
+        <span class="s2">"provided_name"</span> : <span class="s2">"test"</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="인덱스-존재-유무-확인index-exists">인덱스 존재 유무 확인(Index exists)</h2>
+
+<ul>
+  <li>200의 경우 존재, 404의 경우 존재하지 않음을 의미</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>HEAD /test
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>200 - OK
+</code></pre></div></div>
+
+<h2 id="인덱스-닫기close-index">인덱스 닫기(Close Index)</h2>
+
+<ul>
+  <li>읽기와 쓰기 블록 처리</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST /test/_close
+
+POST /test/_doc/1
+<span class="o">{</span>
+  <span class="s2">"name"</span> : <span class="s2">"hamletshu"</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"error"</span> : <span class="o">{</span>
+    <span class="s2">"root_cause"</span> : <span class="o">[</span>
+      <span class="o">{</span>
+        <span class="s2">"type"</span> : <span class="s2">"index_closed_exception"</span>,
+        <span class="s2">"reason"</span> : <span class="s2">"closed"</span>,
+        <span class="s2">"index_uuid"</span> : <span class="s2">"BIbcBFRVSBKDyly1SiIwjA"</span>,
+        <span class="s2">"index"</span> : <span class="s2">"test"</span>
+      <span class="o">}</span>
+    <span class="o">]</span>,
+    <span class="s2">"type"</span> : <span class="s2">"index_closed_exception"</span>,
+    <span class="s2">"reason"</span> : <span class="s2">"closed"</span>,
+    <span class="s2">"index_uuid"</span> : <span class="s2">"BIbcBFRVSBKDyly1SiIwjA"</span>,
+    <span class="s2">"index"</span> : <span class="s2">"test"</span>
+  <span class="o">}</span>,
+  <span class="s2">"status"</span> : 400
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="인덱스-열기open-index">인덱스 열기(Open Index)</h2>
+
+<ul>
+  <li>닫힌 인덱스 열기</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST /test/_open
+
+POST /test/_doc/1
+<span class="o">{</span>
+  <span class="s2">"name"</span> : <span class="s2">"hamletshu"</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"_index"</span> : <span class="s2">"test"</span>,
+  <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+  <span class="s2">"_id"</span> : <span class="s2">"1"</span>,
+  <span class="s2">"_version"</span> : 1,
+  <span class="s2">"result"</span> : <span class="s2">"craeted"</span>,
+  <span class="s2">"_shards"</span> : <span class="o">{</span>
+    <span class="s2">"total"</span> : 2,
+    <span class="s2">"successful"</span> : 2,
+    <span class="s2">"failed"</span> : 0
+  <span class="o">}</span>,
+  <span class="s2">"_seq_no"</span> : 6,
+  <span class="s2">"_primary_term"</span> : 3
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="인덱스-복제clone-index">인덱스 복제(Clone Index)</h2>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">index.blocks.write</code> 설정이 true로 되어있어야 복제 가능</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PUT /test/_settings
+<span class="o">{</span>
+  <span class="s2">"settings"</span>:<span class="o">{</span>
+    <span class="s2">"index.blocks.write"</span>:true
+  <span class="o">}</span>
+<span class="o">}</span>
+
+POST /test/_clone/test2
+</code></pre></div></div>
+
+<h2 id="인덱스-동결freeze-index">인덱스 동결(Freeze Index)</h2>
+
+<ul>
+  <li>동결할 경우 읽기만 가능</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST /test/_freeze
+
+POST /test/_doc/2
+<span class="o">{</span>
+  <span class="s2">"name"</span> : <span class="s2">"hamletshu"</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"error"</span> : <span class="o">{</span>
+    <span class="s2">"root_cause"</span> : <span class="o">[</span>
+      <span class="o">{</span>
+        <span class="s2">"type"</span> : <span class="s2">"cluster_block_exception"</span>,
+        <span class="s2">"reason"</span> : <span class="s2">"index [test] blocked by: [FORBIDDEN/8/index write (api)];"</span>
+      <span class="o">}</span>
+    <span class="o">]</span>,
+    <span class="s2">"type"</span> : <span class="s2">"cluster_block_exception"</span>,
+    <span class="s2">"reason"</span> : <span class="s2">"index [test] blocked by: [FORBIDDEN/8/index write (api)];"</span>
+  <span class="o">}</span>,
+  <span class="s2">"status"</span> : 403
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="인덱스-동결-해제unfreeze-index">인덱스 동결 해제(Unfreeze Index)</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"_index"</span> : <span class="s2">"test"</span>,
+  <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+  <span class="s2">"_id"</span> : <span class="s2">"2"</span>,
+  <span class="s2">"_version"</span> : 1,
+  <span class="s2">"result"</span> : <span class="s2">"created"</span>,
+  <span class="s2">"_shards"</span> : <span class="o">{</span>
+    <span class="s2">"total"</span> : 2,
+    <span class="s2">"successful"</span> : 2,
+    <span class="s2">"failed"</span> : 0
+  <span class="o">}</span>,
+  <span class="s2">"_seq_no"</span> : 7,
+  <span class="s2">"_primary_term"</span> : 7
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST /test/_unfreeze
+
+POST /test/_doc/2
+<span class="o">{</span>
+  <span class="s2">"name"</span> : <span class="s2">"hamletshu"</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="여러-인덱스-조회resolve-index">여러 인덱스 조회(Resolve Index)</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /_resolve/index/test<span class="k">*</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"indices"</span> : <span class="o">[</span>
+    <span class="o">{</span>
+      <span class="s2">"name"</span> : <span class="s2">"test"</span>,
+      <span class="s2">"aliases"</span> : <span class="o">[</span>
+        <span class="s2">"alias_1"</span>
+      <span class="o">]</span>,
+      <span class="s2">"attributes"</span> : <span class="o">[</span>
+        <span class="s2">"open"</span>
+      <span class="o">]</span>
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"name"</span> : <span class="s2">"test2"</span>,
+      <span class="s2">"attributes"</span> : <span class="o">[</span>
+        <span class="s2">"open"</span>
+      <span class="o">]</span>
+    <span class="o">}</span>
+  <span class="o">]</span>,
+  <span class="s2">"aliases"</span> : <span class="o">[</span> <span class="o">]</span>,
+  <span class="s2">"data_streams"</span> : <span class="o">[</span> <span class="o">]</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h1 id="맵핑-관리mapping-management">맵핑 관리(Mapping Management)</h1>
+
+<h2 id="put-mapping">Put mapping</h2>
+
+<ul>
+  <li>맵핑 정의</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PUT /test/_mapping
+<span class="o">{</span>
+  <span class="s2">"properties"</span>: <span class="o">{</span>
+    <span class="s2">"email"</span>: <span class="o">{</span>
+      <span class="s2">"type"</span>: <span class="s2">"keyword"</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="get-mapping">Get mapping</h2>
+
+<ul>
+  <li>맵핑 정보 조회</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /test/_mapping
+
+<span class="c">## 아래의 명령어로 전체 조회도 가능</span>
+GET /<span class="k">*</span>/_mapping
+
+GET /_all/_mapping
+
+GET /_mapping
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"test"</span> : <span class="o">{</span>
+    <span class="s2">"mappings"</span> : <span class="o">{</span>
+      <span class="s2">"properties"</span> : <span class="o">{</span>
+        <span class="s2">"email"</span> : <span class="o">{</span>
+          <span class="s2">"type"</span> : <span class="s2">"keyword"</span>
+        <span class="o">}</span>,
+        <span class="s2">"name"</span> : <span class="o">{</span>
+          <span class="s2">"type"</span> : <span class="s2">"text"</span>,
+          <span class="s2">"fields"</span> : <span class="o">{</span>
+            <span class="s2">"keyword"</span> : <span class="o">{</span>
+              <span class="s2">"type"</span> : <span class="s2">"keyword"</span>,
+              <span class="s2">"ignore_above"</span> : 256
+            <span class="o">}</span>
+          <span class="o">}</span>
+        <span class="o">}</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="get-field-mapping">Get field mapping</h2>
+
+<ul>
+  <li>해당 필드에 해당하는 매핑정보 확인</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /test/_mapping/field/email
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"test"</span> : <span class="o">{</span>
+    <span class="s2">"mappings"</span> : <span class="o">{</span>
+      <span class="s2">"email"</span> : <span class="o">{</span>
+        <span class="s2">"full_name"</span> : <span class="s2">"email"</span>,
+        <span class="s2">"mapping"</span> : <span class="o">{</span>
+          <span class="s2">"email"</span> : <span class="o">{</span>
+            <span class="s2">"type"</span> : <span class="s2">"keyword"</span>
+          <span class="o">}</span>
+        <span class="o">}</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h1 id="별명-관리alias-management">별명 관리(Alias Management)</h1>
+
+<h2 id="add-index-alias">Add Index Alias</h2>
+
+<p><code class="language-plaintext highlighter-rouge">PUT /&lt;index&gt;/_alias/&lt;alias&gt;</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">POST /&lt;index&gt;/_alias/&lt;alias&gt;</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">PUT /&lt;index&gt;/_aliases/&lt;alias&gt;</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">POST /&lt;index&gt;/_aliases/&lt;alias&gt;</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PUT /test/_alias/alias1
+
+GET /test/_alias
+GET /test/_alias/alias1
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"test"</span> : <span class="o">{</span>
+    <span class="s2">"aliases"</span> : <span class="o">{</span>
+      <span class="s2">"alias1"</span> : <span class="o">{</span> <span class="o">}</span>,
+      <span class="s2">"alias2"</span> : <span class="o">{</span> <span class="o">}</span>,
+      <span class="s2">"alias_1"</span> : <span class="o">{</span> <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="o">{</span>
+  <span class="s2">"test"</span> : <span class="o">{</span>
+    <span class="s2">"aliases"</span> : <span class="o">{</span>
+      <span class="s2">"alias1"</span> : <span class="o">{</span> <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="delete-index-alias">Delete Index Alias</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DELETE /test/_alias/alias1
+
+GET /test/_alias
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"test"</span> : <span class="o">{</span>
+    <span class="s2">"aliases"</span> : <span class="o">{</span>
+      <span class="s2">"alias2"</span> : <span class="o">{</span> <span class="o">}</span>,
+      <span class="s2">"alias_1"</span> : <span class="o">{</span> <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="get-index-alias">Get Index Alias</h2>
+
+<p><code class="language-plaintext highlighter-rouge">GET /_alias</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">GET /_alias/&lt;alias&gt;</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">GET /&lt;index&gt;/_alias/&lt;alias&gt;</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /test/_alias
+
+GET /test/_alias/alias2
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"test"</span> : <span class="o">{</span>
+    <span class="s2">"aliases"</span> : <span class="o">{</span>
+      <span class="s2">"alias2"</span> : <span class="o">{</span> <span class="o">}</span>,
+      <span class="s2">"alias_1"</span> : <span class="o">{</span> <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="o">{</span>
+  <span class="s2">"test"</span> : <span class="o">{</span>
+    <span class="s2">"aliases"</span> : <span class="o">{</span>
+      <span class="s2">"alias2"</span> : <span class="o">{</span> <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="index-alias-exists">Index Alias Exists</h2>
+
+<ul>
+  <li>Alias 존재 여부 확인</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">HEAD /_alias/&lt;alias&gt;</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">HEAD /&lt;index&gt;/_alias/&lt;alias&gt;</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>HEAD /test/_alias
+
+HEAD /test/_alias/alias2
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>200 - OK
+
+200 - OK
+</code></pre></div></div>
+
+<h2 id="update-index-alias">Update Index Alias</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST /_aliases
+<span class="o">{</span>
+  <span class="s2">"actions"</span> : <span class="o">[</span>
+    <span class="o">{</span> <span class="s2">"add"</span> : <span class="o">{</span> <span class="s2">"index"</span> : <span class="s2">"test"</span>, <span class="s2">"alias"</span> : <span class="s2">"alias1"</span> <span class="o">}</span> <span class="o">}</span>
+  <span class="o">]</span>
+<span class="o">}</span>
+
+GET /test/_alias/alias1
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"test"</span> : <span class="o">{</span>
+    <span class="s2">"aliases"</span> : <span class="o">{</span>
+      <span class="s2">"alias1"</span> : <span class="o">{</span> <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h1 id="index-templates">Index Templates</h1>
+
+<ul>
+  <li>새로운 인덱스를 생성할 때 자동으로 Settings, Mappings, Aliases을 하게해주는 기능을 가짐</li>
+</ul>
+
+<h2 id="put-index-template">Put index template</h2>
+
+<ul>
+  <li>인덱스 템플릿 생성</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PUT /_index_template/template_1?pretty
+<span class="o">{</span>
+  <span class="s2">"index_patterns"</span> : <span class="o">[</span><span class="s2">"te*"</span><span class="o">]</span>,
+  <span class="s2">"priority"</span> : 1,
+  <span class="s2">"template"</span>: <span class="o">{</span>
+    <span class="s2">"settings"</span> : <span class="o">{</span>
+      <span class="s2">"number_of_shards"</span> : 2
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="get-index-template">Get index template</h2>
+
+<ul>
+  <li>인덱스 템플릿 조회</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /_index_template/template_1
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"index_templates"</span> : <span class="o">[</span>
+    <span class="o">{</span>
+      <span class="s2">"name"</span> : <span class="s2">"template_1"</span>,
+      <span class="s2">"index_template"</span> : <span class="o">{</span>
+        <span class="s2">"index_patterns"</span> : <span class="o">[</span>
+          <span class="s2">"te*"</span>
+        <span class="o">]</span>,
+        <span class="s2">"template"</span> : <span class="o">{</span>
+          <span class="s2">"settings"</span> : <span class="o">{</span>
+            <span class="s2">"index"</span> : <span class="o">{</span>
+              <span class="s2">"number_of_shards"</span> : <span class="s2">"2"</span>
+            <span class="o">}</span>
+          <span class="o">}</span>
+        <span class="o">}</span>,
+        <span class="s2">"composed_of"</span> : <span class="o">[</span> <span class="o">]</span>,
+        <span class="s2">"priority"</span> : 1
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">]</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="delete-index-template">Delete index template</h2>
+
+<ul>
+  <li>인덱스 템플릿 삭제</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DELETE /_index_template/template_1
+
+GET /_index_template/template_1
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"error"</span> : <span class="o">{</span>
+    <span class="s2">"root_cause"</span> : <span class="o">[</span>
+      <span class="o">{</span>
+        <span class="s2">"type"</span> : <span class="s2">"resource_not_found_exception"</span>,
+        <span class="s2">"reason"</span> : <span class="s2">"index template matching [template_1] not found"</span>
+      <span class="o">}</span>
+    <span class="o">]</span>,
+    <span class="s2">"type"</span> : <span class="s2">"resource_not_found_exception"</span>,
+    <span class="s2">"reason"</span> : <span class="s2">"index template matching [template_1] not found"</span>
+  <span class="o">}</span>,
+  <span class="s2">"status"</span> : 404
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="put-component-template">Put component template</h2>
+
+<ul>
+  <li>컴포넌트 템플릿 생성</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PUT /_component_template/template_1?pretty
+<span class="o">{</span>
+  <span class="s2">"template"</span>: <span class="o">{</span>
+    <span class="s2">"settings"</span>: <span class="o">{</span>
+      <span class="s2">"number_of_shards"</span>: 1
+    <span class="o">}</span>,
+    <span class="s2">"mappings"</span>: <span class="o">{</span>
+      <span class="s2">"_source"</span>: <span class="o">{</span>
+        <span class="s2">"enabled"</span>: <span class="nb">false</span>
+      <span class="o">}</span>,
+      <span class="s2">"properties"</span>: <span class="o">{</span>
+        <span class="s2">"host_name"</span>: <span class="o">{</span>
+          <span class="s2">"type"</span>: <span class="s2">"keyword"</span>
+        <span class="o">}</span>,
+        <span class="s2">"created_at"</span>: <span class="o">{</span>
+          <span class="s2">"type"</span>: <span class="s2">"date"</span>,
+          <span class="s2">"format"</span>: <span class="s2">"EEE MMM dd HH:mm:ss Z yyyy"</span>
+        <span class="o">}</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="delete-component-template">Delete component template</h2>
+
+<ul>
+  <li>컴포넌트 템플릿 삭제</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DELETE /_component_template/template_1
+</code></pre></div></div>
+
+<h2 id="index-template-exists">Index template exists</h2>
+
+<ul>
+  <li>인덱스 템플릿 존재여부 확인</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>HEAD /_template/template_1
+</code></pre></div></div>
+:ET
