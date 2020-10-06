@@ -1,0 +1,587 @@
+I"n}<h1 id="검색-질의-표현-방식">검색 질의 표현 방식</h1>
+
+<ul>
+  <li>URI 검색 : 전통적인 방식 (복잡한 쿼리 작성 불가)
+    <ul>
+      <li>사용하기 불편, 가독성 떨어짐</li>
+    </ul>
+  </li>
+  <li>Request Body 검색 : Request Body에 조건을 표기 (ES가 제공하는 검색 API를 모두 활용하기 위해서는 이 방식을 사용하여야 함)</li>
+</ul>
+
+<h1 id="query-dsl-쿼리의-구조">Query DSL 쿼리의 구조</h1>
+
+<h2 id="요청-구조">요청 구조</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+	<span class="s2">"size"</span> : <span class="c">## 리턴받는 결과의 개수, 기본값은 10</span>
+	<span class="s2">"from"</span> : <span class="c">## 몇번째 문서부터 가져올지 지정</span>
+	<span class="s2">"timeout"</span> : <span class="c">## 결과를 받는데 걸리는 시간</span>
+	<span class="s2">"_source"</span> : <span class="o">{}</span> <span class="c">## 필요한 필드만 출력하고 싶을 때 사용</span>
+	<span class="s2">"query"</span> : <span class="o">{}</span> <span class="c">## 검색 조건문</span>
+	<span class="s2">"aggs"</span> : <span class="o">{}</span> <span class="c">## 통계 및 집계 데이터 사용시 활용</span>
+	<span class="s2">"sort"</span> : <span class="o">{}</span> <span class="c">## 문서 결과를 어떻게 출력할지 조건 설정</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="응답-구조">응답 구조</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+	<span class="s2">"took"</span> : <span class="c">## 쿼리를 실행한 시간</span>
+	<span class="s2">"timed_out"</span> : <span class="c">## 쿼리 시간이 초과할 경우</span>
+	<span class="s2">"_shards"</span> : <span class="o">{</span> 
+		<span class="s2">"total"</span> : <span class="c">## 쿼리를 요청한 전체 샤드의 갯수</span>
+		<span class="s2">"successful"</span> : <span class="c">## 성공적으로 응답한 샤드의 갯수</span>
+		<span class="s2">"failed"</span> : <span class="c">## 실패한 샤드의 갯수</span>
+	<span class="o">}</span>
+	<span class="s2">"hits"</span> : <span class="o">{</span> 
+		<span class="s2">"total"</span> :  <span class="c">## 매칭된 문서의 전체 개수 </span>
+		<span class="s2">"max_score"</span> :  <span class="c">## 문서의 스코어 값 중 가장 높은 값</span>
+		<span class="s2">"hits"</span> : <span class="o">[]</span> <span class="c">## 각 문서의 정보와 스코어 값</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="query-context">Query Context</h2>
+
+<ul>
+  <li>전문 검색 시 사용</li>
+</ul>
+
+<h2 id="filter-context">Filter Context</h2>
+
+<ul>
+  <li>조건 검색 시 사용</li>
+</ul>
+
+<h1 id="core-search">Core Search</h1>
+
+<h2 id="search">Search</h2>
+
+<p><code class="language-plaintext highlighter-rouge">GET /&lt;target&gt;/_search</code> : 특정 인덱스 검색</p>
+
+<p><code class="language-plaintext highlighter-rouge">GET /_search</code> : 전체 검색</p>
+
+<p><code class="language-plaintext highlighter-rouge">POST /&lt;target&gt;/_search</code> : 특정 인덱스 검색</p>
+
+<p><code class="language-plaintext highlighter-rouge">POST /_search</code> : 전체 검색</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /test_index/_search
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"took"</span> : 1,
+  <span class="s2">"timed_out"</span> : <span class="nb">false</span>,
+  <span class="s2">"_shards"</span> : <span class="o">{</span>
+    <span class="s2">"total"</span> : 1,
+    <span class="s2">"successful"</span> : 1,
+    <span class="s2">"skipped"</span> : 0,
+    <span class="s2">"failed"</span> : 0
+  <span class="o">}</span>,
+  <span class="s2">"hits"</span> : <span class="o">{</span>
+    <span class="s2">"total"</span> : <span class="o">{</span>
+      <span class="s2">"value"</span> : 3,
+      <span class="s2">"relation"</span> : <span class="s2">"eq"</span>
+    <span class="o">}</span>,
+    <span class="s2">"max_score"</span> : 1.0,
+    <span class="s2">"hits"</span> : <span class="o">[</span>
+      <span class="o">{</span>
+        <span class="s2">"_index"</span> : <span class="s2">"test_index"</span>,
+        <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+        <span class="s2">"_id"</span> : <span class="s2">"1"</span>,
+        <span class="s2">"_score"</span> : 1.0,
+        <span class="s2">"_source"</span> : <span class="o">{</span>
+          <span class="s2">"name"</span> : <span class="s2">"SiWoo Ahn"</span>,
+          <span class="s2">"message"</span> : <span class="s2">"Hello Elasticsearch"</span>
+        <span class="o">}</span>
+      <span class="o">}</span>,
+      <span class="o">{</span>
+        <span class="s2">"_index"</span> : <span class="s2">"test_index"</span>,
+        <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+        <span class="s2">"_id"</span> : <span class="s2">"2"</span>,
+        <span class="s2">"_score"</span> : 1.0,
+        <span class="s2">"_source"</span> : <span class="o">{</span>
+          <span class="s2">"name"</span> : <span class="s2">"Siu Ahn"</span>,
+          <span class="s2">"message"</span> : <span class="s2">"Hello Elasticsearch"</span>
+        <span class="o">}</span>
+      <span class="o">}</span>,
+      <span class="o">{</span>
+        <span class="s2">"_index"</span> : <span class="s2">"test_index"</span>,
+        <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+        <span class="s2">"_id"</span> : <span class="s2">"3"</span>,
+        <span class="s2">"_score"</span> : 1.0,
+        <span class="s2">"_source"</span> : <span class="o">{</span>
+          <span class="s2">"name"</span> : <span class="s2">"Siu Ahn"</span>,
+          <span class="s2">"message"</span> : <span class="s2">"Hello Elasticsearch"</span>
+        <span class="o">}</span>
+      <span class="o">}</span>
+    <span class="o">]</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="multi-search">Multi Search</h2>
+
+<ul>
+  <li>검색 요청시 <code class="language-plaintext highlighter-rouge">,</code> 를 사용해서 여러개의 인덱스에서 조회할 수 있음</li>
+  <li>와일드 카드 사용 가능 <code class="language-plaintext highlighter-rouge">*</code> , <code class="language-plaintext highlighter-rouge">?</code></li>
+  <li><code class="language-plaintext highlighter-rouge">from</code> , <code class="language-plaintext highlighter-rouge">size</code> 로 쿼리 결과 페이징 처리 가능</li>
+  <li><code class="language-plaintext highlighter-rouge">sort</code> 로 쿼리 결과 정렬 가능</li>
+  <li>실제 데이터는 <code class="language-plaintext highlighter-rouge">_source</code> 항목 아래에 존재</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">GET /&lt;target&gt;/_msearch</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /test_index/_msearch?pretty
+<span class="o">{</span> <span class="o">}</span>
+<span class="o">{</span><span class="s2">"query"</span> : <span class="o">{</span><span class="s2">"match"</span> : <span class="o">{</span> <span class="s2">"message"</span>: <span class="s2">"this is a test"</span><span class="o">}}}</span>
+<span class="o">{</span><span class="s2">"index"</span>: <span class="s2">"test_index"</span><span class="o">}</span>
+<span class="o">{</span><span class="s2">"query"</span> : <span class="o">{</span><span class="s2">"match_all"</span> : <span class="o">{}}}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"took"</span> : 1,
+  <span class="s2">"responses"</span> : <span class="o">[</span>
+    <span class="o">{</span>
+      <span class="s2">"took"</span> : 1,
+      <span class="s2">"timed_out"</span> : <span class="nb">false</span>,
+      <span class="s2">"_shards"</span> : <span class="o">{</span>
+        <span class="s2">"total"</span> : 1,
+        <span class="s2">"successful"</span> : 1,
+        <span class="s2">"skipped"</span> : 0,
+        <span class="s2">"failed"</span> : 0
+      <span class="o">}</span>,
+      <span class="s2">"hits"</span> : <span class="o">{</span>
+        <span class="s2">"total"</span> : <span class="o">{</span>
+          <span class="s2">"value"</span> : 0,
+          <span class="s2">"relation"</span> : <span class="s2">"eq"</span>
+        <span class="o">}</span>,
+        <span class="s2">"max_score"</span> : null,
+        <span class="s2">"hits"</span> : <span class="o">[</span> <span class="o">]</span>
+      <span class="o">}</span>,
+      <span class="s2">"status"</span> : 200
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"took"</span> : 1,
+      <span class="s2">"timed_out"</span> : <span class="nb">false</span>,
+      <span class="s2">"_shards"</span> : <span class="o">{</span>
+        <span class="s2">"total"</span> : 1,
+        <span class="s2">"successful"</span> : 1,
+        <span class="s2">"skipped"</span> : 0,
+        <span class="s2">"failed"</span> : 0
+      <span class="o">}</span>,
+      <span class="s2">"hits"</span> : <span class="o">{</span>
+        <span class="s2">"total"</span> : <span class="o">{</span>
+          <span class="s2">"value"</span> : 3,
+          <span class="s2">"relation"</span> : <span class="s2">"eq"</span>
+        <span class="o">}</span>,
+        <span class="s2">"max_score"</span> : 1.0,
+        <span class="s2">"hits"</span> : <span class="o">[</span>
+          <span class="o">{</span>
+            <span class="s2">"_index"</span> : <span class="s2">"test_index"</span>,
+            <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+            <span class="s2">"_id"</span> : <span class="s2">"1"</span>,
+            <span class="s2">"_score"</span> : 1.0,
+            <span class="s2">"_source"</span> : <span class="o">{</span>
+              <span class="s2">"name"</span> : <span class="s2">"SiWoo Ahn"</span>,
+              <span class="s2">"message"</span> : <span class="s2">"Hello Elasticsearch"</span>
+            <span class="o">}</span>
+          <span class="o">}</span>,
+          <span class="o">{</span>
+            <span class="s2">"_index"</span> : <span class="s2">"test_index"</span>,
+            <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+            <span class="s2">"_id"</span> : <span class="s2">"2"</span>,
+            <span class="s2">"_score"</span> : 1.0,
+            <span class="s2">"_source"</span> : <span class="o">{</span>
+              <span class="s2">"name"</span> : <span class="s2">"Siu Ahn"</span>,
+              <span class="s2">"message"</span> : <span class="s2">"Hello Elasticsearch"</span>
+            <span class="o">}</span>
+          <span class="o">}</span>,
+          <span class="o">{</span>
+            <span class="s2">"_index"</span> : <span class="s2">"test_index"</span>,
+            <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+            <span class="s2">"_id"</span> : <span class="s2">"3"</span>,
+            <span class="s2">"_score"</span> : 1.0,
+            <span class="s2">"_source"</span> : <span class="o">{</span>
+              <span class="s2">"name"</span> : <span class="s2">"Siu Ahn"</span>,
+              <span class="s2">"message"</span> : <span class="s2">"Hello Elasticsearch"</span>
+            <span class="o">}</span>
+          <span class="o">}</span>
+        <span class="o">]</span>
+      <span class="o">}</span>,
+      <span class="s2">"status"</span> : 200
+    <span class="o">}</span>
+  <span class="o">]</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="async-search">Async search</h2>
+
+<ul>
+  <li>대용량의 데이터에 대해서 Query를 비동기적으로(Asyncronously) 실행시켜서 그 진행 상황을 모니터링해서 결과가 나오는 대로 리턴하는 형태의 동작을 지원</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>POST /sales<span class="k">*</span>/_async_search?size<span class="o">=</span>0
+<span class="o">{</span>
+  <span class="s2">"sort"</span>: <span class="o">[</span>
+    <span class="o">{</span> <span class="s2">"date"</span>: <span class="o">{</span> <span class="s2">"order"</span>: <span class="s2">"asc"</span> <span class="o">}</span> <span class="o">}</span>
+  <span class="o">]</span>,
+  <span class="s2">"aggs"</span>: <span class="o">{</span>
+    <span class="s2">"sale_date"</span>: <span class="o">{</span>
+      <span class="s2">"date_histogram"</span>: <span class="o">{</span>
+        <span class="s2">"field"</span>: <span class="s2">"date"</span>,
+        <span class="s2">"calendar_interval"</span>: <span class="s2">"1d"</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"id"</span> : <span class="s2">"FmRldE8zREVEUzA2ZVpUeGs2ejJFUFEaMkZ5QTVrSTZSaVN3WlNFVmtlWHJsdzoxMDc="</span>, 
+  <span class="s2">"is_partial"</span> : <span class="nb">true</span>, 
+  <span class="s2">"is_running"</span> : <span class="nb">true</span>, 
+  <span class="s2">"start_time_in_millis"</span> : 1583945890986,
+  <span class="s2">"expiration_time_in_millis"</span> : 1584377890986,
+  <span class="s2">"response"</span> : <span class="o">{</span>
+    <span class="s2">"took"</span> : 1122,
+    <span class="s2">"timed_out"</span> : <span class="nb">false</span>,
+    <span class="s2">"num_reduce_phases"</span> : 0,
+    <span class="s2">"_shards"</span> : <span class="o">{</span>
+      <span class="s2">"total"</span> : 562, 
+      <span class="s2">"successful"</span> : 3, 
+      <span class="s2">"skipped"</span> : 0,
+      <span class="s2">"failed"</span> : 0
+    <span class="o">}</span>,
+    <span class="s2">"hits"</span> : <span class="o">{</span>
+      <span class="s2">"total"</span> : <span class="o">{</span>
+        <span class="s2">"value"</span> : 157483, 
+        <span class="s2">"relation"</span> : <span class="s2">"gte"</span>
+      <span class="o">}</span>,
+      <span class="s2">"max_score"</span> : null,
+      <span class="s2">"hits"</span> : <span class="o">[</span> <span class="o">]</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /_async_search/FmRldE8zREVEUzA2ZVpUeGs2ejJFUFEaMkZ5QTVrSTZSaVN3WlNFVmtlWHJsdzoxMDc<span class="o">=</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"id"</span> : <span class="s2">"FmRldE8zREVEUzA2ZVpUeGs2ejJFUFEaMkZ5QTVrSTZSaVN3WlNFVmtlWHJsdzoxMDc="</span>,
+  <span class="s2">"is_partial"</span> : <span class="nb">true</span>, 
+  <span class="s2">"is_running"</span> : <span class="nb">true</span>, 
+  <span class="s2">"start_time_in_millis"</span> : 1583945890986,
+  <span class="s2">"expiration_time_in_millis"</span> : 1584377890986, 
+  <span class="s2">"response"</span> : <span class="o">{</span>
+    <span class="s2">"took"</span> : 12144,
+    <span class="s2">"timed_out"</span> : <span class="nb">false</span>,
+    <span class="s2">"num_reduce_phases"</span> : 46, 
+    <span class="s2">"_shards"</span> : <span class="o">{</span>
+      <span class="s2">"total"</span> : 562, 
+      <span class="s2">"successful"</span> : 188,
+      <span class="s2">"skipped"</span> : 0,
+      <span class="s2">"failed"</span> : 0
+    <span class="o">}</span>,
+    <span class="s2">"hits"</span> : <span class="o">{</span>
+      <span class="s2">"total"</span> : <span class="o">{</span>
+        <span class="s2">"value"</span> : 456433,
+        <span class="s2">"relation"</span> : <span class="s2">"eq"</span>
+      <span class="o">}</span>,
+      <span class="s2">"max_score"</span> : null,
+      <span class="s2">"hits"</span> : <span class="o">[</span> <span class="o">]</span>
+    <span class="o">}</span>,
+    <span class="s2">"aggregations"</span> : <span class="o">{</span> 
+      <span class="s2">"sale_date"</span> :  <span class="o">{</span>
+        <span class="s2">"buckets"</span> : <span class="o">[]</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>DELETE /_async_search/FmRldE8zREVEUzA2ZVpUeGs2ejJFUFEaMkZ5QTVrSTZSaVN3WlNFVmtlWHJsdzoxMDc<span class="o">=</span>
+</code></pre></div></div>
+
+<h1 id="search-testing">Search testing</h1>
+
+<h2 id="explain">Explain</h2>
+
+<ul>
+  <li>검색한 키워드와 검색 결과가 얼마나 유사한지 확인</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">GET /&lt;index&gt;/_explain/&lt;id&gt;</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">POST /&lt;index&gt;/_explain/&lt;id&gt;</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /test_index/_explain/2?pretty
+<span class="o">{</span>
+  <span class="s2">"query"</span> : <span class="o">{</span>
+    <span class="s2">"match"</span> : <span class="o">{</span> <span class="s2">"rank"</span> : 2 <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"_index"</span> : <span class="s2">"test_index"</span>,
+  <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+  <span class="s2">"_id"</span> : <span class="s2">"2"</span>,
+  <span class="s2">"matched"</span> : <span class="nb">false</span>,
+  <span class="s2">"explanation"</span> : <span class="o">{</span>
+    <span class="s2">"value"</span> : 0.0,
+    <span class="s2">"description"</span> : <span class="s2">"rank:[2 TO 2] doesn't match id 2"</span>,
+    <span class="s2">"details"</span> : <span class="o">[</span> <span class="o">]</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="field-capabilities">Field capabilities</h2>
+
+<ul>
+  <li>여러 인덱스 사이에서 필드의 기능을 검색</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">GET /_field_caps?fields=&lt;fields&gt;</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">POST /_field_caps?fields=&lt;fields&gt;</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">GET /&lt;target&gt;/_field_caps?fields=&lt;fields&gt;</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">POST /&lt;target&gt;/_field_caps?fields=&lt;fields&gt;</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /_field_caps?fields<span class="o">=</span>name
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"indices"</span> : <span class="o">[</span>
+    <span class="s2">".apm-agent-configuration"</span>,
+    <span class="s2">".apm-custom-link"</span>,
+    <span class="s2">".kibana-event-log-7.9.2-000001"</span>,
+    <span class="s2">".kibana_1"</span>,
+    <span class="s2">".kibana_2"</span>,
+    <span class="s2">".kibana_task_manager_1"</span>,
+    <span class="s2">".kibana_task_manager_2"</span>,
+    <span class="s2">"customer"</span>,
+    <span class="s2">"index_test"</span>,
+    <span class="s2">"my-index-000001"</span>,
+    <span class="s2">"test"</span>,
+    <span class="s2">"test2"</span>,
+    <span class="s2">"test_index"</span>,
+    <span class="s2">"test_new_index"</span>
+  <span class="o">]</span>,
+  <span class="s2">"fields"</span> : <span class="o">{</span>
+    <span class="s2">"name"</span> : <span class="o">{</span>
+      <span class="s2">"text"</span> : <span class="o">{</span>
+        <span class="s2">"type"</span> : <span class="s2">"text"</span>,
+        <span class="s2">"searchable"</span> : <span class="nb">true</span>,
+        <span class="s2">"aggregatable"</span> : <span class="nb">false</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="profile">Profile</h2>
+
+<ul>
+  <li>특정 요청에 대한 느린 이유를 이해하고 개선하기 위한 정보 제공</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /test_index/_search
+<span class="o">{</span>
+  <span class="s2">"profile"</span>: <span class="nb">true</span>,
+  <span class="s2">"query"</span> : <span class="o">{</span>
+    <span class="s2">"match"</span> : <span class="o">{</span> <span class="s2">"rank"</span> : 2<span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"took"</span> : 1,
+  <span class="s2">"timed_out"</span> : <span class="nb">false</span>,
+  <span class="s2">"_shards"</span> : <span class="o">{</span>
+    <span class="s2">"total"</span> : 1,
+    <span class="s2">"successful"</span> : 1,
+    <span class="s2">"skipped"</span> : 0,
+    <span class="s2">"failed"</span> : 0
+  <span class="o">}</span>,
+  <span class="s2">"hits"</span> : <span class="o">{</span>
+    <span class="s2">"total"</span> : <span class="o">{</span>
+      <span class="s2">"value"</span> : 1,
+      <span class="s2">"relation"</span> : <span class="s2">"eq"</span>
+    <span class="o">}</span>,
+    <span class="s2">"max_score"</span> : 1.0,
+    <span class="s2">"hits"</span> : <span class="o">[</span>
+      <span class="o">{</span>
+        <span class="s2">"_index"</span> : <span class="s2">"test_index"</span>,
+        <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+        <span class="s2">"_id"</span> : <span class="s2">"1"</span>,
+        <span class="s2">"_score"</span> : 1.0,
+        <span class="s2">"_source"</span> : <span class="o">{</span>
+          <span class="s2">"name"</span> : <span class="s2">"Siu Adhna"</span>,
+          <span class="s2">"message"</span> : <span class="s2">"Hello Elasticsearch"</span>,
+          <span class="s2">"rank"</span> : 2
+        <span class="o">}</span>
+      <span class="o">}</span>
+    <span class="o">]</span>
+  <span class="o">}</span>,
+  <span class="s2">"profile"</span> : <span class="o">{</span>
+    <span class="s2">"shards"</span> : <span class="o">[</span>
+      <span class="o">{</span>
+        <span class="s2">"id"</span> : <span class="s2">"[DlP7xzBnTmqYsd7ZopEhhQ][test_index][0]"</span>,
+        <span class="s2">"searches"</span> : <span class="o">[</span>
+          <span class="o">{</span>
+            <span class="s2">"query"</span> : <span class="o">[</span>
+              <span class="o">{</span>
+                <span class="s2">"type"</span> : <span class="s2">"PointRangeQuery"</span>,
+                <span class="s2">"description"</span> : <span class="s2">"rank:[2 TO 2]"</span>,
+                <span class="s2">"time_in_nanos"</span> : 20000,
+                <span class="s2">"breakdown"</span> : <span class="o">{</span>
+                  <span class="s2">"set_min_competitive_score_count"</span> : 0,
+                  <span class="s2">"match_count"</span> : 0,
+                  <span class="s2">"shallow_advance_count"</span> : 0,
+                  <span class="s2">"set_min_competitive_score"</span> : 0,
+                  <span class="s2">"next_doc"</span> : 1200,
+                  <span class="s2">"match"</span> : 0,
+                  <span class="s2">"next_doc_count"</span> : 1,
+                  <span class="s2">"score_count"</span> : 1,
+                  <span class="s2">"compute_max_score_count"</span> : 0,
+                  <span class="s2">"compute_max_score"</span> : 0,
+                  <span class="s2">"advance"</span> : 1200,
+                  <span class="s2">"advance_count"</span> : 1,
+                  <span class="s2">"score"</span> : 2500,
+                  <span class="s2">"build_scorer_count"</span> : 2,
+                  <span class="s2">"create_weight"</span> : 900,
+                  <span class="s2">"shallow_advance"</span> : 0,
+                  <span class="s2">"create_weight_count"</span> : 1,
+                  <span class="s2">"build_scorer"</span> : 14200
+                <span class="o">}</span>
+              <span class="o">}</span>
+            <span class="o">]</span>,
+            <span class="s2">"rewrite_time"</span> : 1700,
+            <span class="s2">"collector"</span> : <span class="o">[</span>
+              <span class="o">{</span>
+                <span class="s2">"name"</span> : <span class="s2">"SimpleTopScoreDocCollector"</span>,
+                <span class="s2">"reason"</span> : <span class="s2">"search_top_hits"</span>,
+                <span class="s2">"time_in_nanos"</span> : 21200
+              <span class="o">}</span>
+            <span class="o">]</span>
+          <span class="o">}</span>
+        <span class="o">]</span>,
+        <span class="s2">"aggregations"</span> : <span class="o">[</span> <span class="o">]</span>
+      <span class="o">}</span>
+    <span class="o">]</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="ranking-evaluation">Ranking evaluation</h2>
+
+<ul>
+  <li>검색 결과의 품질 평가 가능</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">GET /&lt;target&gt;/_rank_eval</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">POST /&lt;target&gt;/_rank_eval</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /my-index-000001/_rank_eval
+<span class="o">{</span>
+  <span class="s2">"requests"</span>: <span class="o">[</span> ... <span class="o">]</span>, <span class="c">## 검색 요청 리스트                           </span>
+  <span class="s2">"metric"</span>: <span class="o">{</span> <span class="c">## 계산할 항목                                   </span>
+    <span class="s2">"mean_reciprocal_rank"</span>: <span class="o">{</span> ... <span class="o">}</span> <span class="c">## 특정 항목 및 매개 변수              </span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="search-shards">Search Shards</h2>
+
+<ul>
+  <li>검색 요청이 수행되는 노드 및 샤드에 대한 정보 확인</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">GET /&lt;index&gt;/_search_shards</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /test_index/_search_shards
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"nodes"</span> : <span class="o">{</span>
+    <span class="s2">"DlP7xzBnTmqYsd7ZopEhhQ"</span> : <span class="o">{</span>
+      <span class="s2">"name"</span> : <span class="s2">"es02"</span>,
+      <span class="s2">"ephemeral_id"</span> : <span class="s2">"Op7yVs67ShGrskPyl2oVFQ"</span>,
+      <span class="s2">"transport_address"</span> : <span class="s2">"192.168.96.3:9300"</span>,
+      <span class="s2">"attributes"</span> : <span class="o">{</span>
+        <span class="s2">"ml.machine_memory"</span> : <span class="s2">"15805542400"</span>,
+        <span class="s2">"ml.max_open_jobs"</span> : <span class="s2">"20"</span>,
+        <span class="s2">"xpack.installed"</span> : <span class="s2">"true"</span>,
+        <span class="s2">"transform.node"</span> : <span class="s2">"true"</span>
+      <span class="o">}</span>
+    <span class="o">}</span>,
+    <span class="s2">"HaPUbWUNTEG_iJ8MMjPmWQ"</span> : <span class="o">{</span>
+      <span class="s2">"name"</span> : <span class="s2">"es01"</span>,
+      <span class="s2">"ephemeral_id"</span> : <span class="s2">"6am5xny6Scmlqhihnxx80Q"</span>,
+      <span class="s2">"transport_address"</span> : <span class="s2">"192.168.96.4:9300"</span>,
+      <span class="s2">"attributes"</span> : <span class="o">{</span>
+        <span class="s2">"ml.machine_memory"</span> : <span class="s2">"15805542400"</span>,
+        <span class="s2">"ml.max_open_jobs"</span> : <span class="s2">"20"</span>,
+        <span class="s2">"xpack.installed"</span> : <span class="s2">"true"</span>,
+        <span class="s2">"transform.node"</span> : <span class="s2">"true"</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>,
+  <span class="s2">"indices"</span> : <span class="o">{</span>
+    <span class="s2">"test_index"</span> : <span class="o">{</span> <span class="o">}</span>
+  <span class="o">}</span>,
+  <span class="s2">"shards"</span> : <span class="o">[</span>
+    <span class="o">[</span>
+      <span class="o">{</span>
+        <span class="s2">"state"</span> : <span class="s2">"STARTED"</span>,
+        <span class="s2">"primary"</span> : <span class="nb">true</span>,
+        <span class="s2">"node"</span> : <span class="s2">"DlP7xzBnTmqYsd7ZopEhhQ"</span>,
+        <span class="s2">"relocating_node"</span> : null,
+        <span class="s2">"shard"</span> : 0,
+        <span class="s2">"index"</span> : <span class="s2">"test_index"</span>,
+        <span class="s2">"allocation_id"</span> : <span class="o">{</span>
+          <span class="s2">"id"</span> : <span class="s2">"6AjzAIt0T1qkjXXeN5Z-yQ"</span>
+        <span class="o">}</span>
+      <span class="o">}</span>,
+      <span class="o">{</span>
+        <span class="s2">"state"</span> : <span class="s2">"STARTED"</span>,
+        <span class="s2">"primary"</span> : <span class="nb">false</span>,
+        <span class="s2">"node"</span> : <span class="s2">"HaPUbWUNTEG_iJ8MMjPmWQ"</span>,
+        <span class="s2">"relocating_node"</span> : null,
+        <span class="s2">"shard"</span> : 0,
+        <span class="s2">"index"</span> : <span class="s2">"test_index"</span>,
+        <span class="s2">"allocation_id"</span> : <span class="o">{</span>
+          <span class="s2">"id"</span> : <span class="s2">"dwJE69SsRgq7aUvXwc_GGw"</span>
+        <span class="o">}</span>
+      <span class="o">}</span>
+    <span class="o">]</span>
+  <span class="o">]</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="validate">Validate</h2>
+
+<ul>
+  <li>쿼리를 실행하기 전에 쿼리가 유효하게 작성됐는지 확인</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">GET /&lt;target&gt;/_validate/&lt;query&gt;</code></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>GET /test_index/_validate/query?q<span class="o">=</span><span class="s2">"SiU"</span>
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"_shards"</span> : <span class="o">{</span>
+    <span class="s2">"total"</span> : 1,
+    <span class="s2">"successful"</span> : 1,
+    <span class="s2">"failed"</span> : 0
+  <span class="o">}</span>,
+  <span class="s2">"valid"</span> : <span class="nb">true</span>
+<span class="o">}</span>
+</code></pre></div></div>
+:ET
