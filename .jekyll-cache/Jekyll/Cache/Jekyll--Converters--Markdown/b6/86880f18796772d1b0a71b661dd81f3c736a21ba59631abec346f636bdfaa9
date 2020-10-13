@@ -1,0 +1,513 @@
+I"8`<h1 id="실습환경">실습환경</h1>
+
+<ul>
+  <li>Host OS : Window 10
+    <ul>
+      <li>git</li>
+      <li>gradle</li>
+    </ul>
+  </li>
+  <li>VM OS : CentOS 7
+    <ul>
+      <li>docker-compose</li>
+      <li>3 node</li>
+    </ul>
+  </li>
+</ul>
+
+<h1 id="호스트-컴퓨터-window-10-사전-작업">호스트 컴퓨터 (Window 10) 사전 작업</h1>
+
+<h2 id="git-clone">git clone</h2>
+
+<p>ElasticSearch에서 공식적으로 제공하는 플러그인이 아닌 외부 플러그인을 적용시켜 보도록 하겠다. 필자가 이 글에서 설치 및 사용해볼 플러그인은 danawa github에 올라와 있는 left-join 플러그인이다. 아래의 URL로 git 레파지토리를 clone 해주자. VM 환경에서 직접 진행할 수도 있겠지만 필자는 호스트 컴퓨터에서 gradle build를 하여 생성된 파일들을 VM에 넘겨주는 방식으로 진행하였다.</p>
+
+<p>(필자의 경우 C 드라이브에 해당 프로젝트를 clone 하였다)</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## 복제할 경로로 이동하여 clone</span>
+git clone https://github.com/danawalab/left-join-plugin
+</code></pre></div></div>
+
+<h2 id="gradle-build">gradle build</h2>
+
+<p>gradle 이라는 툴로 build를 하여 아래와 같은 파일들을 생성해낸다. (gradle이 설치되어 있지 않다면 설치하여야 한다)</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>c:<span class="se">\l</span>eft-join-plugin&gt;gradle build
+Starting a Gradle Daemon, 1 incompatible Daemon could not be reused, use <span class="nt">--status</span> <span class="k">for </span>details
+
+<span class="o">&gt;</span> Task :compileJava
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with <span class="nt">-Xlint</span>:unchecked <span class="k">for </span>details.
+
+Deprecated Gradle features were used <span class="k">in </span>this build, making it incompatible with Gradle 7.0.
+Use <span class="s1">'--warning-mode all'</span> to show the individual deprecation warnings.
+See https://docs.gradle.org/6.6.1/userguide/command_line_interface.html#sec:command_line_warnings
+
+BUILD SUCCESSFUL <span class="k">in </span>22s
+5 actionable tasks: 5 executed
+</code></pre></div></div>
+
+<p>빌드가 성공적으로 완료되면 아래와 같이 <code class="language-plaintext highlighter-rouge">프로젝트 경로\build\libs</code> 라는 곳에 아래와 같은 파일들이 생성됨을 확인할 수 있다. 이 파일들을 VM으로 옮겨주자.</p>
+
+<p><img src="/assets/img/2020-10-13_18h39_28.png" alt="/assets/img/2020-10-13_18h39_28.png" /></p>
+
+<p>필자의 경우에는 <code class="language-plaintext highlighter-rouge">ES/join-plugin</code> 폴더를 생성하여 하위에 해당 파일들을 넣어주었다. 호스트 컴퓨터와 파일들을 주고받는 방법은 여러가지 일 것이지만 필자의 경우에는 MobaXTerm이라는 툴로 드래그해서 옮겨주었다.</p>
+
+<p><img src="/assets/img/2020-10-13_18h41_10.png" alt="/assets/img/2020-10-13_18h41_10.png" /></p>
+
+<h1 id="vm-환경에서의-nori-플러그인-및-외부-플러그인-설치">VM 환경에서의 nori 플러그인 및 외부 플러그인 설치</h1>
+
+<h2 id="docker-composeyml-파일-작성">docker-compose.yml 파일 작성</h2>
+
+<p>필자의 경우 docker-compose를 통해 3개의 elasticsearch 컨테이너를 띄울 예정이고 그곳에 볼륨 설정을 해주어서 VM 상의 호스트 컴퓨터의 파일들을 컨테이너 안에 전달해줄 것이다.</p>
+
+<p>docker-compose.yml 파일을 통해 이와같이 설정해주자. (danawa/left-join 플러그인의 경우 엘라스틱 서치 버전을 7.6.2를 제공하기 때문에 버전을 맞춰주어야 사용이 가능하다)</p>
+
+<p>볼륨의 경로를 잘못 설정할 경우에 제대로 플러그인이 설치되지 않을 수 있으니 참고하기 바란다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>version: <span class="s1">'2.2'</span>
+services:
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
+    container_name: es01
+    environment:
+      - node.name<span class="o">=</span>es01
+      - cluster.name<span class="o">=</span>es-docker-cluster
+      - discovery.seed_hosts<span class="o">=</span>es02,es03
+      - cluster.initial_master_nodes<span class="o">=</span>es01,es02,es03
+      - bootstrap.memory_lock<span class="o">=</span><span class="nb">true</span>
+      - <span class="s2">"ES_JAVA_OPTS=-Xms512m -Xmx512m"</span>
+    ulimits:
+      memlock:
+        soft: <span class="nt">-1</span>
+        hard: <span class="nt">-1</span>
+    volumes:
+      - data01:/usr/share/elasticsearch/data
+      - ./join-plugin/:/usr/share/elasticsearch/plugins/join-plugin/
+      - ./analysis-product/:/usr/share/elasticsearch/plugins/analysis-product/
+    ports:
+      - 9200:9200
+    networks:
+      - elastic
+
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
+    container_name: es02
+    environment:
+      - node.name<span class="o">=</span>es02
+      - cluster.name<span class="o">=</span>es-docker-cluster
+      - discovery.seed_hosts<span class="o">=</span>es01,es03
+      - cluster.initial_master_nodes<span class="o">=</span>es01,es02,es03
+      - bootstrap.memory_lock<span class="o">=</span><span class="nb">true</span>
+      - <span class="s2">"ES_JAVA_OPTS=-Xms512m -Xmx512m"</span>
+    ulimits:
+    memlock:
+        soft: <span class="nt">-1</span>
+        hard: <span class="nt">-1</span>
+    volumes:
+      - data02:/usr/share/elasticsearch/data
+      - ./join-plugin/:/usr/share/elasticsearch/plugins/join-plugin/
+      - ./analysis-product/:/usr/share/elasticsearch/plugins/analysis-product/
+    ports:
+      - 9201:9200
+    networks:
+      - elastic
+
+  es03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
+    container_name: es03
+    environment:
+      - node.name<span class="o">=</span>es03
+      - cluster.name<span class="o">=</span>es-docker-cluster
+      - discovery.seed_hosts<span class="o">=</span>es01,es02
+      - cluster.initial_master_nodes<span class="o">=</span>es01,es02,es03
+      - bootstrap.memory_lock<span class="o">=</span><span class="nb">true</span>
+      - <span class="s2">"ES_JAVA_OPTS=-Xms512m -Xmx512m"</span>
+    ulimits:
+      memlock:
+        soft: <span class="nt">-1</span>
+        hard: <span class="nt">-1</span>
+    volumes:
+      - data03:/usr/share/elasticsearch/data
+      - ./join-plugin/:/usr/share/elasticsearch/plugins/join-plugin/
+      - ./analysis-product/:/usr/share/elasticsearch/plugins/analysis-product/
+    ports:
+      - 9202:9200
+    networks:
+      - elastic
+
+kib01:
+    image: docker.elastic.co/kibana/kibana:7.6.2
+    container_name: kib01
+    ports:
+      - 5601:5601
+    environment:
+      ELASTICSEARCH_URL: http://es01:9200
+      ELASTICSEARCH_HOSTS: http://es01:9200
+    networks:
+      - elastic
+
+volumes:
+  data01:
+    driver: <span class="nb">local
+  </span>data02:
+    driver: <span class="nb">local
+  </span>data03:
+    driver: <span class="nb">local
+
+</span>networks:
+  elastic:
+    driver: bridge
+</code></pre></div></div>
+
+<h2 id="docker-compose-구동-및-nori-플러그인-설치">docker-compose 구동 및 nori 플러그인 설치</h2>
+
+<p><code class="language-plaintext highlighter-rouge">docker-compose up -d</code> 명령어를 통해서 백그라운드에서 도커 컴포즈로 연결된 모든 컨테이너를 띄워준다. 구동이 완료가 되면 엘라스틱 서치 각 노드에 접속하여 nori 플러그인을 설치해준다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## docker-compose 구동</span>
+docker-compose up <span class="nt">-d</span>
+
+<span class="c">## 각 노드에 접속하여 nori 플러그인 설치</span>
+docker <span class="nb">exec</span> <span class="nt">-it</span> es01 bash
+bin/elasticsearch-plugin <span class="nb">install </span>analysis-nori
+
+docker <span class="nb">exec</span> <span class="nt">-it</span> es02 bash
+bin/elasticsearch-plugin <span class="nb">install </span>analysis-nori
+
+docker <span class="nb">exec</span> <span class="nt">-it</span> es03 bash
+bin/elasticsearch-plugin <span class="nb">install </span>analysis-nori
+</code></pre></div></div>
+
+<h2 id="join-plugin-설치-확인">join-plugin 설치 확인</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## 각 노드 접속</span>
+docker <span class="nb">exec</span> <span class="nt">-it</span> es01 bash
+
+<span class="nb">cd</span> /usr/share/elasticsearch/bin/
+
+<span class="c">## 해당 경로에서 아래와 같이 조회가 되면 잘 설치되었다고 볼 수 있다</span>
+<span class="o">[</span>root@9ebe0f2832d4 bin]# elasticsearch-plugin list
+join-plugin
+</code></pre></div></div>
+
+<h1 id="외부-플러그인-실습-left-join">외부 플러그인 실습 (left-join)</h1>
+
+<p>외부 플러그인 실습은 키바나에서 진행하도록 한다. 키바나 세팅이 되어있지 않다면 필자의 블로그 글 중 키바나 관련 글을 참고하여 세탕하기 바란다.</p>
+
+<h2 id="인덱스-생성-및-샘플-데이터-생성">인덱스 생성 및 샘플 데이터 생성</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>PUT /parent
+<span class="o">{</span>
+  <span class="s2">"settings"</span>: <span class="o">{</span>
+    <span class="s2">"number_of_replicas"</span>: 0
+  <span class="o">}</span>,
+  <span class="s2">"mappings"</span>: <span class="o">{</span>
+    <span class="s2">"properties"</span>: <span class="o">{</span>
+      <span class="s2">"column1"</span>: <span class="o">{</span>
+        <span class="s2">"type"</span>: <span class="s2">"keyword"</span>
+      <span class="o">}</span>,
+      <span class="s2">"column2"</span>: <span class="o">{</span>
+        <span class="s2">"type"</span>: <span class="s2">"text"</span>
+      <span class="o">}</span>,
+      <span class="s2">"fk"</span>: <span class="o">{</span>
+        <span class="s2">"type"</span>: <span class="s2">"keyword"</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+PUT /child
+<span class="o">{</span>
+  <span class="s2">"settings"</span>: <span class="o">{</span>
+    <span class="s2">"number_of_replicas"</span>: 0
+  <span class="o">}</span>,
+  <span class="s2">"mappings"</span>: <span class="o">{</span>
+    <span class="s2">"properties"</span>: <span class="o">{</span>
+      <span class="s2">"pk"</span>: <span class="o">{</span>
+        <span class="s2">"type"</span>: <span class="s2">"keyword"</span>
+      <span class="o">}</span>,
+      <span class="s2">"column3"</span>: <span class="o">{</span>
+        <span class="s2">"type"</span>: <span class="s2">"text"</span>
+      <span class="o">}</span>,
+      <span class="s2">"column4"</span>: <span class="o">{</span>
+        <span class="s2">"type"</span>: <span class="s2">"keyword"</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+PUT /child2
+<span class="o">{</span>
+  <span class="s2">"mappings"</span>: <span class="o">{</span>
+    <span class="s2">"properties"</span>: <span class="o">{</span>
+      <span class="s2">"pk"</span>: <span class="o">{</span>
+        <span class="s2">"type"</span>: <span class="s2">"keyword"</span>
+      <span class="o">}</span>,
+      <span class="s2">"column5"</span>: <span class="o">{</span>
+        <span class="s2">"type"</span>: <span class="s2">"text"</span>
+      <span class="o">}</span>,
+      <span class="s2">"column6"</span>: <span class="o">{</span>
+        <span class="s2">"type"</span>: <span class="s2">"keyword"</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+PUT /child3
+<span class="o">{</span>
+  <span class="s2">"mappings"</span>: <span class="o">{</span>
+    <span class="s2">"properties"</span>: <span class="o">{</span>
+      <span class="s2">"pk"</span>: <span class="o">{</span>
+        <span class="s2">"type"</span>: <span class="s2">"keyword"</span>
+      <span class="o">}</span>,
+      <span class="s2">"column7"</span>: <span class="o">{</span>
+        <span class="s2">"type"</span>: <span class="s2">"text"</span>
+      <span class="o">}</span>,
+      <span class="s2">"column8"</span>: <span class="o">{</span>
+        <span class="s2">"type"</span>: <span class="s2">"keyword"</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+POST /parent/_doc
+<span class="o">{</span>
+  <span class="s2">"column1"</span>: <span class="s2">"a"</span>,
+  <span class="s2">"column2"</span>: <span class="s2">"a"</span>,
+  <span class="s2">"fk"</span>: <span class="s2">"key1"</span>
+<span class="o">}</span>
+
+POST /child/_doc
+<span class="o">{</span>
+  <span class="s2">"pk"</span>: <span class="s2">"key1"</span>,
+  <span class="s2">"column3"</span>: <span class="s2">"b"</span>,
+  <span class="s2">"column4"</span>: <span class="s2">"b"</span>
+<span class="o">}</span>
+POST /child/_doc
+<span class="o">{</span>
+  <span class="s2">"pk"</span>: <span class="s2">"key1"</span>,
+  <span class="s2">"column3"</span>: <span class="s2">"c"</span>,
+  <span class="s2">"column4"</span>: <span class="s2">"c"</span>
+<span class="o">}</span>
+POST /parent/_doc
+<span class="o">{</span>
+  <span class="s2">"column1"</span>: <span class="s2">"aaaaaaa"</span>,
+  <span class="s2">"column2"</span>: <span class="s2">"aaaaaaaaa"</span>,
+  <span class="s2">"fk"</span>: <span class="s2">"key1000"</span>
+<span class="o">}</span>
+POST /child2/_doc
+<span class="o">{</span>
+  <span class="s2">"pk"</span>: <span class="s2">"key1"</span>,
+  <span class="s2">"column3"</span>: <span class="s2">"e"</span>,
+  <span class="s2">"column4"</span>: <span class="s2">"f"</span>
+<span class="o">}</span>
+POST /child2/_doc
+<span class="o">{</span>
+  <span class="s2">"pk"</span>: <span class="s2">"key55"</span>,
+  <span class="s2">"column3"</span>: <span class="s2">"e"</span>,
+  <span class="s2">"column4"</span>: <span class="s2">"f"</span>
+<span class="o">}</span>
+POST /child3/_doc
+<span class="o">{</span>
+  <span class="s2">"pk"</span>: <span class="s2">"key55"</span>,
+  <span class="s2">"column3"</span>: <span class="s2">"g"</span>,
+  <span class="s2">"column4"</span>: <span class="s2">"h"</span>
+<span class="o">}</span>
+
+POST /parent/_doc
+<span class="o">{</span>
+  <span class="s2">"column1"</span>: <span class="s2">"ggg"</span>,
+  <span class="s2">"column2"</span>: <span class="s2">"ggrr"</span>,
+  <span class="s2">"fk"</span>: <span class="s2">"key55"</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h2 id="left-join-쿼리-테스트">left join 쿼리 테스트</h2>
+
+<ul>
+  <li>Query1</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## 요청</span>
+GET /parent/_left
+<span class="o">{</span>
+  <span class="s2">"query"</span>: <span class="o">{</span>
+    <span class="s2">"bool"</span>: <span class="o">{</span>
+      <span class="s2">"should"</span>: <span class="o">[</span>
+        <span class="o">{</span>
+          <span class="s2">"match"</span>: <span class="o">{</span>
+            <span class="s2">"column1"</span>: <span class="s2">"a"</span>
+          <span class="o">}</span>
+        <span class="o">}</span>
+      <span class="o">]</span>
+    <span class="o">}</span>
+  <span class="o">}</span>,
+  <span class="s2">"join"</span>: <span class="o">[</span>  
+    <span class="o">{</span>
+      <span class="s2">"index"</span>: <span class="s2">"child2"</span>,
+      <span class="s2">"parent"</span>: <span class="s2">"fk"</span>,
+      <span class="s2">"child"</span>: <span class="s2">"pk"</span>,
+      <span class="s2">"query"</span>: <span class="o">{</span>
+        <span class="s2">"term"</span>: <span class="o">{</span>
+          <span class="s2">"column3"</span>: <span class="o">{</span>
+            <span class="s2">"value"</span>: <span class="s2">"b"</span>
+          <span class="o">}</span>
+        <span class="o">}</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">]</span>
+<span class="o">}</span>
+
+<span class="c">## 응답</span>
+<span class="o">{</span>
+  <span class="s2">"took"</span> : 1,
+  <span class="s2">"timed_out"</span> : <span class="nb">false</span>,
+  <span class="s2">"_shards"</span> : <span class="o">{</span>
+    <span class="s2">"total"</span> : 1,
+    <span class="s2">"successful"</span> : 1,
+    <span class="s2">"skipped"</span> : 0,
+    <span class="s2">"failed"</span> : 0
+  <span class="o">}</span>,
+  <span class="s2">"hits"</span> : <span class="o">{</span>
+    <span class="s2">"total"</span> : <span class="o">{</span>
+      <span class="s2">"value"</span> : 1,
+      <span class="s2">"relation"</span> : <span class="s2">"eq"</span>
+    <span class="o">}</span>,
+    <span class="s2">"max_score"</span> : 0.9808291,
+    <span class="s2">"hits"</span> : <span class="o">[</span>
+      <span class="o">{</span>
+        <span class="s2">"_index"</span> : <span class="s2">"parent"</span>,
+        <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+        <span class="s2">"_id"</span> : <span class="s2">"pTwwIXUB_TPgn8ZdeRFz"</span>,
+        <span class="s2">"_score"</span> : 0.9808291,
+        <span class="s2">"_source"</span> : <span class="o">{</span>
+          <span class="s2">"column1"</span> : <span class="s2">"a"</span>,
+          <span class="s2">"column2"</span> : <span class="s2">"a"</span>,
+          <span class="s2">"fk"</span> : <span class="s2">"key1"</span>
+        <span class="o">}</span>,
+        <span class="s2">"inner_hits"</span> : <span class="o">{</span>
+          <span class="s2">"_child"</span> : <span class="o">{</span>
+            <span class="s2">"hits"</span> : <span class="o">{</span>
+              <span class="s2">"total"</span> : <span class="o">{</span>
+                <span class="s2">"value"</span> : 1,
+                <span class="s2">"relation"</span> : <span class="s2">"eq"</span>
+              <span class="o">}</span>,
+              <span class="s2">"max_score"</span> : 1.1823215,
+              <span class="s2">"hits"</span> : <span class="o">[</span>
+                <span class="o">{</span>
+                  <span class="s2">"_index"</span> : <span class="s2">"child2"</span>,
+                  <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+                  <span class="s2">"_id"</span> : <span class="s2">"qTwwIXUB_TPgn8ZdlRFm"</span>,
+                  <span class="s2">"_score"</span> : 1.1823215,
+                  <span class="s2">"_source"</span> : <span class="o">{</span>
+                    <span class="s2">"pk"</span> : <span class="s2">"key1"</span>,
+                    <span class="s2">"column3"</span> : <span class="s2">"e"</span>,
+                    <span class="s2">"column4"</span> : <span class="s2">"f"</span>
+                  <span class="o">}</span>
+                <span class="o">}</span>
+              <span class="o">]</span>
+            <span class="o">}</span>
+          <span class="o">}</span>
+        <span class="o">}</span>
+      <span class="o">}</span>
+    <span class="o">]</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>Query2</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## 요청</span>
+GET /parent/_left
+<span class="o">{</span>
+  <span class="s2">"query"</span>: <span class="o">{</span>
+    <span class="s2">"bool"</span>: <span class="o">{</span>
+      <span class="s2">"should"</span>: <span class="o">[</span>
+        <span class="o">{</span>
+          <span class="s2">"match"</span>: <span class="o">{</span>
+            <span class="s2">"column1"</span>: <span class="s2">"a"</span>
+          <span class="o">}</span>
+        <span class="o">}</span>
+      <span class="o">]</span>
+    <span class="o">}</span>
+  <span class="o">}</span>,
+  <span class="s2">"join"</span>: <span class="o">[</span>  
+    <span class="o">{</span>
+      <span class="s2">"index"</span>: <span class="s2">"child"</span>,
+      <span class="s2">"parent"</span>: <span class="s2">"fk"</span>,
+      <span class="s2">"child"</span>: <span class="s2">"pk"</span>,
+      <span class="s2">"query"</span>: <span class="o">[</span>
+        <span class="o">{</span>
+          <span class="s2">"bool"</span>: <span class="o">{</span>
+            <span class="s2">"must"</span>: <span class="o">[</span>
+              <span class="o">{</span>
+                <span class="s2">"term"</span>: <span class="o">{</span>
+                  <span class="s2">"column3"</span>: <span class="o">{</span>
+                    <span class="s2">"value"</span>: <span class="s2">"b"</span>
+                  <span class="o">}</span>
+                <span class="o">}</span>
+              <span class="o">}</span>
+            <span class="o">]</span>
+          <span class="o">}</span>
+        <span class="o">}</span>        
+      <span class="o">]</span>
+    <span class="o">}</span>
+  <span class="o">]</span>
+<span class="o">}</span> 
+
+<span class="c">## 응답</span>
+<span class="o">{</span>
+  <span class="s2">"took"</span> : 6,
+  <span class="s2">"timed_out"</span> : <span class="nb">false</span>,
+  <span class="s2">"_shards"</span> : <span class="o">{</span>
+    <span class="s2">"total"</span> : 1,
+    <span class="s2">"successful"</span> : 1,
+    <span class="s2">"skipped"</span> : 0,
+    <span class="s2">"failed"</span> : 0
+  <span class="o">}</span>,
+  <span class="s2">"hits"</span> : <span class="o">{</span>
+    <span class="s2">"total"</span> : <span class="o">{</span>
+      <span class="s2">"value"</span> : 1,
+      <span class="s2">"relation"</span> : <span class="s2">"eq"</span>
+    <span class="o">}</span>,
+    <span class="s2">"max_score"</span> : 0.9808291,
+    <span class="s2">"hits"</span> : <span class="o">[</span>
+      <span class="o">{</span>
+        <span class="s2">"_index"</span> : <span class="s2">"parent"</span>,
+        <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+        <span class="s2">"_id"</span> : <span class="s2">"pTwwIXUB_TPgn8ZdeRFz"</span>,
+        <span class="s2">"_score"</span> : 0.9808291,
+        <span class="s2">"_source"</span> : <span class="o">{</span>
+          <span class="s2">"column1"</span> : <span class="s2">"a"</span>,
+          <span class="s2">"column2"</span> : <span class="s2">"a"</span>,
+          <span class="s2">"fk"</span> : <span class="s2">"key1"</span>
+        <span class="o">}</span>,
+        <span class="s2">"inner_hits"</span> : <span class="o">{</span>
+          <span class="s2">"_child"</span> : <span class="o">{</span>
+            <span class="s2">"hits"</span> : <span class="o">{</span>
+              <span class="s2">"total"</span> : <span class="o">{</span>
+                <span class="s2">"value"</span> : 1,
+                <span class="s2">"relation"</span> : <span class="s2">"eq"</span>
+              <span class="o">}</span>,
+              <span class="s2">"max_score"</span> : 1.6931472,
+              <span class="s2">"hits"</span> : <span class="o">[</span>
+                <span class="o">{</span>
+                  <span class="s2">"_index"</span> : <span class="s2">"child"</span>,
+                  <span class="s2">"_type"</span> : <span class="s2">"_doc"</span>,
+                  <span class="s2">"_id"</span> : <span class="s2">"pjwwIXUB_TPgn8ZdgRGz"</span>,
+                  <span class="s2">"_score"</span> : 1.6931472,
+                  <span class="s2">"_source"</span> : <span class="o">{</span>
+                    <span class="s2">"pk"</span> : <span class="s2">"key1"</span>,
+                    <span class="s2">"column3"</span> : <span class="s2">"b"</span>,
+                    <span class="s2">"column4"</span> : <span class="s2">"b"</span>
+                  <span class="o">}</span>
+                <span class="o">}</span>
+              <span class="o">]</span>
+            <span class="o">}</span>
+          <span class="o">}</span>
+        <span class="o">}</span>
+      <span class="o">}</span>
+    <span class="o">]</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+:ET
