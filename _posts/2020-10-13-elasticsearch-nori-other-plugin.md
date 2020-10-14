@@ -1,5 +1,5 @@
 ---
-title: ElasticSearch nori 외부 플러그인(left-join) 설치 및 사용법
+title: ElasticSearch 외부 플러그인(left-join) 설치 및 사용법
 layout: post
 date: '2020-10-13 18:01:00 +0300'
 description: 호스트 컴퓨터 (Window 10) 사전 작업
@@ -65,7 +65,7 @@ BUILD SUCCESSFUL in 22s
 
 ![/assets/img/2020-10-13_18h41_10.png](/assets/img/2020-10-13_18h41_10.png)
 
-# VM 환경에서의 nori 플러그인 및 외부 플러그인 설치
+# VM 환경에서의 외부 플러그인 설치
 
 ## docker-compose.yml 파일 작성
 
@@ -173,21 +173,11 @@ networks:
 
 ## docker-compose 구동 및 nori 플러그인 설치
 
-`docker-compose up -d` 명령어를 통해서 백그라운드에서 도커 컴포즈로 연결된 모든 컨테이너를 띄워준다. 구동이 완료가 되면 엘라스틱 서치 각 노드에 접속하여 nori 플러그인을 설치해준다.
+`docker-compose up -d` 명령어를 통해서 백그라운드에서 도커 컴포즈로 연결된 모든 컨테이너를 띄워준다. 
 
 ```bash
 ## docker-compose 구동
 docker-compose up -d
-
-## 각 노드에 접속하여 nori 플러그인 설치
-docker exec -it es01 bash
-bin/elasticsearch-plugin install analysis-nori
-
-docker exec -it es02 bash
-bin/elasticsearch-plugin install analysis-nori
-
-docker exec -it es03 bash
-bin/elasticsearch-plugin install analysis-nori
 ```
 
 ## join-plugin 설치 확인

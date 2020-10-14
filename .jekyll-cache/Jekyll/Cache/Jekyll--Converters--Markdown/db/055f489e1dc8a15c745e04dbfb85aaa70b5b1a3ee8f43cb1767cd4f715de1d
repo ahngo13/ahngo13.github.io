@@ -1,4 +1,4 @@
-I"8`<h1 id="실습환경">실습환경</h1>
+I"�]<h1 id="실습환경">실습환경</h1>
 
 <ul>
   <li>Host OS : Window 10
@@ -54,7 +54,7 @@ BUILD SUCCESSFUL <span class="k">in </span>22s
 
 <p><img src="/assets/img/2020-10-13_18h41_10.png" alt="/assets/img/2020-10-13_18h41_10.png" /></p>
 
-<h1 id="vm-환경에서의-nori-플러그인-및-외부-플러그인-설치">VM 환경에서의 nori 플러그인 및 외부 플러그인 설치</h1>
+<h1 id="vm-환경에서의-외부-플러그인-설치">VM 환경에서의 외부 플러그인 설치</h1>
 
 <h2 id="docker-composeyml-파일-작성">docker-compose.yml 파일 작성</h2>
 
@@ -161,20 +161,10 @@ volumes:
 
 <h2 id="docker-compose-구동-및-nori-플러그인-설치">docker-compose 구동 및 nori 플러그인 설치</h2>
 
-<p><code class="language-plaintext highlighter-rouge">docker-compose up -d</code> 명령어를 통해서 백그라운드에서 도커 컴포즈로 연결된 모든 컨테이너를 띄워준다. 구동이 완료가 되면 엘라스틱 서치 각 노드에 접속하여 nori 플러그인을 설치해준다.</p>
+<p><code class="language-plaintext highlighter-rouge">docker-compose up -d</code> 명령어를 통해서 백그라운드에서 도커 컴포즈로 연결된 모든 컨테이너를 띄워준다.</p>
 
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## docker-compose 구동</span>
 docker-compose up <span class="nt">-d</span>
-
-<span class="c">## 각 노드에 접속하여 nori 플러그인 설치</span>
-docker <span class="nb">exec</span> <span class="nt">-it</span> es01 bash
-bin/elasticsearch-plugin <span class="nb">install </span>analysis-nori
-
-docker <span class="nb">exec</span> <span class="nt">-it</span> es02 bash
-bin/elasticsearch-plugin <span class="nb">install </span>analysis-nori
-
-docker <span class="nb">exec</span> <span class="nt">-it</span> es03 bash
-bin/elasticsearch-plugin <span class="nb">install </span>analysis-nori
 </code></pre></div></div>
 
 <h2 id="join-plugin-설치-확인">join-plugin 설치 확인</h2>
