@@ -1,0 +1,309 @@
+I">?<h1 id="실습-환경">실습 환경</h1>
+
+<ul>
+  <li>OS : CentOS 7</li>
+  <li>docker-compose</li>
+  <li>3 node</li>
+</ul>
+
+<h1 id="형태소-분석">형태소 분석</h1>
+
+<ul>
+  <li>한글 문장에서 의미가 있는 최소 단위를 분석하는 것</li>
+</ul>
+
+<h1 id="arirang-형태소-분석기-release-버전-확인-및-다운로드">Arirang 형태소 분석기 release 버전 확인 및 다운로드</h1>
+
+<p><a href="https://github.com/HowookJeong/elasticsearch-analysis-arirang/releases">https://github.com/HowookJeong/elasticsearch-analysis-arirang/releases</a></p>
+
+<h1 id="docker-composeyml-파일-작성">docker-compose.yml 파일 작성</h1>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">logstash</code> 는 꼭 추가하지 않아도 됨.</li>
+  <li>elasticsearch version을 arirang version과 꼭 일치시켜주어야 함. (일치하지 않을 경우 설치시 오류 발생)</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>version: <span class="s1">'3.2'</span>
+services:
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.1
+    container_name: es01
+    environment:
+      - node.name<span class="o">=</span>es01
+      - cluster.name<span class="o">=</span>es-docker-cluster
+      - discovery.seed_hosts<span class="o">=</span>es02,es03
+      - cluster.initial_master_nodes<span class="o">=</span>es01,es02,es03
+      - bootstrap.memory_lock<span class="o">=</span><span class="nb">true</span>
+      - <span class="s2">"ES_JAVA_OPTS=-Xms512m -Xmx512m"</span>
+      - reindex.remote.whitelist<span class="o">=</span>es1.danawa.io:9200
+    ulimits:
+      memlock:
+        soft: <span class="nt">-1</span>
+        hard: <span class="nt">-1</span>
+    volumes:
+      - data01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - elastic
+
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.1
+    container_name: es02
+    environment:
+      - node.name<span class="o">=</span>es02
+      - cluster.name<span class="o">=</span>es-docker-cluster
+      - discovery.seed_hosts<span class="o">=</span>es01,es03
+      - cluster.initial_master_nodes<span class="o">=</span>es01,es02,es03
+      - bootstrap.memory_lock<span class="o">=</span><span class="nb">true</span>
+      - <span class="s2">"ES_JAVA_OPTS=-Xms512m -Xmx512m"</span>
+    ulimits:
+      memlock:
+        soft: <span class="nt">-1</span>
+        hard: <span class="nt">-1</span>
+    volumes:
+      - data02:/usr/share/elasticsearch/data
+    ports:
+      - 9201:9200
+    networks:
+      - elastic
+
+  es03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.1
+    container_name: es03
+    environment:
+      - node.name<span class="o">=</span>es03
+      - cluster.name<span class="o">=</span>es-docker-cluster
+      - discovery.seed_hosts<span class="o">=</span>es01,es02
+      - cluster.initial_master_nodes<span class="o">=</span>es01,es02,es03
+      - bootstrap.memory_lock<span class="o">=</span><span class="nb">true</span>
+      - <span class="s2">"ES_JAVA_OPTS=-Xms512m -Xmx512m"</span>
+    ulimits:
+      memlock:
+        soft: <span class="nt">-1</span>
+        hard: <span class="nt">-1</span>
+    volumes:
+      - data03:/usr/share/elasticsearch/data
+    ports:
+      - 9202:9200
+    networks:
+      - elastic
+
+  kib01:
+    image: docker.elastic.co/kibana/kibana:7.9.1
+    container_name: kib01
+    ports:
+      - 5601:5601
+    environment:
+      ELASTICSEARCH_URL: http://es01:9200
+      ELASTICSEARCH_HOSTS: http://es01:9200
+    networks:
+      - elastic
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.9.1
+    volumes:
+      - ./pipeline/:/usr/share/logstash/pipeline/
+      - /var/log/httpd/:/usr/share/logstash/log/
+    networks:
+      - elastic
+
+volumes:
+  data01:
+    driver: <span class="nb">local
+  </span>data02:
+    driver: <span class="nb">local
+  </span>data03:
+    driver: <span class="nb">local
+
+</span>networks:
+  elastic:
+    driver: bridge
+</code></pre></div></div>
+
+<h1 id="docker-compose-구동-및-arirang-plugin설치">docker-compose 구동 및 Arirang plugin설치</h1>
+
+<ul>
+  <li>설치 명령어(각 elasticsearch node별 접속 후 실행, 버전은 elasticsearch version에 맞게 해주면 됨, 필자는 7.9.1 버전) : <code class="language-plaintext highlighter-rouge">bin/elasticsearch-plugin install https://github.com/HowookJeong/elasticsearch-analysis-arirang/releases/download/7.9.1/elasticsearch-analysis-arirang-7.9.1.zip</code></li>
+  <li>제거 명령어 : <code class="language-plaintext highlighter-rouge">bin/elasticsearch-plugin remove analysis-arirang</code></li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## docker-compose 백그라운드 구동</span>
+<span class="o">[</span>root@node1 es]# docker-compose up <span class="nt">-d</span>
+
+<span class="c">## es01 arirang 플러그인 설치</span>
+<span class="o">[</span>root@node1 es]# docker <span class="nb">exec</span> <span class="nt">-it</span> es01 bash
+<span class="o">[</span>root@eecdc2606808 elasticsearch]# <span class="nb">ls
+</span>LICENSE.txt  NOTICE.txt  README.asciidoc  bin  config  data  jdk  lib  logs  modules  plugins
+<span class="o">[</span>root@eecdc2606808 elasticsearch]# bin/elasticsearch-plugin <span class="nb">install </span>https://github.com/HowookJeong/elasticsearch-analysis-arirang/releases/download/7.9.1/elasticsearch-analysis-arirang-7.9.1.zip
+-&gt; Installing https://github.com/HowookJeong/elasticsearch-analysis-arirang/releases/download/7.9.1/elasticsearch-analysis-arirang-7.9.1.zip
+-&gt; Downloading https://github.com/HowookJeong/elasticsearch-analysis-arirang/releases/download/7.9.1/elasticsearch-analysis-arirang-7.9.1.zip
+<span class="o">[=================================================]</span> 100%??
+-&gt; Installed analysis-arirang
+<span class="o">[</span>root@eecdc2606808 elasticsearch]# <span class="nb">cd </span>bin
+<span class="o">[</span>root@eecdc2606808 bin]# <span class="nb">ls
+</span>elasticsearch           elasticsearch-env-from-file  elasticsearch-setup-passwords    x-pack-env
+elasticsearch-certgen   elasticsearch-keystore       elasticsearch-shard              x-pack-security-env
+elasticsearch-certutil  elasticsearch-migrate        elasticsearch-sql-cli            x-pack-watcher-env
+elasticsearch-cli       elasticsearch-node           elasticsearch-sql-cli-7.9.1.jar
+elasticsearch-croneval  elasticsearch-plugin         elasticsearch-syskeygen
+elasticsearch-env       elasticsearch-saml-metadata  elasticsearch-users
+
+<span class="c">## arirang 플러그인 설치 확인</span>
+<span class="o">[</span>root@eecdc2606808 bin]# elasticsearch-plugin list
+analysis-arirang
+<span class="o">[</span>root@eecdc2606808 bin]# <span class="nb">exit
+exit</span>
+
+<span class="c">## es02 arirang 플러그인 설치</span>
+<span class="o">[</span>root@node1 es]# docker <span class="nb">exec</span> <span class="nt">-it</span> es02 bash
+<span class="o">[</span>root@613bd70dcea1 elasticsearch]# bin/elasticsearch-plugin <span class="nb">install </span>https://github.com/HowookJeong/elasticsearch-analysis-arirang/releases/download/7.9.1/elasticsearch-analysis-arirang-7.9.1.zip
+-&gt; Installing https://github.com/HowookJeong/elasticsearch-analysis-arirang/releases/download/7.9.1/elasticsearch-analysis-arirang-7.9.1.zip
+-&gt; Downloading https://github.com/HowookJeong/elasticsearch-analysis-arirang/releases/download/7.9.1/elasticsearch-analysis-arirang-7.9.1.zip
+<span class="o">[=================================================]</span> 100%??
+-&gt; Installed analysis-arirang
+<span class="o">[</span>root@613bd70dcea1 elasticsearch]# <span class="nb">exit
+exit</span>
+
+<span class="c">## es03 arirang 플러그인 설치</span>
+<span class="o">[</span>root@node1 es]# docker <span class="nb">exec</span> <span class="nt">-it</span> es03 bash
+<span class="o">[</span>root@df241e8a3d35 elasticsearch]# bin/elasticsearch-plugin <span class="nb">install </span>https://github.com/HowookJeong/elasticsearch-analysis-arirang/releases/download/7.9.1/elasticsearch-analysis-arirang-7.9.1.zip
+-&gt; Installing https://github.com/HowookJeong/elasticsearch-analysis-arirang/releases/download/7.9.1/elasticsearch-analysis-arirang-7.9.1.zip
+-&gt; Downloading https://github.com/HowookJeong/elasticsearch-analysis-arirang/releases/download/7.9.1/elasticsearch-analysis-arirang-7.9.1.zip
+<span class="o">[=================================================]</span> 100%??
+-&gt; Installed analysis-arirang
+<span class="o">[</span>root@df241e8a3d35 elasticsearch]# <span class="nb">exit
+exit</span>
+<span class="o">[</span>root@node1 es]# docker-compose stop
+Stopping es02          ... <span class="k">done
+</span>Stopping es01          ... <span class="k">done
+</span>Stopping es03          ... <span class="k">done
+</span>Stopping kib01         ... <span class="k">done
+</span>Stopping es_logstash_1 ... <span class="k">done</span>
+<span class="o">[</span>root@node1 es]# docker-compose start
+Starting es01     ... <span class="k">done
+</span>Starting es02     ... <span class="k">done
+</span>Starting es03     ... <span class="k">done
+</span>Starting kib01    ... <span class="k">done
+</span>Starting logstash ... <span class="k">done</span>
+</code></pre></div></div>
+
+<h1 id="arirang-플러그인-실습">Arirang 플러그인 실습</h1>
+
+<p><a href="https://cafe.naver.com/korlucene">https://cafe.naver.com/korlucene</a> 다운로드에서 2018년에 업로드된 Arirang Analyzer Elastic Manaual을 참고 해보았는데 버전 차이가 커서 그런지 결과값이 다른 것을 확인할 수 있었다.</p>
+
+<p>실습은 ElasticSearch kibana에서 하도록 하겠다.</p>
+
+<h2 id="configuration">Configuration</h2>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">queryMode (default false)</code> :  search time 여부 (search time은 1순위 키워드만 추출)</li>
+  <li><code class="language-plaintext highlighter-rouge">decompound (default true)</code> : 복합명사를 분해할지 여부</li>
+  <li><code class="language-plaintext highlighter-rouge">preserveVerb (default false)</code> : 용언을 검색어로 추출한 것인지 여부</li>
+  <li><code class="language-plaintext highlighter-rouge">exactMatch (default false)</code> : 복합명사를 분해할 때 사전에 존재해야 복합명사로 분해할지 여부</li>
+  <li><code class="language-plaintext highlighter-rouge">preserveCNoun (default true)</code> : 복합명사를 분해하기 전의 단어를 token으로 추출할 것인지 여부</li>
+  <li><code class="language-plaintext highlighter-rouge">preserveOrigin (default false)</code> : 형태소 분석이 안된 어절을 token으로 추출 여부</li>
+  <li><code class="language-plaintext highlighter-rouge">bigrammable (default false)</code> : 형태소 분석에 실패한 경우 Bigram을 token으로 추출할지 여부</li>
+  <li><code class="language-plaintext highlighter-rouge">wordSegment (default false)</code> : 형태소 분석에 실패한 경우 자동 띄어쓰기를 할 것인지 여부</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## Arirang 플러그인 인덱스 설정</span>
+PUT arirang_analyzer
+<span class="o">{</span>
+  <span class="s2">"settings"</span>: <span class="o">{</span>
+    <span class="s2">"index"</span>: <span class="o">{</span>
+      <span class="s2">"analysis"</span>: <span class="o">{</span>
+        <span class="s2">"analyzer"</span>: <span class="o">{</span>
+          <span class="s2">"arirang_custom"</span>: <span class="o">{</span>
+            <span class="s2">"type"</span>: <span class="s2">"arirang_analyzer"</span>,
+            <span class="s2">"tokenizer"</span>: <span class="s2">"arirang_tokenizer"</span>,
+            <span class="s2">"filter"</span>: <span class="o">[</span>
+              <span class="s2">"lowercase"</span>,
+              <span class="s2">"trim"</span>,
+              <span class="s2">"arirang_filter"</span>
+            <span class="o">]</span>
+          <span class="o">}</span>
+        <span class="o">}</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="c">## text에 대한 형태소 분석 실행</span>
+POST arirang_analyzer/_analyze
+<span class="o">{</span>
+  <span class="s2">"analyzer"</span>: <span class="s2">"arirang_analyzer"</span>,
+  <span class="s2">"text"</span>: <span class="s2">"행복해지기 위해서는 몇가지를 버려야 할 필요가 있다. 그렇게 하고 나서야 나는 행복해질 수 있었다."</span>
+<span class="o">}</span>
+
+<span class="c">## 결과 값 (비교적 형태소 분석이 잘 되는 듯 하나 약간 미흡 해보인다)</span>
+<span class="o">{</span>
+  <span class="s2">"tokens"</span> : <span class="o">[</span>
+    <span class="o">{</span>
+      <span class="s2">"token"</span> : <span class="s2">"행복"</span>,
+      <span class="s2">"start_offset"</span> : 0,
+      <span class="s2">"end_offset"</span> : 2,
+      <span class="s2">"type"</span> : <span class="s2">"korean"</span>,
+      <span class="s2">"position"</span> : 0
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"token"</span> : <span class="s2">"몇가지"</span>,
+      <span class="s2">"start_offset"</span> : 11,
+      <span class="s2">"end_offset"</span> : 14,
+      <span class="s2">"type"</span> : <span class="s2">"korean"</span>,
+      <span class="s2">"position"</span> : 1
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"token"</span> : <span class="s2">"몇가지를"</span>,
+      <span class="s2">"start_offset"</span> : 11,
+      <span class="s2">"end_offset"</span> : 15,
+      <span class="s2">"type"</span> : <span class="s2">"korean"</span>,
+      <span class="s2">"position"</span> : 1
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"token"</span> : <span class="s2">"할"</span>,
+      <span class="s2">"start_offset"</span> : 20,
+      <span class="s2">"end_offset"</span> : 21,
+      <span class="s2">"type"</span> : <span class="s2">"korean"</span>,
+      <span class="s2">"position"</span> : 2
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"token"</span> : <span class="s2">"필요"</span>,
+      <span class="s2">"start_offset"</span> : 22,
+      <span class="s2">"end_offset"</span> : 24,
+      <span class="s2">"type"</span> : <span class="s2">"korean"</span>,
+      <span class="s2">"position"</span> : 3
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"token"</span> : <span class="s2">"나서"</span>,
+      <span class="s2">"start_offset"</span> : 37,
+      <span class="s2">"end_offset"</span> : 39,
+      <span class="s2">"type"</span> : <span class="s2">"korean"</span>,
+      <span class="s2">"position"</span> : 4
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"token"</span> : <span class="s2">"나"</span>,
+      <span class="s2">"start_offset"</span> : 41,
+      <span class="s2">"end_offset"</span> : 42,
+      <span class="s2">"type"</span> : <span class="s2">"korean"</span>,
+      <span class="s2">"position"</span> : 5
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"token"</span> : <span class="s2">"행복"</span>,
+      <span class="s2">"start_offset"</span> : 44,
+      <span class="s2">"end_offset"</span> : 46,
+      <span class="s2">"type"</span> : <span class="s2">"korean"</span>,
+      <span class="s2">"position"</span> : 6
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">"token"</span> : <span class="s2">"수"</span>,
+      <span class="s2">"start_offset"</span> : 49,
+      <span class="s2">"end_offset"</span> : 50,
+      <span class="s2">"type"</span> : <span class="s2">"korean"</span>,
+      <span class="s2">"position"</span> : 7
+    <span class="o">}</span>
+  <span class="o">]</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+:ET
