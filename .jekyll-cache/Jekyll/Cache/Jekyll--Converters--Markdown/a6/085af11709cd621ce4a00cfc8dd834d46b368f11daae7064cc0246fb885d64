@@ -1,0 +1,264 @@
+I"fE<h1 id="실습-환경">실습 환경</h1>
+
+<ul>
+  <li>OS : CentOS 7</li>
+  <li>docker-compose</li>
+  <li>3 node</li>
+</ul>
+
+<h1 id="형태소-분석">형태소 분석</h1>
+
+<ul>
+  <li>한글 문장에서 의미가 있는 최소 단위를 분석하는 것</li>
+</ul>
+
+<h1 id="docker-composeyml-파일-작성">docker-compose.yml 파일 작성</h1>
+
+<ul>
+  <li>아래와 같은 소스가 설정파일에 있다면 과감하게 변경해 바란다. 아래의 환경설정은 엘라스틱 서치 7버전 이후에 사용가능한 환경설정이라고 한다. 그래서 필자의 경우 컨테이너를 띄울 때마다 에러가 발생했었다. 6버전 이하의 엘라스틱 버전에서는 아래와 같이 변경해줘야 해당하는 오류가 발생하지 않는다.</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">- discovery.seed_hosts=es02,es03</code> ⇒ <code class="language-plaintext highlighter-rouge">discovery.zen.ping.unicast.hosts=es02,es03</code>
+<code class="language-plaintext highlighter-rouge">- cluster.initial_master_nodes=es01,es02,es03</code> ⇒ <code class="language-plaintext highlighter-rouge">discovery.zen.minimum_master_nodes=2</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">- "ES_JAVA_OPTS=-Xms512m -Xmx512m"</code> ⇒ <code class="language-plaintext highlighter-rouge">- "ES_JAVA_OPTS=-Xms2g -Xmx2g"</code>,  <code class="language-plaintext highlighter-rouge">- "ES_JAVA_OPTS=-Xms4000m -Xmx4000m"</code></p>
+
+<p><code class="language-plaintext highlighter-rouge">xpack.security.enabled=false</code> 추가</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>version: <span class="s1">'2.2'</span>
+services:
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.7.1
+    container_name: es01
+    environment:
+      - node.name<span class="o">=</span>es01
+      - cluster.name<span class="o">=</span>es-docker-cluster
+      - discovery.zen.ping.unicast.hosts<span class="o">=</span>es02,es03
+      - discovery.zen.minimum_master_nodes<span class="o">=</span>2
+      - bootstrap.memory_lock<span class="o">=</span><span class="nb">true</span>
+      - <span class="s2">"ES_JAVA_OPTS=-Xms2g -Xmx2g"</span>
+      - <span class="s2">"ES_JAVA_OPTS=-Xms4000m -Xmx4000m"</span>
+      - xpack.security.enabled<span class="o">=</span><span class="nb">false
+    </span>ulimits:
+      memlock:
+        soft: <span class="nt">-1</span>
+        hard: <span class="nt">-1</span>
+    volumes:
+      - data01:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - elastic
+
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.7.1
+    container_name: es02
+    environment:
+      - node.name<span class="o">=</span>es02
+      - cluster.name<span class="o">=</span>es-docker-cluster
+      - discovery.zen.ping.unicast.hosts<span class="o">=</span>es01,es03
+      - discovery.zen.minimum_master_nodes<span class="o">=</span>2
+      - bootstrap.memory_lock<span class="o">=</span><span class="nb">true</span>
+      - <span class="s2">"ES_JAVA_OPTS=-Xms2g -Xmx2g"</span>
+      - <span class="s2">"ES_JAVA_OPTS=-Xms4000m -Xmx4000m"</span>
+      - xpack.security.enabled<span class="o">=</span><span class="nb">false
+    </span>ulimits:
+      memlock:
+        soft: <span class="nt">-1</span>
+        hard: <span class="nt">-1</span>
+    volumes:
+      - data02:/usr/share/elasticsearch/data
+    ports:
+      - 9201:9200
+    networks:
+      - elastic
+
+  es03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.7.1
+    container_name: es03
+    environment:
+      - node.name<span class="o">=</span>es03
+      - cluster.name<span class="o">=</span>es-docker-cluster
+      - discovery.zen.ping.unicast.hosts<span class="o">=</span>es01,es02
+      - discovery.zen.minimum_master_nodes<span class="o">=</span>2
+      - bootstrap.memory_lock<span class="o">=</span><span class="nb">true</span>
+      - <span class="s2">"ES_JAVA_OPTS=-Xms512m -Xmx512m"</span>
+      - xpack.security.enabled<span class="o">=</span><span class="nb">false
+    </span>ulimits:
+      memlock:
+        soft: <span class="nt">-1</span>
+        hard: <span class="nt">-1</span>
+    volumes:
+      - data03:/usr/share/elasticsearch/data
+    ports:
+      - 9202:9200
+    networks:
+      - elastic
+
+  kib01:
+    image: docker.elastic.co/kibana/kibana:6.7.1
+    container_name: kib01
+    ports:
+      - 5601:5601
+    environment:
+      ELASTICSEARCH_URL: http://es01:9200
+      ELASTICSEARCH_HOSTS: http://es01:9200
+    networks:
+      - elastic
+
+volumes:
+  data01:
+    driver: <span class="nb">local
+  </span>data02:
+    driver: <span class="nb">local
+  </span>data03:
+    driver: <span class="nb">local
+
+</span>networks:
+  elastic:
+    driver: bridge
+</code></pre></div></div>
+
+<h1 id="은전한닢-형태소-분석기-다운로드-및-설치">은전한닢 형태소 분석기 다운로드 및 설치</h1>
+
+<ul>
+  <li>공식 사이트에서 다운받고 싶었으나 적용이 잘 안되는 관계로 아래의 경로를 통해 설치하였다.</li>
+</ul>
+
+<p><a href="https://raw.githubusercontent.com/javacafe-project/elastic-book-etc/master/plugin/elasticsearch-analysis-seunjeon-6.7.1.zip"><code class="language-plaintext highlighter-rouge">https://raw.githubusercontent.com/javacafe-project/elastic-book-etc/master/plugin/elasticsearch-analysis-seunjeon-6.7.1.zip</code></a></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## 백그라운드에서 컨테이너들 띄우기</span>
+docker-compose up <span class="nt">-d</span>
+
+<span class="c">## 엘라스틱 서치 노드에 접속</span>
+<span class="o">[</span>root@node1 es]# docker <span class="nb">exec</span> <span class="nt">-it</span> es01 bash
+
+<span class="c">## 은전한닢 플러그인 설치</span>
+<span class="o">[</span>root@1cec75606214 elasticsearch]# ./bin/elasticsearch-plugin <span class="nb">install </span>https://raw.githubusercontent.com/javacafe-project/elastic-book-etc/master/plugin/elasticsearch-analysis-seunjeon-6.7.1.zip
+<span class="o">[=================================================]</span> 100%??
+-&gt; Installed analysis-seunjeon
+<span class="o">[</span>root@1cec75606214 elasticsearch]# <span class="nb">cd </span>bin
+<span class="o">[</span>root@1cec75606214 bin]# <span class="nb">ls
+</span>elasticsearch               elasticsearch-keystore           elasticsearch-setup-passwords      elasticsearch.bat
+elasticsearch-certgen       elasticsearch-keystore.bat       elasticsearch-setup-passwords.bat  x-pack
+elasticsearch-certgen.bat   elasticsearch-migrate            elasticsearch-sql-cli              x-pack-env
+elasticsearch-certutil      elasticsearch-migrate.bat        elasticsearch-sql-cli-6.4.3.jar    x-pack-env.bat
+elasticsearch-certutil.bat  elasticsearch-plugin             elasticsearch-sql-cli.bat          x-pack-security-env
+elasticsearch-cli           elasticsearch-plugin.bat         elasticsearch-syskeygen            x-pack-security-env.bat
+elasticsearch-cli.bat       elasticsearch-saml-metadata      elasticsearch-syskeygen.bat        x-pack-watcher-env
+elasticsearch-croneval      elasticsearch-saml-metadata.bat  elasticsearch-translog             x-pack-watcher-env.bat
+elasticsearch-croneval.bat  elasticsearch-service-mgr.exe    elasticsearch-translog.bat
+elasticsearch-env           elasticsearch-service-x64.exe    elasticsearch-users
+elasticsearch-env.bat       elasticsearch-service.bat        elasticsearch-users.bat
+
+<span class="c">## 플러그인이 잘 설치되었는지 확인</span>
+<span class="o">[</span>root@1cec75606214 bin]# elasticsearch-plugin list
+analysis-seunjeon
+
+<span class="o">[</span>root@1cec75606214 bin]# <span class="nb">exit
+exit</span>
+
+<span class="c">## 다른 노드들에도 설치를 진행해준다</span>
+<span class="o">[</span>root@node1 es]# docker <span class="nb">exec</span> <span class="nt">-it</span> es02 bash
+<span class="o">[</span>root@9b89ab54ad2f elasticsearch]# ./bin/elasticsearch-plugin <span class="nb">install </span>https://raw.githubusercontent.com/javacafe-project/elastic-book-etc/master/plugin/elasticsearch-analysis-seunjeon-6.7.1.zip
+<span class="o">[=================================================]</span> 100%??
+-&gt; Installed analysis-seunjeon
+<span class="o">[</span>root@9b89ab54ad2f elasticsearch]# <span class="nb">exit
+exit</span>
+<span class="o">[</span>root@node1 es]# docker <span class="nb">exec</span> <span class="nt">-it</span> es03 bash
+<span class="o">[</span>root@83fa897e43dc elasticsearch]# ./bin/elasticsearch-plugin <span class="nb">install </span>https://raw.githubusercontent.com/javacafe-project/elastic-book-etc/master/plugin/elasticsearch-analysis-seunjeon-6.7.1.zip
+<span class="o">[=================================================]</span> 100%??
+
+<span class="c">## 플러그인을 인식시키기 위해 재시작 해준다</span>
+<span class="o">[</span>root@node1 es]# docker-compose stop
+Stopping es02  ... <span class="k">done
+</span>Stopping es01  ... <span class="k">done
+</span>Stopping es03  ... <span class="k">done
+</span>Stopping kib01 ... <span class="k">done</span>
+<span class="o">[</span>root@node1 es]# docker-compose start
+Starting es01  ... <span class="k">done
+</span>Starting es02  ... <span class="k">done
+</span>Starting es03  ... <span class="k">done
+</span>Starting kib01 ... <span class="k">done</span>
+</code></pre></div></div>
+
+<p><a href="https://www.notion.so/34-10-14-d3598aea499d438c8f0b27f1bdfd5d3e">34일차(10/14) (수)</a></p>
+
+<p>혹시나 <code class="language-plaintext highlighter-rouge">docker-compose start</code>를 했을 때 인덱스 관련 에러가 뜬다면 기존에 생성된 인덱스가 깨졌거나 충돌이 되어 그럴 수 있으므로 모두 삭제해준다. 필자의 경우 해당 경로에 볼륨이 추가되어있었으므로 아래와 같이 삭제하였다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@node1 ES]# <span class="nb">rm</span> <span class="nt">-rf</span> /var/lib/docker/volumes/es_data01/_data/nodes/
+<span class="o">[</span>root@node1 ES]# <span class="nb">rm</span> <span class="nt">-rf</span> /var/lib/docker/volumes/es_data02/_data/nodes/
+<span class="o">[</span>root@node1 ES]# <span class="nb">rm</span> <span class="nt">-rf</span> /var/lib/docker/volumes/es_data02/_data/nodes/
+</code></pre></div></div>
+
+<h1 id="은전한닢-형태소-분석기-실습">은전한닢 형태소 분석기 실습</h1>
+
+<p>필자가 올린 여러가지 시행착오는 버전을 이걸로도 해보고 저걸로도 해보고 다운을 받아서 설치도해보고 압축을 풀어서 옮겨서 설치도 해보고 여러가지 환경변수로 변경해서 실행시켜보고 다양한 방법을 시도한 것이다. 엘라스틱 서치에서 제공하는 공식 플러그인이 생기면서 관리가 소홀해진건지 변경된 부분이 많아서 아리랑도 그렇고 설치하는데에도 꽤나 애를 먹었다. 아래와 같은 명령어를 해서 요청 보내는 것은 성공했으나 그 이외의 쿼리를 요청했을 때 또 다른 에러가 발생하는 것을 확인할 수 있었다. 불안감을 품고 계속해서 실습을 진행할 수 없었으므로 여기에서 멈추기로 하였다.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 요청</span>
+PUT /seunjeon_default_analyzer
+<span class="o">{</span>
+  <span class="s2">"settings"</span>: <span class="o">{</span>
+    <span class="s2">"number_of_shards"</span>: 5,
+    <span class="s2">"number_of_replicas"</span>: 1,
+    <span class="s2">"index"</span>: <span class="o">{</span>
+      <span class="s2">"analysis"</span>: <span class="o">{</span>
+        <span class="s2">"analyzer"</span>: <span class="o">{</span>
+          <span class="s2">"korean"</span>: <span class="o">{</span>
+            <span class="s2">"type"</span>: <span class="s2">"custom"</span>,
+            <span class="s2">"tokenizer"</span>: <span class="s2">"seunjeon_default_tokenizer"</span>
+          <span class="o">}</span>
+        <span class="o">}</span>,
+        <span class="s2">"tokenizer"</span>: <span class="o">{</span>
+          <span class="s2">"seunjeon_default_tokenizer"</span>: <span class="o">{</span>
+            <span class="s2">"type"</span>: <span class="s2">"seunjeon_tokenizer"</span>,
+            <span class="s2">"index_eojeol"</span>: <span class="nb">false</span>,
+            <span class="s2">"user_words"</span>: <span class="o">[</span>
+              <span class="s2">"낄끼+빠빠,-100"</span>, <span class="s2">"c</span><span class="se">\\</span><span class="s2">+</span><span class="se">\\</span><span class="s2">+"</span>, <span class="s2">"어그로"</span>, <span class="s2">"버카충"</span>, <span class="s2">"abc마트"</span>
+            <span class="o">]</span>
+          <span class="o">}</span>
+        <span class="o">}</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="c"># 결과</span>
+<span class="o">{</span>
+    <span class="s2">"acknowledged"</span>: <span class="nb">true</span>,
+    <span class="s2">"shards_acknowledged"</span>: <span class="nb">true</span>,
+    <span class="s2">"index"</span>: <span class="s2">"seunjeon_default_analyzer"</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>마지막 오류</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>2020-10-15T05:06:50,132][ERROR][o.e.b.ElasticsearchUncaughtExceptionHandler] <span class="o">[</span>es01] fatal error <span class="k">in </span>thread <span class="o">[</span>elasticsearch[es01][analyze][T#1]], exiting
+java.lang.NoClassDefFoundError: org/elasticsearch/common/logging/ESLoggerFactory
+        at org.bitbucket.eunjeon.seunjeon.elasticsearch.SeunjeonTokenizer.&lt;init&gt;<span class="o">(</span>SeunjeonTokenizer.java:31<span class="o">)</span> ~[?:?]
+        at org.bitbucket.eunjeon.seunjeon.elasticsearch.index.analysis.SeunjeonTokenizerFactory.create<span class="o">(</span>SeunjeonTokenizerFactory.java:49<span class="o">)</span> ~[?:?]
+        at org.elasticsearch.index.analysis.CustomAnalyzer.createComponents<span class="o">(</span>CustomAnalyzer.java:89<span class="o">)</span> ~[elasticsearch-6.7.1.jar:6.7.1]
+        at org.apache.lucene.analysis.AnalyzerWrapper.createComponents<span class="o">(</span>AnalyzerWrapper.java:136<span class="o">)</span> ~[lucene-core-7.7.0.jar:7.7.0 8c831daf4eb41153c25ddb152501ab5bae3ea3d5 - jimczi - 2019-02-04 23:16:28]
+        at org.apache.lucene.analysis.Analyzer.tokenStream<span class="o">(</span>Analyzer.java:198<span class="o">)</span> ~[lucene-core-7.7.0.jar:7.7.0 8c831daf4eb41153c25ddb152501ab5bae3ea3d5 - jimczi - 2019-02-04 23:16:28]
+        at org.elasticsearch.action.admin.indices.analyze.TransportAnalyzeAction.simpleAnalyze<span class="o">(</span>TransportAnalyzeAction.java:267<span class="o">)</span> ~[elasticsearch-6.7.1.jar:6.7.1]
+        at org.elasticsearch.action.admin.indices.analyze.TransportAnalyzeAction.analyze<span class="o">(</span>TransportAnalyzeAction.java:252<span class="o">)</span> ~[elasticsearch-6.7.1.jar:6.7.1]
+        at org.elasticsearch.action.admin.indices.analyze.TransportAnalyzeAction.shardOperation<span class="o">(</span>TransportAnalyzeAction.java:170<span class="o">)</span> ~[elasticsearch-6.7.1.jar:6.7.1]
+        at org.elasticsearch.action.admin.indices.analyze.TransportAnalyzeAction.shardOperation<span class="o">(</span>TransportAnalyzeAction.java:81<span class="o">)</span> ~[elasticsearch-6.7.1.jar:6.7.1]
+        at org.elasticsearch.action.support.single.shard.TransportSingleShardAction<span class="nv">$1</span>.doRun<span class="o">(</span>TransportSingleShardAction.java:115<span class="o">)</span> ~[elasticsearch-6.7.1.jar:6.7.1]
+        at org.elasticsearch.common.util.concurrent.ThreadContext<span class="nv">$ContextPreservingAbstractRunnable</span>.doRun<span class="o">(</span>ThreadContext.java:751<span class="o">)</span> ~[elasticsearch-6.7.1.jar:6.7.1]
+        at org.elasticsearch.common.util.concurrent.AbstractRunnable.run<span class="o">(</span>AbstractRunnable.java:37<span class="o">)</span> ~[elasticsearch-6.7.1.jar:6.7.1]
+        at java.util.concurrent.ThreadPoolExecutor.runWorker<span class="o">(</span>ThreadPoolExecutor.java:1128<span class="o">)</span> ~[?:?]
+        at java.util.concurrent.ThreadPoolExecutor<span class="nv">$Worker</span>.run<span class="o">(</span>ThreadPoolExecutor.java:628<span class="o">)</span> ~[?:?]
+        at java.lang.Thread.run<span class="o">(</span>Thread.java:835<span class="o">)</span> <span class="o">[</span>?:?]
+Caused by: java.lang.ClassNotFoundException: org.elasticsearch.common.logging.ESLoggerFactory
+        at java.net.URLClassLoader.findClass<span class="o">(</span>URLClassLoader.java:436<span class="o">)</span> ~[?:?]
+        at java.lang.ClassLoader.loadClass<span class="o">(</span>ClassLoader.java:588<span class="o">)</span> ~[?:?]
+        at java.net.FactoryURLClassLoader.loadClass<span class="o">(</span>URLClassLoader.java:864<span class="o">)</span> ~[?:?]
+        at java.lang.ClassLoader.loadClass<span class="o">(</span>ClassLoader.java:521<span class="o">)</span> ~[?:?]
+        ... 15 more
+</code></pre></div></div>
+
+<p>컴퓨터 사양 때문에 안되는 건가라는 생각도 들었다. 의외로 메모리와 CPU를 많이 잡아먹는 것 같다.</p>
+
+<p><img src="/assets/img/2020-10-15_19h38_40.png" alt="/assets/img/2020-10-15_19h38_40.png" /></p>
+:ET
