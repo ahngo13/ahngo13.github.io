@@ -192,8 +192,6 @@ Starting es03  ... done
 Starting kib01 ... done
 ```
 
-[34일차(10/14) (수)](https://www.notion.so/34-10-14-d3598aea499d438c8f0b27f1bdfd5d3e)
-
 혹시나 `docker-compose start`를 했을 때 인덱스 관련 에러가 뜬다면 기존에 생성된 인덱스가 깨졌거나 충돌이 되어 그럴 수 있으므로 모두 삭제해준다. 필자의 경우 해당 경로에 볼륨이 추가되어있었으므로 아래와 같이 삭제하였다.
 
 ```bash
