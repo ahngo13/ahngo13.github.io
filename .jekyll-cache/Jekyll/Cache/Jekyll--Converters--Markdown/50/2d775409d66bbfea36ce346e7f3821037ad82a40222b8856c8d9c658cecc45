@@ -1,0 +1,250 @@
+I"�;<h1 id="elastic-apm이란">Elastic APM이란?</h1>
+
+<ul>
+  <li>애플리케이션 모니터링을 위해 상세한 성능 지표를 제공 (문제 해결 시간을 최소화해주는 도구)</li>
+</ul>
+
+<h2 id="elastic-apm의-기능">Elastic APM의 기능</h2>
+
+<ul>
+  <li>앱과 서비스의 end to end 헬스 모니터링</li>
+  <li>이상치 탐지와 문제점 식별</li>
+  <li>문제점 분류 및 격리</li>
+  <li>근본 원인 분석 및 사고 연결</li>
+  <li>문제 디버깅 및 중화</li>
+</ul>
+
+<h2 id="최소한의-노력으로-애플리케이션-연결">최소한의 노력으로 애플리케이션 연결</h2>
+
+<ul>
+  <li>총 7개의 언어와 프레임워크 제공 : 프론트엔드에서 백엔드까지 데이터 수집 가능</li>
+  <li>공개 표준 수용 : OpenTracing, Jaeger, OpenTelemetry…</li>
+  <li>코드 수준 가시성</li>
+  <li>에이전트 부하 최소화</li>
+</ul>
+
+<h2 id="애플리케이션과-서비스의-완전한-가시성-확보">애플리케이션과 서비스의 완전한 가시성 확보</h2>
+
+<ul>
+  <li>end to end 가시성 : 분산 트레이싱으로 마이크로서비스 환경에서의 병목지점 확인</li>
+  <li>의존성 매핑 자동 생성 : 의존성을 자동으로 그려줌</li>
+  <li>프로액티브 가용성 모니터링 : 업타임과 연동</li>
+</ul>
+
+<h2 id="스마트-탐지-신속한-근본-원인-분석">스마트 탐지, 신속한 근본 원인 분석</h2>
+
+<ul>
+  <li>자동 이상치 탐지</li>
+  <li>강력한 ad hoc 검색</li>
+  <li>단일화된 통합 가시성 : log와 메트릭컨텍스트 넘나드는 신속한 근본 원인 분석</li>
+</ul>
+
+<h2 id="기존-워크플로우와-통합">기존 워크플로우와 통합</h2>
+
+<ul>
+  <li>데브옵스 콜라보 : 배포 어노테이션의 상호 연결</li>
+  <li>ITSM 프로세스 연결</li>
+</ul>
+
+<h1 id="elasticsearch-apm-설치">Elasticsearch APM 설치</h1>
+
+<h2 id="docker-composeyml-파일-작성">docker-compose.yml 파일 작성</h2>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">2.2'</span>
+<span class="na">services</span><span class="pi">:</span>
+  <span class="na">apm-server</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">docker.elastic.co/apm/apm-server:7.9.2</span>
+    <span class="na">depends_on</span><span class="pi">:</span>
+      <span class="na">elasticsearch</span><span class="pi">:</span>
+        <span class="na">condition</span><span class="pi">:</span> <span class="s">service_healthy</span>
+      <span class="na">kibana</span><span class="pi">:</span>
+        <span class="na">condition</span><span class="pi">:</span> <span class="s">service_healthy</span>
+    <span class="na">cap_add</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">CHOWN"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">DAC_OVERRIDE"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">SETGID"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">SETUID"</span><span class="pi">]</span>
+    <span class="na">cap_drop</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">ALL"</span><span class="pi">]</span>
+    <span class="na">ports</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">8200:8200</span>
+    <span class="na">networks</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">elastic</span>
+    <span class="na">command</span><span class="pi">:</span> <span class="pi">&gt;</span>
+       <span class="s">apm-server -e</span>
+         <span class="s">-E apm-server.rum.enabled=true</span>
+         <span class="s">-E setup.kibana.host=kibana:5601</span>
+         <span class="s">-E setup.template.settings.index.number_of_replicas=0</span>
+         <span class="s">-E apm-server.kibana.enabled=true</span>
+         <span class="s">-E apm-server.kibana.host=kibana:5601</span>
+         <span class="s">-E output.elasticsearch.hosts=["elasticsearch:9200"]</span>
+    <span class="na">healthcheck</span><span class="pi">:</span>
+      <span class="na">interval</span><span class="pi">:</span> <span class="s">10s</span>
+      <span class="na">retries</span><span class="pi">:</span> <span class="m">12</span>
+      <span class="na">test</span><span class="pi">:</span> <span class="s">curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:8200/</span>
+
+  <span class="na">elasticsearch</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">docker.elastic.co/elasticsearch/elasticsearch:7.9.2</span>
+    <span class="na">environment</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">bootstrap.memory_lock=true</span>
+    <span class="pi">-</span> <span class="s">cluster.name=docker-cluster</span>
+    <span class="pi">-</span> <span class="s">cluster.routing.allocation.disk.threshold_enabled=false</span>
+    <span class="pi">-</span> <span class="s">discovery.type=single-node</span>
+    <span class="pi">-</span> <span class="s">ES_JAVA_OPTS=-XX:UseAVX=2 -Xms1g -Xmx1g</span>
+    <span class="na">ulimits</span><span class="pi">:</span>
+      <span class="na">memlock</span><span class="pi">:</span>
+        <span class="na">hard</span><span class="pi">:</span> <span class="s">-1</span>
+        <span class="na">soft</span><span class="pi">:</span> <span class="s">-1</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">esdata:/usr/share/elasticsearch/data</span>
+    <span class="na">ports</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">9200:9200</span>
+    <span class="na">networks</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">elastic</span>
+    <span class="na">healthcheck</span><span class="pi">:</span>
+      <span class="na">interval</span><span class="pi">:</span> <span class="s">20s</span>
+      <span class="na">retries</span><span class="pi">:</span> <span class="m">10</span>
+      <span class="na">test</span><span class="pi">:</span> <span class="s">curl -s http://localhost:9200/_cluster/health | grep -vq '"status":"red"'</span>
+
+  <span class="na">kibana</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">docker.elastic.co/kibana/kibana:7.9.2</span>
+    <span class="na">depends_on</span><span class="pi">:</span>
+      <span class="na">elasticsearch</span><span class="pi">:</span>
+        <span class="na">condition</span><span class="pi">:</span> <span class="s">service_healthy</span>
+    <span class="na">environment</span><span class="pi">:</span>
+      <span class="na">ELASTICSEARCH_URL</span><span class="pi">:</span> <span class="s">http://elasticsearch:9200</span>
+      <span class="na">ELASTICSEARCH_HOSTS</span><span class="pi">:</span> <span class="s">http://elasticsearch:9200</span>
+    <span class="na">ports</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">5601:5601</span>
+    <span class="na">networks</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">elastic</span>
+    <span class="na">healthcheck</span><span class="pi">:</span>
+      <span class="na">interval</span><span class="pi">:</span> <span class="s">10s</span>
+      <span class="na">retries</span><span class="pi">:</span> <span class="m">20</span>
+      <span class="na">test</span><span class="pi">:</span> <span class="s">curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:5601/api/status</span>
+
+<span class="na">volumes</span><span class="pi">:</span>
+  <span class="na">esdata</span><span class="pi">:</span>
+    <span class="na">driver</span><span class="pi">:</span> <span class="s">local</span>
+
+<span class="na">networks</span><span class="pi">:</span>
+  <span class="na">elastic</span><span class="pi">:</span>
+    <span class="na">driver</span><span class="pi">:</span> <span class="s">bridge</span>
+</code></pre></div></div>
+
+<p><img src="/assets/img/2020-10-16_10h52_21.png" alt="/assets/img/2020-10-16_10h52_21.png" /></p>
+
+<p><img src="/assets/img/2020-10-16_10h53_05.png" alt="/assets/img/2020-10-16_10h53_05.png" /></p>
+
+<h2 id="apm-agents-연결">APM Agents 연결</h2>
+
+<h3 id="1-elastic-apm-agentjar-파일-download">1. elastic-apm-agent.jar 파일 download</h3>
+
+<p><a href="https://search.maven.org/search?q=a:elastic-apm-agent">https://search.maven.org/search?q=a:elastic-apm-agent</a></p>
+
+<h3 id="2-demo-springboot-project-생성">2. demo Springboot project 생성</h3>
+
+<p><a href="https://start.spring.io/">https://start.spring.io/</a></p>
+
+<ul>
+  <li>필자는 아래와 같이 메이븐 프로젝트로 해당 Dependencies를 추가하여 프로젝트를 생성하였다.</li>
+</ul>
+
+<p><img src="/assets/img/2020-10-16_13h27_55.png" alt="/assets/img/2020-10-16_13h27_55.png" /></p>
+
+<ul>
+  <li>간단한 html 페이지를 띄우기 위해 아래와 같이 <code class="language-plaintext highlighter-rouge">[DemoApplication.java](http://demoapplication.java)</code> 파일을 수정한다.</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>package com.example.demo<span class="p">;</span>
+
+import org.springframework.boot.SpringApplication<span class="p">;</span>
+import org.springframework.boot.autoconfigure.SpringBootApplication<span class="p">;</span>
+import org.springframework.web.bind.annotation.GetMapping<span class="p">;</span>
+import org.springframework.web.bind.annotation.RequestParam<span class="p">;</span>
+import org.springframework.web.bind.annotation.RestController<span class="p">;</span>
+
+@SpringBootApplication
+@RestController
+public class DemoApplication <span class="o">{</span>
+
+	public static void main<span class="o">(</span>String[] args<span class="o">)</span> <span class="o">{</span>
+		SpringApplication.run<span class="o">(</span>DemoApplication.class, args<span class="o">)</span><span class="p">;</span>
+		System.out.println<span class="o">(</span><span class="s2">"Hello World"</span><span class="o">)</span><span class="p">;</span>
+	<span class="o">}</span>
+
+	@GetMapping<span class="o">(</span><span class="s2">"/hello"</span><span class="o">)</span>
+	public String sayHello<span class="o">(</span>@RequestParam<span class="o">(</span>value <span class="o">=</span> <span class="s2">"myName"</span>, defaultValue <span class="o">=</span> <span class="s2">"World"</span><span class="o">)</span> String name<span class="o">)</span> <span class="o">{</span>
+		<span class="k">return </span>String.format<span class="o">(</span><span class="s2">"Hello %s!"</span>, name<span class="o">)</span><span class="p">;</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>Application을 실행해 <a href="http://localhost:8080/hello">http://localhost:8080/hello</a> 로 접속해서 Hello World!가 잘 찍혀나오는지 확인한다.</p>
+
+    <p><img src="/assets/img/2020-10-16_13h31_26.png" alt="/assets/img/2020-10-16_13h31_26.png" /></p>
+  </li>
+  <li>
+    <p>elastic-apm-agent.jar을 원하는 위치에 옮겨 놓고 인텔리제이에서 <code class="language-plaintext highlighter-rouge">Ctrl+Alt+Shift+S</code> 로 창을 띄운 후 <code class="language-plaintext highlighter-rouge">Project Settings&gt;Modules&gt;Dependencies</code> 에 <code class="language-plaintext highlighter-rouge">+</code> 버튼을 눌러 다운받은 jar파일을 추가시키자.</p>
+  </li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>java <span class="nt">-javaagent</span>:/path/to/elastic-apm-agent-&lt;version&gt;.jar <span class="se">\</span>
+     <span class="nt">-Delastic</span>.apm.service_name<span class="o">=</span>my-application <span class="se">\</span>
+     <span class="nt">-Delastic</span>.apm.server_urls<span class="o">=</span>http://localhost:8200 <span class="se">\</span>
+     <span class="nt">-Delastic</span>.apm.secret_token<span class="o">=</span> <span class="se">\</span>
+     <span class="nt">-Delastic</span>.apm.application_packages<span class="o">=</span>org.example <span class="se">\</span>
+     <span class="nt">-jar</span> my-application.jar
+</code></pre></div></div>
+
+<ul>
+  <li>프로젝트를 jar파일로 묶어서 실행할 것이라면 위의 공식문서에 나와있는 대로 필요한 부분만 수정해서 사용하면 되고 IDE에서 그대로 실행하고 싶다면 필자처럼 VM options에 아래와 비슷하게 사용하여 실행하면 된다.</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">-javaagent</span>:C:<span class="se">\/</span>elastic-apm-agent-1.18.1.jar <span class="nt">-Delastic</span>.apm.service_name<span class="o">=</span>demo <span class="nt">-Delastic</span>.apm.server_urls<span class="o">=</span>http://172.23.13.91:8200 <span class="nt">-Delastic</span>.apm.secret_token<span class="o">=</span> <span class="nt">-Delastic</span>.apm.application_packages<span class="o">=</span>com.example.demo
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>오류가 나지 않고 정상적으로 실행 되었다면 키바나 APM 페이지로 돌아가 <code class="language-plaintext highlighter-rouge">Check agent status</code> 와 <code class="language-plaintext highlighter-rouge">Load Kibana objects</code> 버튼을 눌러 성공적으로 세팅이 되었는지 확인한다.</p>
+
+    <p><img src="/assets/img/2020-10-16_13h37_29.png" alt="/assets/img/2020-10-16_13h37_29.png" /></p>
+  </li>
+  <li>
+    <p>세팅이 잘 되었다면 APM을 실행한다.</p>
+  </li>
+</ul>
+
+<h1 id="apm-데이터-확인">APM 데이터 확인</h1>
+
+<h2 id="연동된-서비스-확인">연동된 서비스 확인</h2>
+
+<ul>
+  <li>필자가 연동한 서비스인 demo가 추가 되어있음을 확인할 수 있다.</li>
+</ul>
+
+<p><img src="/assets/img/2020-10-16_13h46_16.png" alt="/assets/img/2020-10-16_13h46_16.png" /></p>
+
+<h2 id="transactions-모니터링">Transactions 모니터링</h2>
+
+<ul>
+  <li>필터를 통해서 원하는 조건을 주어 트랜잭션에 대해서 모니터링이 가능</li>
+</ul>
+
+<p><img src="/assets/img/2020-10-16_13h50_30.png" alt="/assets/img/2020-10-16_13h50_30.png" /></p>
+
+<p><img src="/assets/img/2020-10-16_13h52_29.png" alt="/assets/img/2020-10-16_13h52_29.png" /></p>
+
+<h2 id="errors-모니터링">Errors 모니터링</h2>
+
+<ul>
+  <li>필터를 통해서 원하는 조건을 주어 트랜잭션에 대해서 모니터링이 가능</li>
+</ul>
+
+<p><img src="/assets/img/2020-10-16_14h01_38.png" alt="/assets/img/2020-10-16_14h01_38.png" /></p>
+
+<h2 id="jvms-모니터링">JVMs 모니터링</h2>
+
+<ul>
+  <li>필터를 통해서 원하는 조건을 주어 트랜잭션에 대해서 모니터링이 가능</li>
+</ul>
+
+<p><img src="/assets/img/2020-10-16_14h02_25.png" alt="/assets/img/2020-10-16_14h02_25.png" /></p>
+:ET

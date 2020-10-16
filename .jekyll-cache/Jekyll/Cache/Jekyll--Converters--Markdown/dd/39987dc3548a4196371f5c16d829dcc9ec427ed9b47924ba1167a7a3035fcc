@@ -1,4 +1,4 @@
-I"fE<h1 id="실습-환경">실습 환경</h1>
+I"�D<h1 id="실습-환경">실습 환경</h1>
 
 <ul>
   <li>OS : CentOS 7</li>
@@ -181,8 +181,6 @@ Starting es01  ... <span class="k">done
 </span>Starting es03  ... <span class="k">done
 </span>Starting kib01 ... <span class="k">done</span>
 </code></pre></div></div>
-
-<p><a href="https://www.notion.so/34-10-14-d3598aea499d438c8f0b27f1bdfd5d3e">34일차(10/14) (수)</a></p>
 
 <p>혹시나 <code class="language-plaintext highlighter-rouge">docker-compose start</code>를 했을 때 인덱스 관련 에러가 뜬다면 기존에 생성된 인덱스가 깨졌거나 충돌이 되어 그럴 수 있으므로 모두 삭제해준다. 필자의 경우 해당 경로에 볼륨이 추가되어있었으므로 아래와 같이 삭제하였다.</p>
 

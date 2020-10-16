@@ -1,0 +1,816 @@
+I"��<p>React  공식 문서에 있는 Tic Tac Toe 게임을 따라하면서 정리 해보았다.</p>
+
+<p><a href="https://ko.reactjs.org/tutorial/tutorial.html#prerequisites">https://ko.reactjs.org/tutorial/tutorial.html#prerequisites</a></p>
+
+<h1 id="props로-데이터-전달">Props로 데이터 전달</h1>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nx">Board</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+  <span class="nx">renderSquare</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">//Square 컴포넌트에 value라는 키값으로 i값을 pros로 전달</span>
+    <span class="k">return</span> <span class="p">&lt;</span><span class="nc">Square</span> <span class="na">value</span><span class="p">=</span><span class="si">{</span><span class="nx">i</span><span class="si">}</span> <span class="p">/&gt;;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nx">Square</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+  <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nt">button</span> <span class="na">className</span><span class="p">=</span><span class="s">"square"</span><span class="p">&gt;</span>
+				//Board 컴포넌트에서 받아온 value 값을 출력
+        <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">value</span><span class="si">}</span>
+      <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h1 id="버튼을-클릭할-시-x-표시가-되도록-하기">버튼을 클릭할 시 X 표시가 되도록 하기</h1>
+
+<p><code class="language-plaintext highlighter-rouge">onClick={alert('click')}</code> 로 작성하는 실수를 많이 한다고 함.</p>
+
+<p><code class="language-plaintext highlighter-rouge">onClick={() =&gt; alert('click')}</code> 로 작성하도록 함.</p>
+
+<p>화살표 함수를 쓰는 이유 : 타이핑 횟수를 줄이고 this의 혼란스러운 동작을 피하기 위함.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nx">Square</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+  <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+			<span class="c1">//버튼을 클릭했을 때 alert이 뜨도록 처리</span>
+      <span class="p">&lt;</span><span class="nt">button</span> <span class="na">className</span><span class="p">=</span><span class="s">"square"</span> <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span> <span class="nx">alert</span><span class="p">(</span><span class="dl">'</span><span class="s1">click</span><span class="dl">'</span><span class="p">);</span> <span class="p">}</span><span class="si">}</span><span class="p">&gt;</span>
+        <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">value</span><span class="si">}</span>
+      <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nx">Square</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+ <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+   <span class="k">return</span> <span class="p">(</span>
+			<span class="c1">//화살표 함수를 사용해서 간단하게 표현할 수도 있음</span>
+     <span class="p">&lt;</span><span class="nt">button</span> <span class="na">className</span><span class="p">=</span><span class="s">"square"</span> <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">alert</span><span class="p">(</span><span class="dl">'</span><span class="s1">click</span><span class="dl">'</span><span class="p">)</span><span class="si">}</span><span class="p">&gt;</span>
+       <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">value</span><span class="si">}</span>
+     <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+   <span class="p">);</span>
+ <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h1 id="생성자-추가">생성자 추가</h1>
+
+<ul>
+  <li>JavaScript 클래스에서 하위 클래스의 생성자를 정의할 때 항상 super를 호출해야 함</li>
+  <li>모든 React 컴포넌트 클래스는 생성자를 가질 때 super(props) 호출 구문부터 작성해야 함</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nx">Square</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+  <span class="c1">//생성자를 추가하여 value라는 state 값을 초기화</span>
+  <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="na">value</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="p">};</span>
+  <span class="p">}</span>
+
+  <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nt">button</span> <span class="na">className</span><span class="p">=</span><span class="s">"square"</span> <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="nx">alert</span><span class="p">(</span><span class="dl">'</span><span class="s1">click</span><span class="dl">'</span><span class="p">)</span><span class="si">}</span><span class="p">&gt;</span>
+        <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">value</span><span class="si">}</span>
+      <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nx">Square</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+  <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="na">value</span><span class="p">:</span> <span class="kc">null</span><span class="p">,</span>
+    <span class="p">};</span>
+  <span class="p">}</span>
+
+  <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nt">button</span>
+        <span class="na">className</span><span class="p">=</span><span class="s">"square"</span>
+				<span class="c1">//버튼 클릭시 value라는 state 변수에 'X'값을 세팅</span>
+        <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span><span class="na">value</span><span class="p">:</span> <span class="dl">'</span><span class="s1">X</span><span class="dl">'</span><span class="p">})</span><span class="si">}</span>
+      <span class="p">&gt;</span>
+        <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">value</span><span class="si">}</span>
+      <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h1 id="state-끌어-올리기">State 끌어 올리기</h1>
+
+<ul>
+  <li>각 Square 컴포넌트가 아닌 부모 Board 컴포넌트에 게임의 상태를 저장하는 것이 가장 좋은 방법</li>
+  <li>각 Square에 숫자를 넘겨주었을 때와 같이 Board 컴포넌트는 각 Square에게 prop을 전달하는 것으로 무엇을 표시할 지 알려줌</li>
+  <li>자식으로부터 데이터를 모으거나 두 개의 자식 컴포넌트들이 서로 통신하게 하려면 부모 컴포넌트에 공유 state를 정의해야 함</li>
+  <li>부모 컴포넌트는 props를 사용하여 자식 컴포넌트에 state를 다시 전달할 수 있음</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nx">Board</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+  <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span>
+			<span class="c1">//9개의 사각형에 해당하는 9개의 null 배열을 초기화 하고 state로 설정</span>
+      <span class="na">squares</span><span class="p">:</span> <span class="nb">Array</span><span class="p">(</span><span class="mi">9</span><span class="p">).</span><span class="nx">fill</span><span class="p">(</span><span class="kc">null</span><span class="p">),</span>
+    <span class="p">};</span>
+  <span class="p">}</span>
+
+<span class="c1">// ==&gt; state로 변경</span>
+	<span class="nx">renderSquare</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">&lt;</span><span class="nc">Square</span> <span class="na">value</span><span class="p">=</span><span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">squares</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="si">}</span> <span class="p">/&gt;;</span>
+  <span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>Board에서 Square로 함수를 전달하고 사각형을 클릭할 때 함수 호출</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Board 컴포넌트 중간</span>
+<span class="nx">renderSquare</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nc">Square</span>
+        <span class="na">value</span><span class="p">=</span><span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">squares</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="si">}</span>
+        <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">handleClick</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span><span class="si">}</span>
+      <span class="p">/&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+
+<span class="nx">handleClick</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">squares</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">squares</span><span class="p">.</span><span class="nx">slice</span><span class="p">();</span>
+  <span class="nx">squares</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">X</span><span class="dl">'</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span><span class="na">squares</span><span class="p">:</span> <span class="nx">squares</span><span class="p">});</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nx">Square</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+  <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nt">button</span>
+        <span class="na">className</span><span class="p">=</span><span class="s">"square"</span>
+				<span class="c1">//Board에서 받아온 props에 들어있는 함수 세팅</span>
+        <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">onClick</span><span class="p">()</span><span class="si">}</span>
+      <span class="p">&gt;</span>
+				//Board에서 받아온 props에 들어있는 value 값 세팅
+        <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">value</span><span class="si">}</span>
+      <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h1 id="불변성">불변성</h1>
+
+<ul>
+  <li>복잡한 특징들을 단순하게 만듦, 변화를 감지함, 다시 렌더링하는 시기를 결정함</li>
+  <li>
+    <p>데이터 변경 방법</p>
+
+    <p>1.데이터를 직접 변경</p>
+
+    <div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="kd">var</span> <span class="nx">player</span> <span class="o">=</span> <span class="p">{</span><span class="na">score</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Jeff</span><span class="dl">'</span><span class="p">};</span>
+  <span class="nx">player</span><span class="p">.</span><span class="nx">score</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+</code></pre></div>    </div>
+
+    <p>2.새로운 사본 데이터로 교체</p>
+
+    <div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="kd">var</span> <span class="nx">player</span> <span class="o">=</span> <span class="p">{</span><span class="na">score</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Jeff</span><span class="dl">'</span><span class="p">};</span>
+
+  <span class="kd">var</span> <span class="nx">newPlayer</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">assign</span><span class="p">({},</span> <span class="nx">player</span><span class="p">,</span> <span class="p">{</span><span class="na">score</span><span class="p">:</span> <span class="mi">2</span><span class="p">});</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<h1 id="함수-컴포넌트">함수 컴포넌트</h1>
+
+<ul>
+  <li>더 간단하게 컴포넌트를 작성하는 방법</li>
+  <li>state 없이 render 함수만을 가짐</li>
+  <li>this가 사라짐</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//클래스형 컴포넌트</span>
+<span class="kd">class</span> <span class="nx">Square</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+  <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nt">button</span>
+        <span class="na">className</span><span class="p">=</span><span class="s">"square"</span>
+				<span class="c1">//Board에서 받아온 props에 들어있는 함수 세팅</span>
+        <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">onClick</span><span class="p">()</span><span class="si">}</span>
+      <span class="p">&gt;</span>
+				//Board에서 받아온 props에 들어있는 value 값 세팅
+        <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">value</span><span class="si">}</span>
+      <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">//함수형 컴포넌트</span>
+<span class="kd">function</span> <span class="nx">Square</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">button</span> <span class="na">className</span><span class="p">=</span><span class="s">"square"</span> <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="nx">props</span><span class="p">.</span><span class="nx">onClick</span><span class="si">}</span><span class="p">&gt;</span>
+      <span class="si">{</span><span class="nx">props</span><span class="p">.</span><span class="nx">value</span><span class="si">}</span>
+    <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+  <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h1 id="순서-만들기">순서 만들기</h1>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nx">Board</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+  <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="na">squares</span><span class="p">:</span> <span class="nb">Array</span><span class="p">(</span><span class="mi">9</span><span class="p">).</span><span class="nx">fill</span><span class="p">(</span><span class="kc">null</span><span class="p">),</span>
+			<span class="c1">//첫번째 차례의 기본값 세팅</span>
+      <span class="na">xIsNext</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="p">};</span>
+  <span class="p">}</span>
+
+	<span class="nx">handleClick</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+	  <span class="kd">const</span> <span class="nx">squares</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">squares</span><span class="p">.</span><span class="nx">slice</span><span class="p">();</span>
+    <span class="c1">//삼항 연산자 활용 세팅</span>
+	  <span class="nx">squares</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span> <span class="p">?</span> <span class="dl">'</span><span class="s1">X</span><span class="dl">'</span> <span class="p">:</span> <span class="dl">'</span><span class="s1">O</span><span class="dl">'</span><span class="p">;</span>
+	  <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span>
+	    <span class="na">squares</span><span class="p">:</span> <span class="nx">squares</span><span class="p">,</span>
+      <span class="c1">//xIsNext state 값에 따라 true, false 값 변경</span>
+	    <span class="na">xIsNext</span><span class="p">:</span> <span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span><span class="p">,</span>
+	  <span class="p">});</span>
+	<span class="p">}</span>
+
+	<span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+			<span class="c1">//status을 통해 다음 차례 플레이어를 알려줌</span>
+	    <span class="kd">const</span> <span class="nx">status</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Next player: </span><span class="dl">'</span> <span class="o">+</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span> <span class="p">?</span> <span class="dl">'</span><span class="s1">X</span><span class="dl">'</span> <span class="p">:</span> <span class="dl">'</span><span class="s1">O</span><span class="dl">'</span><span class="p">);</span>
+	
+	    <span class="k">return</span> <span class="p">(</span>
+	      <span class="c1">// 나머지는 그대로</span>
+</code></pre></div></div>
+
+<ul>
+  <li>순서 만들기 완성 소스</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nx">Board</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+  <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="na">squares</span><span class="p">:</span> <span class="nb">Array</span><span class="p">(</span><span class="mi">9</span><span class="p">).</span><span class="nx">fill</span><span class="p">(</span><span class="kc">null</span><span class="p">),</span>
+      <span class="na">xIsNext</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="p">};</span>
+  <span class="p">}</span>
+
+  <span class="nx">handleClick</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">squares</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">squares</span><span class="p">.</span><span class="nx">slice</span><span class="p">();</span>
+    <span class="nx">squares</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span> <span class="p">?</span> <span class="dl">'</span><span class="s1">X</span><span class="dl">'</span> <span class="p">:</span> <span class="dl">'</span><span class="s1">O</span><span class="dl">'</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span>
+      <span class="na">squares</span><span class="p">:</span> <span class="nx">squares</span><span class="p">,</span>
+      <span class="na">xIsNext</span><span class="p">:</span> <span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span><span class="p">,</span>
+    <span class="p">});</span>
+  <span class="p">}</span>
+
+  <span class="nx">renderSquare</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nc">Square</span>
+        <span class="na">value</span><span class="p">=</span><span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">squares</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="si">}</span>
+        <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">handleClick</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span><span class="si">}</span>
+      <span class="p">/&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">status</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Next player: </span><span class="dl">'</span> <span class="o">+</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span> <span class="p">?</span> <span class="dl">'</span><span class="s1">X</span><span class="dl">'</span> <span class="p">:</span> <span class="dl">'</span><span class="s1">O</span><span class="dl">'</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"status"</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">status</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"board-row"</span><span class="p">&gt;</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span>
+        <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"board-row"</span><span class="p">&gt;</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="si">}</span>
+        <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"board-row"</span><span class="p">&gt;</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="si">}</span>
+        <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+      <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h1 id="승자-결정하기">승자 결정하기</h1>
+
+<ul>
+  <li>최하단에 해당 소스 추가</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">calculateWinner</span><span class="p">(</span><span class="nx">squares</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">lines</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+  <span class="p">];</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">lines</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="p">[</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">c</span><span class="p">]</span> <span class="o">=</span> <span class="nx">lines</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">squares</span><span class="p">[</span><span class="nx">a</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="nx">squares</span><span class="p">[</span><span class="nx">a</span><span class="p">]</span> <span class="o">===</span> <span class="nx">squares</span><span class="p">[</span><span class="nx">b</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="nx">squares</span><span class="p">[</span><span class="nx">a</span><span class="p">]</span> <span class="o">===</span> <span class="nx">squares</span><span class="p">[</span><span class="nx">c</span><span class="p">])</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">squares</span><span class="p">[</span><span class="nx">a</span><span class="p">];</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>Board render 함수에 추가 (누가 우승했는지 문구 표시용)</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">winner</span> <span class="o">=</span> <span class="nx">calculateWinner</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">squares</span><span class="p">);</span>
+    <span class="kd">let</span> <span class="nx">status</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">winner</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">status</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Winner: </span><span class="dl">'</span> <span class="o">+</span> <span class="nx">winner</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="nx">status</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Next player: </span><span class="dl">'</span> <span class="o">+</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span> <span class="p">?</span> <span class="dl">'</span><span class="s1">X</span><span class="dl">'</span> <span class="p">:</span> <span class="dl">'</span><span class="s1">O</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">}</span>
+
+<span class="p">...</span>
+</code></pre></div></div>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">handleClick</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">squares</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">squares</span><span class="p">.</span><span class="nx">slice</span><span class="p">();</span>
+  <span class="c1">//누군가 승리하거나 Square가 이미 채워져있다면 handleClick 함수가 무시하도록 처리</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">calculateWinner</span><span class="p">(</span><span class="nx">squares</span><span class="p">)</span> <span class="o">||</span> <span class="nx">squares</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span> <span class="p">{</span>
+    <span class="k">return</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="nx">squares</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span> <span class="p">?</span> <span class="dl">'</span><span class="s1">X</span><span class="dl">'</span> <span class="p">:</span> <span class="dl">'</span><span class="s1">O</span><span class="dl">'</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span>
+    <span class="na">squares</span><span class="p">:</span> <span class="nx">squares</span><span class="p">,</span>
+    <span class="na">xIsNext</span><span class="p">:</span> <span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span><span class="p">,</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h1 id="시간-여행-추가하기">시간 여행 추가하기</h1>
+
+<h2 id="동작에-대한-기록-저장하기">동작에 대한 기록 저장하기</h2>
+
+<ul>
+  <li>과거의 squares 배열들을 history라는 다른 배열에 저장</li>
+</ul>
+
+<h2 id="다시-state-끌어올리기">다시 state 끌어올리기</h2>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nx">Game</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+  <span class="c1">//초기 state 설정</span>
+  <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="c1">//history라는 저장된 과거의 차례를 Board가 렌더링할 수 있게 만들 예정</span>
+      <span class="na">history</span><span class="p">:</span> <span class="p">[{</span>
+        <span class="na">squares</span><span class="p">:</span> <span class="nb">Array</span><span class="p">(</span><span class="mi">9</span><span class="p">).</span><span class="nx">fill</span><span class="p">(</span><span class="kc">null</span><span class="p">),</span>
+      <span class="p">}],</span>
+      <span class="na">xIsNext</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="p">};</span>
+  <span class="p">}</span>
+
+  <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"game"</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"game-board"</span><span class="p">&gt;</span>
+          <span class="p">&lt;</span><span class="nc">Board</span> <span class="p">/&gt;</span>
+        <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"game-info"</span><span class="p">&gt;</span>
+          <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span><span class="si">{</span><span class="cm">/* status */</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+          <span class="p">&lt;</span><span class="nt">ol</span><span class="p">&gt;</span><span class="si">{</span><span class="cm">/* TODO */</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">ol</span><span class="p">&gt;</span>
+        <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+      <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nx">Board</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+  <span class="nx">handleClick</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">squares</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">squares</span><span class="p">.</span><span class="nx">slice</span><span class="p">();</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">calculateWinner</span><span class="p">(</span><span class="nx">squares</span><span class="p">)</span> <span class="o">||</span> <span class="nx">squares</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span> <span class="p">{</span>
+      <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="nx">squares</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span> <span class="p">?</span> <span class="dl">'</span><span class="s1">X</span><span class="dl">'</span> <span class="p">:</span> <span class="dl">'</span><span class="s1">O</span><span class="dl">'</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span>
+      <span class="na">squares</span><span class="p">:</span> <span class="nx">squares</span><span class="p">,</span>
+      <span class="na">xIsNext</span><span class="p">:</span> <span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span><span class="p">,</span>
+    <span class="p">});</span>
+  <span class="p">}</span>
+
+  <span class="nx">renderSquare</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nc">Square</span>
+        <span class="c1">//Game 컴포넌트에서 전달받은 value값과 onClick 함수를 전달함</span>
+        <span class="na">value</span><span class="p">=</span><span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">squares</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="si">}</span>
+        <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">onClick</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span><span class="si">}</span>
+      <span class="p">/&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">winner</span> <span class="o">=</span> <span class="nx">calculateWinner</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">squares</span><span class="p">);</span>
+    <span class="kd">let</span> <span class="nx">status</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">winner</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">status</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Winner: </span><span class="dl">'</span> <span class="o">+</span> <span class="nx">winner</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="nx">status</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Next player: </span><span class="dl">'</span> <span class="o">+</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span> <span class="p">?</span> <span class="dl">'</span><span class="s1">X</span><span class="dl">'</span> <span class="p">:</span> <span class="dl">'</span><span class="s1">O</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"status"</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">status</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"board-row"</span><span class="p">&gt;</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span>
+        <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"board-row"</span><span class="p">&gt;</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="si">}</span>
+        <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"board-row"</span><span class="p">&gt;</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="si">}</span>
+        <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+      <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>함수를 가장 최근 기록을 사용하도록 업데이트하여 게임의 상태를 확인하고 표시</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Game 컴포넌트, Board render 함수에서 중복되는 코드는 제거 필요</span>
+<span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">history</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">history</span><span class="p">;</span>
+  <span class="kd">const</span> <span class="nx">current</span> <span class="o">=</span> <span class="nx">history</span><span class="p">[</span><span class="nx">history</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">];</span>
+  <span class="kd">const</span> <span class="nx">winner</span> <span class="o">=</span> <span class="nx">calculateWinner</span><span class="p">(</span><span class="nx">current</span><span class="p">.</span><span class="nx">squares</span><span class="p">);</span>
+  <span class="kd">let</span> <span class="nx">status</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">winner</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">status</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Winner: </span><span class="dl">'</span> <span class="o">+</span> <span class="nx">winner</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="nx">status</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Next player: </span><span class="dl">'</span> <span class="o">+</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span> <span class="p">?</span> <span class="dl">'</span><span class="s1">X</span><span class="dl">'</span> <span class="p">:</span> <span class="dl">'</span><span class="s1">O</span><span class="dl">'</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"game"</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"game-board"</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nc">Board</span>
+          <span class="na">squares</span><span class="p">=</span><span class="si">{</span><span class="nx">current</span><span class="p">.</span><span class="nx">squares</span><span class="si">}</span>
+          <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">handleClick</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span><span class="si">}</span>
+        <span class="p">/&gt;</span>
+      <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"game-info"</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">status</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">ol</span><span class="p">&gt;</span><span class="si">{</span><span class="cm">/* TODO */</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">ol</span><span class="p">&gt;</span>
+      <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Board render 함수에서 중복 제거 후</span>
+<span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"board-row"</span><span class="p">&gt;</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span>
+        <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"board-row"</span><span class="p">&gt;</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="si">}</span>
+        <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"board-row"</span><span class="p">&gt;</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="si">}</span>
+        <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+      <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>handleClick 함수를 Board에서 Game 컴포넌트로 이동</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//state가 다르기 때문에 handleClick 수정 필요</span>
+<span class="nx">handleClick</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">history</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">history</span><span class="p">;</span>
+  <span class="kd">const</span> <span class="nx">current</span> <span class="o">=</span> <span class="nx">history</span><span class="p">[</span><span class="nx">history</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">];</span>
+  <span class="kd">const</span> <span class="nx">squares</span> <span class="o">=</span> <span class="nx">current</span><span class="p">.</span><span class="nx">squares</span><span class="p">.</span><span class="nx">slice</span><span class="p">();</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">calculateWinner</span><span class="p">(</span><span class="nx">squares</span><span class="p">)</span> <span class="o">||</span> <span class="nx">squares</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span> <span class="p">{</span>
+    <span class="k">return</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="nx">squares</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span> <span class="p">?</span> <span class="dl">'</span><span class="s1">X</span><span class="dl">'</span> <span class="p">:</span> <span class="dl">'</span><span class="s1">O</span><span class="dl">'</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span>
+    <span class="na">history</span><span class="p">:</span> <span class="nx">history</span><span class="p">.</span><span class="nx">concat</span><span class="p">([{</span>
+      <span class="na">squares</span><span class="p">:</span> <span class="nx">squares</span><span class="p">,</span>
+    <span class="p">}]),</span>
+    <span class="na">xIsNext</span><span class="p">:</span> <span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span><span class="p">,</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="과거의-이동-표시하기">과거의 이동 표시하기</h2>
+
+<ul>
+  <li>다른 데이터와 함께 매핑할 때 사용하는 <code class="language-plaintext highlighter-rouge">map()</code> 함수 활용</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Game 컴포넌트</span>
+<span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">history</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">history</span><span class="p">;</span>
+  <span class="kd">const</span> <span class="nx">current</span> <span class="o">=</span> <span class="nx">history</span><span class="p">[</span><span class="nx">history</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">];</span>
+  <span class="kd">const</span> <span class="nx">winner</span> <span class="o">=</span> <span class="nx">calculateWinner</span><span class="p">(</span><span class="nx">current</span><span class="p">.</span><span class="nx">squares</span><span class="p">);</span>
+
+  <span class="c1">//돌아가는 버튼 목록 표시</span>
+  <span class="kd">const</span> <span class="nx">moves</span> <span class="o">=</span> <span class="nx">history</span><span class="p">.</span><span class="nx">map</span><span class="p">((</span><span class="nx">step</span><span class="p">,</span> <span class="nx">move</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">desc</span> <span class="o">=</span> <span class="nx">move</span> <span class="p">?</span>
+      <span class="dl">'</span><span class="s1">Go to move #</span><span class="dl">'</span> <span class="o">+</span> <span class="nx">move</span> <span class="p">:</span>
+      <span class="dl">'</span><span class="s1">Go to game start</span><span class="dl">'</span><span class="p">;</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">button</span> <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">jumpTo</span><span class="p">(</span><span class="nx">move</span><span class="p">)</span><span class="si">}</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">desc</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+      <span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+    <span class="p">);</span>
+  <span class="p">});</span>
+  <span class="c1">//</span>
+
+  <span class="kd">let</span> <span class="nx">status</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">winner</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">status</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Winner: </span><span class="dl">'</span> <span class="o">+</span> <span class="nx">winner</span><span class="p">;</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="nx">status</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Next player: </span><span class="dl">'</span> <span class="o">+</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span> <span class="p">?</span> <span class="dl">'</span><span class="s1">X</span><span class="dl">'</span> <span class="p">:</span> <span class="dl">'</span><span class="s1">O</span><span class="dl">'</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"game"</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"game-board"</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nc">Board</span>
+          <span class="na">squares</span><span class="p">=</span><span class="si">{</span><span class="nx">current</span><span class="p">.</span><span class="nx">squares</span><span class="si">}</span>
+          <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">handleClick</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span><span class="si">}</span>
+        <span class="p">/&gt;</span>
+      <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"game-info"</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">status</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+        //돌아가는 버튼 목록 표시
+        <span class="p">&lt;</span><span class="nt">ol</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">moves</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">ol</span><span class="p">&gt;</span>
+      <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="시간-여행-구현하기">시간 여행 구현하기</h2>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Game 컴포넌트 render 함수안</span>
+<span class="kd">const</span> <span class="nx">moves</span> <span class="o">=</span> <span class="nx">history</span><span class="p">.</span><span class="nx">map</span><span class="p">((</span><span class="nx">step</span><span class="p">,</span> <span class="nx">move</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">desc</span> <span class="o">=</span> <span class="nx">move</span> <span class="p">?</span>
+      <span class="dl">'</span><span class="s1">Go to move #</span><span class="dl">'</span> <span class="o">+</span> <span class="nx">move</span> <span class="p">:</span>
+      <span class="dl">'</span><span class="s1">Go to game start</span><span class="dl">'</span><span class="p">;</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="c1">//key 값 구현, React의 key에 대한 경고가 사라짐</span>
+      <span class="p">&lt;</span><span class="nt">li</span> <span class="na">key</span><span class="p">=</span><span class="si">{</span><span class="nx">move</span><span class="si">}</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">button</span> <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">jumpTo</span><span class="p">(</span><span class="nx">move</span><span class="p">)</span><span class="si">}</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">desc</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+      <span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+    <span class="p">);</span>
+  <span class="p">});</span>
+</code></pre></div></div>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Game 컴포넌트 state 추가</span>
+<span class="kd">class</span> <span class="nx">Game</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+	<span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+	  <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+	  <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span>
+	    <span class="na">history</span><span class="p">:</span> <span class="p">[{</span>
+	      <span class="na">squares</span><span class="p">:</span> <span class="nb">Array</span><span class="p">(</span><span class="mi">9</span><span class="p">).</span><span class="nx">fill</span><span class="p">(</span><span class="kc">null</span><span class="p">),</span>
+	    <span class="p">}],</span>
+      <span class="c1">//초기값 세팅</span>
+	    <span class="na">stepNumber</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+	    <span class="na">xIsNext</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+	  <span class="p">};</span>
+	<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Game 컴포넌트에 jumpTo 함수 추가</span>
+<span class="nx">handleClick</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// 이 함수는 변하지 않음</span>
+<span class="p">}</span>
+
+<span class="c1">//짝수일 때마다 xIsNext true</span>
+<span class="nx">jumpTo</span><span class="p">(</span><span class="nx">step</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span>
+    <span class="na">stepNumber</span><span class="p">:</span> <span class="nx">step</span><span class="p">,</span>
+    <span class="na">xIsNext</span><span class="p">:</span> <span class="p">(</span><span class="nx">step</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+
+<span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// 이 함수는 변하지 않음</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Game 컴포넌트</span>
+<span class="nx">handleClick</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">//새로운 이동이 발생할 때 미래의 기록을 모두 날려버림</span>
+	<span class="kd">const</span> <span class="nx">history</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">history</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">stepNumber</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+  <span class="kd">const</span> <span class="nx">current</span> <span class="o">=</span> <span class="nx">history</span><span class="p">[</span><span class="nx">history</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">];</span>
+  <span class="kd">const</span> <span class="nx">squares</span> <span class="o">=</span> <span class="nx">current</span><span class="p">.</span><span class="nx">squares</span><span class="p">.</span><span class="nx">slice</span><span class="p">();</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">calculateWinner</span><span class="p">(</span><span class="nx">squares</span><span class="p">)</span> <span class="o">||</span> <span class="nx">squares</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span> <span class="p">{</span>
+    <span class="k">return</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="nx">squares</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span> <span class="p">?</span> <span class="dl">'</span><span class="s1">X</span><span class="dl">'</span> <span class="p">:</span> <span class="dl">'</span><span class="s1">O</span><span class="dl">'</span><span class="p">;</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span>
+    <span class="na">history</span><span class="p">:</span> <span class="nx">history</span><span class="p">.</span><span class="nx">concat</span><span class="p">([{</span>
+      <span class="na">squares</span><span class="p">:</span> <span class="nx">squares</span>
+    <span class="p">}]),</span>
+    <span class="c1">//history의 갯수만큼 세팅</span>
+    <span class="na">stepNumber</span><span class="p">:</span> <span class="nx">history</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span>
+    <span class="na">xIsNext</span><span class="p">:</span> <span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span><span class="p">,</span>
+  <span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Game 컴포넌트</span>
+<span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">history</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">history</span><span class="p">;</span>
+    <span class="c1">//state 값으로 세팅한 stepNumber로 현재 선택된 이동으로 렌더링</span>
+    <span class="kd">const</span> <span class="nx">current</span> <span class="o">=</span> <span class="nx">history</span><span class="p">[</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">stepNumber</span><span class="p">];</span>
+    <span class="kd">const</span> <span class="nx">winner</span> <span class="o">=</span> <span class="nx">calculateWinner</span><span class="p">(</span><span class="nx">current</span><span class="p">.</span><span class="nx">squares</span><span class="p">);</span>
+</code></pre></div></div>
+
+<h1 id="최종-소스">최종 소스</h1>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">Square</span><span class="p">(</span><span class="nx">props</span><span class="p">){</span>
+  <span class="k">return</span> <span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">button</span> <span class="na">className</span><span class="p">=</span><span class="s">"square"</span> <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="nx">props</span><span class="p">.</span><span class="nx">onClick</span><span class="si">}</span><span class="p">&gt;</span>
+      <span class="si">{</span><span class="nx">props</span><span class="p">.</span><span class="nx">value</span><span class="si">}</span>
+    <span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+  <span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nx">Board</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+          
+  <span class="nx">renderSquare</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nc">Square</span>
+        <span class="na">value</span><span class="p">=</span><span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">squares</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span><span class="si">}</span>
+        <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">onClick</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span><span class="si">}</span>
+      <span class="p">/&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"board-row"</span><span class="p">&gt;</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span>
+        <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"board-row"</span><span class="p">&gt;</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="si">}</span>
+        <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"board-row"</span><span class="p">&gt;</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="si">}</span>
+          <span class="si">{</span><span class="k">this</span><span class="p">.</span><span class="nx">renderSquare</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="si">}</span>
+        <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+      <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">class</span> <span class="nx">Game</span> <span class="kd">extends</span> <span class="nx">React</span><span class="p">.</span><span class="nx">Component</span> <span class="p">{</span>
+  <span class="kd">constructor</span><span class="p">(</span><span class="nx">props</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">super</span><span class="p">(</span><span class="nx">props</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">state</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="na">history</span><span class="p">:</span> <span class="p">[{</span>
+        <span class="na">squares</span><span class="p">:</span> <span class="nb">Array</span><span class="p">(</span><span class="mi">9</span><span class="p">).</span><span class="nx">fill</span><span class="p">(</span><span class="kc">null</span><span class="p">),</span>
+      <span class="p">}],</span>
+      <span class="na">stepNumber</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+      <span class="na">xIsNext</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="p">};</span>
+  <span class="p">}</span>
+  
+  <span class="nx">jumpTo</span><span class="p">(</span><span class="nx">step</span><span class="p">){</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span>
+      <span class="na">stepNumber</span><span class="p">:</span> <span class="nx">step</span><span class="p">,</span>
+      <span class="na">xIsNext</span><span class="p">:</span> <span class="p">(</span><span class="nx">step</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span> <span class="o">===</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="p">})</span>
+  <span class="p">}</span>
+  
+  <span class="nx">handleClick</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">history</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">history</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">stepNumber</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="kd">const</span> <span class="nx">current</span> <span class="o">=</span> <span class="nx">history</span><span class="p">[</span><span class="nx">history</span><span class="p">.</span><span class="nx">length</span> <span class="o">-</span><span class="mi">1</span><span class="p">];</span>
+    <span class="kd">const</span> <span class="nx">squares</span> <span class="o">=</span> <span class="nx">current</span><span class="p">.</span><span class="nx">squares</span><span class="p">.</span><span class="nx">slice</span><span class="p">();</span>
+    <span class="k">if</span><span class="p">(</span><span class="nx">calculateWinner</span><span class="p">(</span><span class="nx">squares</span><span class="p">)</span> <span class="o">||</span> <span class="nx">squares</span><span class="p">[</span><span class="nx">i</span><span class="p">]){</span>
+      <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nx">squares</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span> <span class="p">?</span> <span class="dl">'</span><span class="s1">X</span><span class="dl">'</span> <span class="p">:</span> <span class="dl">'</span><span class="s1">O</span><span class="dl">'</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">setState</span><span class="p">({</span>
+      <span class="na">history</span><span class="p">:</span> <span class="nx">history</span><span class="p">.</span><span class="nx">concat</span><span class="p">([{</span>
+        <span class="na">squares</span><span class="p">:</span> <span class="nx">squares</span><span class="p">,</span>
+      <span class="p">}]),</span>
+      <span class="na">stepNumber</span><span class="p">:</span> <span class="nx">history</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span>
+      <span class="na">xIsNext</span><span class="p">:</span> <span class="o">!</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span><span class="p">,</span>  
+    <span class="p">});</span>
+  <span class="p">}</span>
+  
+  <span class="nx">render</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">history</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">history</span><span class="p">;</span>
+    <span class="kd">const</span> <span class="nx">current</span> <span class="o">=</span> <span class="nx">history</span><span class="p">[</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">stepNumber</span><span class="p">];</span>
+    <span class="kd">const</span> <span class="nx">winner</span> <span class="o">=</span> <span class="nx">calculateWinner</span><span class="p">(</span><span class="nx">current</span><span class="p">.</span><span class="nx">squares</span><span class="p">);</span>
+    
+    <span class="kd">const</span> <span class="nx">moves</span> <span class="o">=</span> <span class="nx">history</span><span class="p">.</span><span class="nx">map</span><span class="p">((</span><span class="nx">step</span><span class="p">,</span> <span class="nx">move</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">desc</span> <span class="o">=</span> <span class="nx">move</span> <span class="p">?</span> 
+        <span class="dl">'</span><span class="s1">Go to move #</span><span class="dl">'</span> <span class="o">+</span> <span class="nx">move</span> <span class="p">:</span>
+        <span class="dl">'</span><span class="s1">Go to game start</span><span class="dl">'</span><span class="p">;</span>
+      <span class="k">return</span> <span class="p">(</span>
+        <span class="p">&lt;</span><span class="nt">li</span> <span class="na">key</span><span class="p">=</span><span class="si">{</span><span class="nx">move</span><span class="si">}</span><span class="p">&gt;</span>
+          <span class="p">&lt;</span><span class="nt">button</span> <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span><span class="o">=&gt;</span><span class="k">this</span><span class="p">.</span><span class="nx">jumpTo</span><span class="p">(</span><span class="nx">move</span><span class="p">)</span><span class="si">}</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">desc</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+        <span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+      <span class="p">);</span>
+    <span class="p">});</span>
+    
+    <span class="kd">let</span> <span class="nx">status</span><span class="p">;</span>
+    <span class="k">if</span><span class="p">(</span><span class="nx">winner</span><span class="p">){</span>
+      <span class="nx">status</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Winner:</span><span class="dl">'</span> <span class="o">+</span> <span class="nx">winner</span><span class="p">;</span>
+    <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+      <span class="nx">status</span> <span class="o">=</span> <span class="dl">'</span><span class="s1">Next player: </span><span class="dl">'</span> <span class="o">+</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">state</span><span class="p">.</span><span class="nx">xIsNext</span><span class="p">?</span>  <span class="dl">'</span><span class="s1">X</span><span class="dl">'</span><span class="p">:</span> <span class="dl">'</span><span class="s1">O</span><span class="dl">'</span><span class="p">);</span>
+    <span class="p">}</span>
+    
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"game"</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"game-board"</span><span class="p">&gt;</span>
+          <span class="p">&lt;</span><span class="nc">Board</span>
+            <span class="na">squares</span><span class="p">=</span><span class="si">{</span><span class="nx">current</span><span class="p">.</span><span class="nx">squares</span><span class="si">}</span>
+            <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">handleClick</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span><span class="si">}</span><span class="p">/&gt;</span>
+        <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">className</span><span class="p">=</span><span class="s">"game-info"</span><span class="p">&gt;</span>
+          <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">status</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+          <span class="p">&lt;</span><span class="nt">ol</span><span class="p">&gt;</span><span class="si">{</span><span class="nx">moves</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">ol</span><span class="p">&gt;</span>
+        <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+      <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">calculateWinner</span><span class="p">(</span><span class="nx">squares</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">lines</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+  <span class="p">];</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">lines</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="p">[</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">c</span><span class="p">]</span> <span class="o">=</span> <span class="nx">lines</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">squares</span><span class="p">[</span><span class="nx">a</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="nx">squares</span><span class="p">[</span><span class="nx">a</span><span class="p">]</span> <span class="o">===</span> <span class="nx">squares</span><span class="p">[</span><span class="nx">b</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="nx">squares</span><span class="p">[</span><span class="nx">a</span><span class="p">]</span> <span class="o">===</span> <span class="nx">squares</span><span class="p">[</span><span class="nx">c</span><span class="p">])</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">squares</span><span class="p">[</span><span class="nx">a</span><span class="p">];</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// ========================================</span>
+
+<span class="nx">ReactDOM</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span>
+  <span class="p">&lt;</span><span class="nc">Game</span> <span class="p">/&gt;,</span>
+  <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">'</span><span class="s1">root</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">);</span>
+</code></pre></div></div>
+:ET
