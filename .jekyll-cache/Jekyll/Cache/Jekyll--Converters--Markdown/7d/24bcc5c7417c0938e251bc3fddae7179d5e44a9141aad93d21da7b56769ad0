@@ -1,0 +1,122 @@
+I"�8<h1 id="promise-객체란">Promise 객체란?</h1>
+
+<ul>
+  <li>비동기 상태를 값으로 다룰 수 있는 객체</li>
+  <li>비동기 프로그래밍을 동기 프로그래밍 방식으로 코드를 작성할 수 있음</li>
+  <li>Javascript ES6에서는 프로미스 객체가 포함이 됨</li>
+</ul>
+
+<h1 id="promise-객체의-3가지-상태">Promise 객체의 3가지 상태</h1>
+
+<ul>
+  <li>Pending : 결과 기다림</li>
+  <li>fulfilled : 수행 정상 종료 (결과 값 O)</li>
+  <li>rejected : 수행이 비정상적으로 종료</li>
+</ul>
+
+<h1 id="promise-생성-방법">Promise 생성 방법</h1>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">promise1</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Promise</span><span class="p">((</span><span class="nx">resolve</span><span class="p">,</span> <span class="nx">reject</span><span class="p">)</span><span class="o">=&gt;</span><span class="p">{});</span>
+<span class="kd">const</span> <span class="nx">promise2</span> <span class="o">=</span> <span class="nb">Promise</span><span class="p">.</span><span class="nx">reject</span><span class="p">(</span><span class="dl">'</span><span class="s1">error message</span><span class="dl">'</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">error</span> <span class="o">=&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">error</span><span class="p">));</span>
+<span class="kd">const</span> <span class="nx">promise3</span> <span class="o">=</span> <span class="nb">Promise</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="dl">"</span><span class="s2">1</span><span class="dl">"</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">data</span> <span class="o">=&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span>
+</code></pre></div></div>
+
+<h1 id="promise-이용-방법">Promise 이용 방법</h1>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">then</code> : 처리된 상태의 프로미스를 처리할 때 사용하는 메서드</li>
+  <li>then 메서드를 여러번 사용 가능</li>
+  <li><code class="language-plaintext highlighter-rouge">onReject</code> 함수에서는 onResolve 함수에서 발생한 예외는 처리되지 않음. 따라서 <code class="language-plaintext highlighter-rouge">catch</code> 함수를 사용하는 것이 좋음</li>
+  <li><code class="language-plaintext highlighter-rouge">finally</code> 메서드는 가장 마지막에 사용되고 처리된 상태인 프로미스 데이터에 추가작업 할 때 사용</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// then 메서드 활용</span>
+<span class="nb">Promise</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="nx">data</span> <span class="o">=&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span> <span class="c1">//1</span>
+<span class="nb">Promise</span><span class="p">.</span><span class="nx">reject</span><span class="p">(</span><span class="dl">'</span><span class="s1">err</span><span class="dl">'</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span> <span class="o">=&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">err</span><span class="p">));</span> <span class="c1">//err</span>
+
+<span class="c1">// 여러 번 사용</span>
+<span class="nb">Promise</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">data</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">then1 지나감</span><span class="dl">'</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">1</span>
+<span class="p">})</span>
+<span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">data</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">then2 지나감</span><span class="dl">'</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">1</span>
+<span class="p">})</span>
+<span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">data</span> <span class="o">=&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">data</span><span class="p">));</span> <span class="c1">//1</span>
+
+<span class="nb">Promise</span><span class="p">.</span><span class="nx">reject</span><span class="p">(</span><span class="dl">'</span><span class="s1">err</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">.</span><span class="nx">then</span><span class="p">(()</span><span class="o">=&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">then1 지나감</span><span class="dl">'</span><span class="p">)</span> <span class="p">,</span> <span class="p">()</span><span class="o">=&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">then2 지나감</span><span class="dl">'</span><span class="p">))</span> <span class="c1">//then2 지나감</span>
+<span class="p">.</span><span class="nx">then</span><span class="p">(()</span><span class="o">=&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">then3 지나감</span><span class="dl">'</span><span class="p">)</span> <span class="p">,</span> <span class="p">()</span><span class="o">=&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">then4 지나감</span><span class="dl">'</span><span class="p">))</span> <span class="c1">//then3 지나감</span>
+
+<span class="c1">//onResolve 함수에서 발생한 예외는 처리되지 않으므로 catch 함수 권장</span>
+<span class="c1">//catch 이후에도 then 사용 가능</span>
+<span class="nb">Promise</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">data</span><span class="p">)</span><span class="o">=&gt;</span><span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span> <span class="p">(</span><span class="dl">'</span><span class="s1">error 발생</span><span class="dl">'</span><span class="p">);</span>
+<span class="p">})</span>
+<span class="p">.</span><span class="k">catch</span><span class="p">(</span><span class="nx">error</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">error</span><span class="p">);</span>
+    <span class="k">return</span> <span class="dl">'</span><span class="s1">error 로그 전달</span><span class="dl">'</span><span class="p">;</span>
+<span class="p">})</span>
+<span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">log</span><span class="p">)</span><span class="o">=&gt;</span><span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">log</span><span class="p">);</span>
+<span class="p">})</span>
+<span class="p">.</span><span class="k">finally</span><span class="p">(()</span><span class="o">=&gt;</span><span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">final</span><span class="dl">'</span><span class="p">);</span>
+<span class="p">})</span>
+</code></pre></div></div>
+
+<h2 id="promiseall">Promise.all</h2>
+
+<ul>
+  <li>여러 프로미스 객체를 병렬 처리할 때 사용</li>
+  <li>병렬로 코드를 작성하면 되지만 서로 의존성이 있다면 <code class="language-plaintext highlighter-rouge">Promise.all</code> 로 처리하는 것이 좋음</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">p1</span> <span class="o">=</span> <span class="nb">Promise</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">p2</span> <span class="o">=</span> <span class="nb">Promise</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="mi">20</span><span class="p">);</span>
+
+<span class="c1">// requestData().then(data =&gt; console.log(data));</span>
+<span class="c1">//의존성이 없을 경우</span>
+<span class="nx">p1</span><span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">returnData</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">returnData</span><span class="p">);</span>
+<span class="p">});</span>
+<span class="nx">p2</span><span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">returnData</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">returnData</span><span class="p">)</span>
+<span class="p">});</span>
+
+<span class="c1">//의존성이 있을 경우</span>
+<span class="nb">Promise</span><span class="p">.</span><span class="nx">all</span><span class="p">([</span><span class="nx">p1</span><span class="p">,</span> <span class="nx">p2</span><span class="p">]).</span><span class="nx">then</span><span class="p">(([</span><span class="nx">returnData1</span><span class="p">,</span><span class="nx">returnData2</span><span class="p">])</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">returnData1</span><span class="p">,</span> <span class="nx">returnData2</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<h2 id="promiserace">Promise.race</h2>
+
+<ul>
+  <li>가장 빨리 처리된 프로미스를 가져올 때 사용</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">p1</span><span class="p">(){</span>
+    <span class="k">return</span> <span class="nx">fetch</span><span class="p">(</span><span class="dl">'</span><span class="s1">sadf</span><span class="dl">'</span><span class="p">)</span>
+    <span class="p">.</span><span class="nx">then</span><span class="p">(()</span><span class="o">=&gt;</span><span class="p">{</span>
+
+    <span class="p">})</span>
+    <span class="p">.</span><span class="k">catch</span><span class="p">(</span><span class="nx">err</span><span class="o">=&gt;</span> <span class="p">{</span><span class="k">return</span>  <span class="dl">'</span><span class="s1"> 데이터 로딩 성공 </span><span class="dl">'</span><span class="p">});</span>
+<span class="p">}</span>
+
+<span class="c1">//1초 안에 데이터 로딩이 성공하면 then ' 데이터 로딩 성공' 출력, 실패하면 err 로그 출력</span>
+<span class="nb">Promise</span><span class="p">.</span><span class="nx">race</span><span class="p">([</span><span class="nx">p1</span><span class="p">(),</span> 
+    <span class="k">new</span> <span class="nb">Promise</span><span class="p">((</span><span class="nx">_</span><span class="p">,</span><span class="nx">reject</span><span class="p">)</span><span class="o">=&gt;</span><span class="p">{</span>
+        <span class="nx">setTimeout</span><span class="p">(</span><span class="nx">reject</span><span class="p">,</span> <span class="mi">1000</span><span class="p">);</span>
+    <span class="p">}),</span>
+<span class="p">])</span>
+<span class="p">.</span><span class="nx">then</span><span class="p">(</span><span class="nx">data</span><span class="o">=&gt;</span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">data</span><span class="p">))</span>
+<span class="p">.</span><span class="k">catch</span><span class="p">(</span><span class="nx">err</span><span class="o">=&gt;</span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">err</span><span class="p">));</span>
+</code></pre></div></div>
+:ET
