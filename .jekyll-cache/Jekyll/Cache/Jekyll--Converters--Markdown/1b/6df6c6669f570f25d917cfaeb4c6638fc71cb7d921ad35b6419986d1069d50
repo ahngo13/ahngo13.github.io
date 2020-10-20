@@ -1,4 +1,4 @@
-I"��<h1 id="react-hooks-이란">React Hooks 이란?</h1>
+I")�<h1 id="react-hooks-이란">React Hooks 이란?</h1>
 
 <ul>
   <li>함수형 컴포넌트에서도 클래스형 컴포넌트의 기능을 사용할 수 있게 하는 기능</li>
@@ -39,7 +39,7 @@
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p><img src="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/e45ad9c6-a4cd-4800-9996-50b8f300be69/2020-10-19_15h10_20.png" alt="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/e45ad9c6-a4cd-4800-9996-50b8f300be69/2020-10-19_15h10_20.png" /></p>
+<p><img src="/assets/img/2020-10-19_15h10_20.png" alt="/assets/img/2020-10-19_15h10_20.png" /></p>
 
 <div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">React</span><span class="p">,</span> <span class="p">{</span><span class="nx">useState</span><span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">react</span><span class="dl">'</span><span class="p">;</span>
 
@@ -57,7 +57,7 @@
   <span class="p">}</span>
   
   <span class="k">return</span> <span class="p">(</span>
-    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">style</span><span class="p">=&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
       이름 : <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="p">=</span><span class="s">"text"</span> <span class="na">onChange</span><span class="p">=</span><span class="si">{</span><span class="nx">e</span><span class="o">=&gt;</span><span class="nx">setName</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span><span class="p">)</span><span class="si">}</span><span class="p">/&gt;</span>
       나이 : <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="p">=</span><span class="s">"text"</span> <span class="na">onChange</span><span class="p">=</span><span class="si">{</span><span class="nx">e</span><span class="o">=&gt;</span><span class="nx">setAge</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span><span class="p">)</span><span class="si">}</span><span class="p">/&gt;</span>
       <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>이름 : <span class="si">{</span><span class="nx">name</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
@@ -72,7 +72,7 @@
 <span class="k">export</span> <span class="k">default</span> <span class="nx">App</span><span class="p">;</span>
 </code></pre></div></div>
 
-<p><img src="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/e8330b9e-22bc-44c1-9a56-13240bde92ef/2020-10-19_15h30_25.png" alt="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/e8330b9e-22bc-44c1-9a56-13240bde92ef/2020-10-19_15h30_25.png" /></p>
+<p><img src="/assets/img/2020-10-19_15h30_25.png" alt="/assets/img/2020-10-19_15h30_25.png" /></p>
 
 <h3 id="usestate를-사용한-턱걸이-갯수-카운터이름-나이-입력값-추가">useState를 사용한 턱걸이 갯수 카운터(이름, 나이 입력값 추가)</h3>
 
@@ -154,7 +154,7 @@
 export default App;
 </code></pre></div></div>
 
-<p><img src="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/e5563cee-d170-41e7-b508-0bf1768bd8d5/2020-10-19_16h19_57.png" alt="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/e5563cee-d170-41e7-b508-0bf1768bd8d5/2020-10-19_16h19_57.png" /></p>
+<p><img src="/assets/img/2020-10-19_16h19_57.png" alt="/assets/img/2020-10-19_16h19_57.png" /></p>
 
 <h2 id="custom-hook">Custom Hook</h2>
 
@@ -219,7 +219,7 @@ export default App;
 <span class="p">}</span>
 </code></pre></div></div>
 
-<p><img src="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/55294530-cef3-4ab8-9354-cb279d3adcb6/2020-10-19_17h10_24.png" alt="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/55294530-cef3-4ab8-9354-cb279d3adcb6/2020-10-19_17h10_24.png" /></p>
+<p><img src="/assets/img/2020-10-19_17h10_24.png" alt="/assets/img/2020-10-19_17h10_24.png" /></p>
 
 <h2 id="usecontext">useContext</h2>
 
@@ -289,7 +289,7 @@ export default App;
 <span class="k">export</span> <span class="k">default</span> <span class="nx">Display</span><span class="p">;</span>
 </code></pre></div></div>
 
-<p><img src="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/a09452e1-98e4-4ee7-b5ab-6a5e1cdc5033/2020-10-19_18h53_02.png" alt="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/a09452e1-98e4-4ee7-b5ab-6a5e1cdc5033/2020-10-19_18h53_02.png" /></p>
+<p><img src="/assets/img/2020-10-19_18h53_02.png" alt="/assets/img/2020-10-19_18h53_02.png" /></p>
 
 <h2 id="useref">useRef</h2>
 
@@ -321,7 +321,7 @@ export default App;
 <span class="k">export</span> <span class="k">default</span> <span class="nx">App</span><span class="p">;</span>
 </code></pre></div></div>
 
-<p><img src="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/58d64325-27a7-43bd-9061-b74e416b1385/2020-10-19_19h03_10.png" alt="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/58d64325-27a7-43bd-9061-b74e416b1385/2020-10-19_19h03_10.png" /></p>
+<p><img src="/assets/img/2020-10-19_19h03_10.png" alt="/assets/img/2020-10-19_19h03_10.png" /></p>
 
 <h2 id="usememo">useMemo</h2>
 
@@ -420,5 +420,5 @@ export default App;
   <li>아래의 버튼도 동일하게 작동하는 것을 확인할 수 있다.</li>
 </ul>
 
-<p><img src="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/0564d7a8-f48c-4d12-8f3b-5d6527416412/2020-10-19_19h43_53.png" alt="https://s3-us-west-2.amazonaws.com/secure.notion-static.com/0564d7a8-f48c-4d12-8f3b-5d6527416412/2020-10-19_19h43_53.png" /></p>
+<p><img src="/assets/img/2020-10-19_19h43_53.png" alt="/assets/img/2020-10-19_19h43_53.png" /></p>
 :ET

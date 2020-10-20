@@ -41,7 +41,7 @@ const App =()=> {
   }
 
   return (
-    <div style={{textAlign:"center"}}>
+    <div>
       <h1>{count}</h1>
       <button onClick={minus}>-</button>
       <button onClick={plus}>+</button>
@@ -69,7 +69,7 @@ const App =()=> {
   }
   
   return (
-    <div style={{textAlign:"center"}}>
+    <div>
       이름 : <input type="text" onChange={e=>setName(e.target.value)}/>
       나이 : <input type="text" onChange={e=>setAge(e.target.value)}/>
       <h1>이름 : {name}</h1>
@@ -107,7 +107,7 @@ const App =()=> {
   }
   
   return (
-    <div style={{textAlign:"center"}}>
+    <div>
       //스프레드 연산자 사용해서 값 세팅
       이름 : <input type="text" onChange={e=>setState({...state, name: e.target.value})}/>
       나이 : <input type="text" onChange={e=>setState({...state, age: e.target.value})}/>
@@ -156,7 +156,7 @@ const App =()=> {
          //다른 변수를 넣는다면 변수값 변경에 따라 api 호출됨
 
   return (
-    <div style={{textAlign:"center"}}>
+    <div>
 			{//list 상태변수 출력}
       {list}
     </div>
@@ -199,7 +199,7 @@ const App =()=> {
   },[]);
 
   return (
-    <div style={{textAlign:"center"}}>
+    <div>
       <h1>width:{width}, height:{height}</h1>
       {list}
     </div>

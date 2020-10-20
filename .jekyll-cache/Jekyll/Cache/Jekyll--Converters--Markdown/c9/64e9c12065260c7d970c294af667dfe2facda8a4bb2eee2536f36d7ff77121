@@ -1,0 +1,226 @@
+I"�:<h1 id="redux란">Redux란?</h1>
+
+<ul>
+  <li>action이라는 이벤트를 사용하여 애플리케이션 상태를 관리하고 업데이트 하기 위한 패턴 및 라이브러리</li>
+  <li>애플리케이션의 여러 부분에서 필요한 전역 상태를 관리함</li>
+</ul>
+
+<h2 id="redux-라이브러리-도구">Redux 라이브러리 도구</h2>
+
+<h3 id="react-redux">React-Redux</h3>
+
+<ul>
+  <li>Redux 저장소와 상호작용할 수 있도록 하는 공식 패키지</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// npm
+npm <span class="nb">install </span>react-redux
+
+// yarm
+yarn add react-redux
+</code></pre></div></div>
+
+<h3 id="redux-toolkit">Redux Toolkit</h3>
+
+<ul>
+  <li>Redux 로직 작성에 권장되는 접근 방식 (Redux 앱 빌드에 필요한 함수와 패키지가 포함 되어있음)</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">## create-react-app 명령어를 통한 생성시</span>
+npx create-react-app my-app <span class="nt">--template</span> redux
+
+<span class="c">## 이미 존재하는 프로젝트에 추가할 경우</span>
+<span class="c"># NPM</span>
+npm <span class="nb">install</span> @reduxjs/toolkit
+
+<span class="c"># Yarn</span>
+yarn add @reduxjs/toolkit
+</code></pre></div></div>
+
+<h3 id="redux-devtools-extension">Redux DevTools Extension</h3>
+
+<ul>
+  <li>Redux 개발 도구</li>
+</ul>
+
+<p><a href="https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd">https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd</a></p>
+
+<p><a href="https://github.com/zalmoxisus/redux-devtools-extension">https://github.com/zalmoxisus/redux-devtools-extension</a></p>
+
+<h1 id="redux-용어-및-개념">Redux 용어 및 개념</h1>
+
+<h2 id="state-management-상태-관리">State Management (상태 관리)</h2>
+
+<ul>
+  <li>아래와 같은 상황에서는 부모컴포넌트로 state를 올려서 해결할 수 있지만 Redux는 상태 관리와 관련된 개념을 정의 및 분리하고 뷰와 상태 간의 독립성을 유지하는 규칙을 시행함으로써 코드에 더 많은 구조와 유지 관리 기능을 제공한다.</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">**</span><span class="kd">function</span> <span class="nx">Counter</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// State(상태): a counter value</span>
+  <span class="kd">const</span> <span class="p">[</span><span class="nx">counter</span><span class="p">,</span> <span class="nx">setCounter</span><span class="p">]</span> <span class="o">=</span> <span class="nx">useState</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+  <span class="c1">// Action(액션): code that causes an update to the state when something happens</span>
+  <span class="kd">const</span> <span class="nx">increment</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="nx">setCounter</span><span class="p">(</span><span class="nx">prevCounter</span> <span class="o">=&gt;</span> <span class="nx">prevCounter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="c1">// View(뷰): the UI definition</span>
+  <span class="k">return</span> <span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+      Value: <span class="si">{</span><span class="nx">counter</span><span class="si">}</span> <span class="p">&lt;</span><span class="nt">button</span> <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="nx">increment</span><span class="si">}</span><span class="p">&gt;</span>Increment<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">)</span>
+<span class="p">}</span><span class="o">**</span>
+</code></pre></div></div>
+
+<h2 id="immutability-불변성">Immutability (불변성)</h2>
+
+<ul>
+  <li>Redux는 불변값을 변경하기 위해서 기존 객체를 복제하고 복제한 객체들을 수정하여 사용한다.</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">obj</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">a</span><span class="p">:</span> <span class="p">{</span>
+    <span class="c1">// To safely update obj.a.c, we have to copy each piece</span>
+    <span class="na">c</span><span class="p">:</span> <span class="mi">3</span>
+  <span class="p">},</span>
+  <span class="na">b</span><span class="p">:</span> <span class="mi">2</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">obj2</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="c1">// copy obj</span>
+  <span class="p">...</span><span class="nx">obj</span><span class="p">,</span>
+  <span class="c1">// overwrite a</span>
+  <span class="na">a</span><span class="p">:</span> <span class="p">{</span>
+    <span class="c1">// copy obj.a</span>
+    <span class="p">...</span><span class="nx">obj</span><span class="p">.</span><span class="nx">a</span><span class="p">,</span>
+    <span class="c1">// overwrite c</span>
+    <span class="na">c</span><span class="p">:</span> <span class="mi">42</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">arr</span> <span class="o">=</span> <span class="p">[</span><span class="dl">'</span><span class="s1">a</span><span class="dl">'</span><span class="p">,</span> <span class="dl">'</span><span class="s1">b</span><span class="dl">'</span><span class="p">]</span>
+<span class="c1">// Create a new copy of arr, with "c" appended to the end</span>
+<span class="kd">const</span> <span class="nx">arr2</span> <span class="o">=</span> <span class="nx">arr</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="dl">'</span><span class="s1">c</span><span class="dl">'</span><span class="p">)</span>
+
+<span class="c1">// or, we can make a copy of the original array:</span>
+<span class="kd">const</span> <span class="nx">arr3</span> <span class="o">=</span> <span class="nx">arr</span><span class="p">.</span><span class="nx">slice</span><span class="p">()</span>
+<span class="c1">// and mutate the copy:</span>
+<span class="nx">arr3</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="dl">'</span><span class="s1">c</span><span class="dl">'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="action">Action</h2>
+
+<ul>
+  <li>type 속성값을 가진 자바스크립트 객체</li>
+  <li>type 필드는 작업을 설명하는 문자열이어야 함</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">addTodoAction</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">todos/todoAdded</span><span class="dl">'</span><span class="p">,</span>
+  <span class="na">payload</span><span class="p">:</span> <span class="dl">'</span><span class="s1">Buy milk</span><span class="dl">'</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="action-creators">Action Creators</h2>
+
+<ul>
+  <li>액션 객체를 생성하고 반환하는 함수</li>
+  <li>일반적으로 사용하므로 매번 수동으로 액션 객체를 작성할 필요 없음</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">addTodo</span> <span class="o">=</span> <span class="nx">text</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">todos/todoAdded</span><span class="dl">'</span><span class="p">,</span>
+    <span class="na">payload</span><span class="p">:</span> <span class="nx">text</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="reducers">Reducers</h2>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">state</code> 와 <code class="language-plaintext highlighter-rouge">action</code> 객체를 필요한 경우 상태를 업데이트 하는 방법을 결정하고, 새로운 상태를 반환함</li>
+  <li>Reducer 규칙
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">state</code> 와 <code class="language-plaintext highlighter-rouge">action</code> 인수를 기반으로 새 상태값만 계산해야 함</li>
+      <li>기존의 <code class="language-plaintext highlighter-rouge">state</code> 를 수정할 수 없음. 기존 항목을 복사하고 복사된 값을 변경하여 업데이트 해야 함</li>
+      <li>비동기 논리를 수행하거나 임의 값을 계산하거나 기타 부작용을 유발해서는 안됨</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">initialState</span> <span class="o">=</span> <span class="p">{</span> <span class="na">value</span><span class="p">:</span> <span class="mi">0</span> <span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">counterReducer</span><span class="p">(</span><span class="nx">state</span> <span class="o">=</span> <span class="nx">initialState</span><span class="p">,</span> <span class="nx">action</span><span class="p">)</span> <span class="p">{</span>
+  <span class="c1">// Check to see if the reducer cares about this action</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">action</span><span class="p">.</span><span class="nx">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">counter/increment</span><span class="dl">'</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// If so, make a copy of `state`</span>
+    <span class="k">return</span> <span class="p">{</span>
+      <span class="p">...</span><span class="nx">state</span><span class="p">,</span>
+      <span class="c1">// and update the copy with the new value</span>
+      <span class="na">value</span><span class="p">:</span> <span class="nx">state</span><span class="p">.</span><span class="nx">value</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="c1">// otherwise return the existing state unchanged</span>
+  <span class="k">return</span> <span class="nx">state</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="store">Store</h2>
+
+<ul>
+  <li>리덕스의 상태값을 갖는 객체</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">configureStore</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@reduxjs/toolkit</span><span class="dl">'</span>
+
+<span class="kd">const</span> <span class="nx">store</span> <span class="o">=</span> <span class="nx">configureStore</span><span class="p">({</span> <span class="na">reducer</span><span class="p">:</span> <span class="nx">counterReducer</span> <span class="p">})</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">store</span><span class="p">.</span><span class="nx">getState</span><span class="p">())</span>
+<span class="c1">// {value: 0}</span>
+</code></pre></div></div>
+
+<h2 id="dispatch">Dispatch</h2>
+
+<ul>
+  <li>상태를 업데이트하는 유일한 방법, 작업 객체를 호출하고 전달하는 것</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">store</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">({</span> <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">counter/increment</span><span class="dl">'</span> <span class="p">})</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">store</span><span class="p">.</span><span class="nx">getState</span><span class="p">())</span>
+<span class="c1">// {value: 1}</span>
+</code></pre></div></div>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">increment</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="na">type</span><span class="p">:</span> <span class="dl">'</span><span class="s1">counter/increment</span><span class="dl">'</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="nx">store</span><span class="p">.</span><span class="nx">dispatch</span><span class="p">(</span><span class="nx">increment</span><span class="p">())</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">store</span><span class="p">.</span><span class="nx">getState</span><span class="p">())</span>
+<span class="c1">// {value: 2}</span>
+</code></pre></div></div>
+
+<h2 id="selectors">Selectors</h2>
+
+<ul>
+  <li>store 값에서 특정 정보를 부를 수 있는 함수 (반복되는 논리를 피할 수 있음)</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">selectCounterValue</span> <span class="o">=</span> <span class="nx">state</span> <span class="o">=&gt;</span> <span class="nx">state</span><span class="p">.</span><span class="nx">value</span>
+
+<span class="kd">const</span> <span class="nx">currentValue</span> <span class="o">=</span> <span class="nx">selectCounterValue</span><span class="p">(</span><span class="nx">store</span><span class="p">.</span><span class="nx">getState</span><span class="p">())</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">currentValue</span><span class="p">)</span>
+<span class="c1">// 2</span>
+</code></pre></div></div>
+
+<h2 id="middleware">Middleware</h2>
+
+<ul>
+  <li>리듀서가 액션을 처리하기 전에 실행되는 함수</li>
+</ul>
+:ET
