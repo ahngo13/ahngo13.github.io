@@ -1,0 +1,440 @@
+I"��<p>공식문서를 보고 바로 따라하면서 공부하려고 했으나 처음부터 입문하기에는 어려움이 있는 것 같아 비교적 간단해 보이는 예제인 생활코딩 예제부터 따라했다. 생활 코딩 예제의 경우에는 React 기준이 아닌 html에서 바로 시작하도록 되어있어서 비교적 진입장벽이 낮다. Redux 공식문서의 경우에는 React 기준으로 파일들이 나뉘어져 있어서 조금 더 이해하기에 복잡한 것 같다.</p>
+
+<h1 id="생활-코딩-예제-따라하기">생활 코딩 예제 따라하기</h1>
+
+<ul>
+  <li>Youtube 채널에서 생활코딩으로 검색해서도 볼 수 있으므로 꼭 인프런을 가입해서 볼 필요는 없다.</li>
+</ul>
+
+<p><a href="https://www.inflearn.com/course/redux-%EC%83%9D%ED%99%9C%EC%BD%94%EB%94%A9/lecture/34691?tab=note">https://www.inflearn.com/course/redux-생활코딩/lecture/34691?tab=note</a></p>
+
+<h2 id="redux-cdn-추가">redux CDN 추가</h2>
+
+<ul>
+  <li>React 였다면 import 하여서 시작했겠지만 html 파일에 간단하게 연습하는 것이므로 cdn을 추가하였다.</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="p">=</span><span class="s">"https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.5/redux.min.js"</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<h2 id="생활-코딩-redux-예제1-작성">생활 코딩 redux 예제1 작성</h2>
+
+<ul>
+  <li>fire 버튼을 클릭하면 해당 네모에 쓰여있는 색깔로 주변 네모들까지 배경색이 바꿔지는 애플리케이션이다.</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">with-redux.html</code></p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="err">!</span><span class="na">DOCTYPE</span> <span class="na">html</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="p">=</span><span class="s">"en"</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="p">=</span><span class="s">"UTF-8"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="p">=</span><span class="s">"viewport"</span> <span class="na">content</span><span class="p">=</span><span class="s">"width=device-width, initial-scale=1.0"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>Redux Test<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="p">=</span><span class="s">"https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.5/redux.min.js"</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">style</span><span class="p">&gt;</span>
+        .container<span class="si">{</span>
+            <span class="nx">border</span><span class="p">:</span> <span class="mi">5</span><span class="nx">px</span> <span class="nx">solid</span> <span class="nx">black</span><span class="p">;</span>
+            <span class="nl">padding</span><span class="p">:</span> <span class="mi">10</span><span class="nx">px</span><span class="p">;</span>
+        <span class="si">}</span>
+    <span class="p">&lt;/</span><span class="nt">style</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="p">=</span><span class="s">"red"</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="p">=</span><span class="s">"blue"</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="p">=</span><span class="s">"green"</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+        //reducer 함수
+        function reducer(state, action)<span class="si">{</span>
+            <span class="k">if</span><span class="p">(</span><span class="nx">state</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">){</span>
+                <span class="k">return</span> <span class="p">{</span><span class="na">color</span><span class="p">:</span><span class="dl">'</span><span class="s1">yellow</span><span class="dl">'</span><span class="p">}</span>
+            <span class="p">}</span>
+
+            <span class="kd">var</span> <span class="nx">newState</span><span class="p">;</span>
+            <span class="k">if</span><span class="p">(</span><span class="nx">action</span><span class="p">.</span><span class="nx">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">CHANGE_COLOR</span><span class="dl">'</span><span class="p">){</span>
+                <span class="nx">newState</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">assign</span><span class="p">({},</span> <span class="nx">state</span><span class="p">,</span> <span class="p">{</span><span class="na">color</span><span class="p">:</span><span class="nx">action</span><span class="p">.</span><span class="nx">color</span><span class="p">});</span>
+            <span class="p">}</span>
+
+            <span class="k">return</span> <span class="nx">newState</span><span class="p">;</span>
+        <span class="si">}</span> 
+        //store 생성
+        var store = Redux.createStore(reducer);
+
+        function red()<span class="si">{</span>
+            <span class="c1">//store에 있는 상태값 가져오기</span>
+            <span class="kd">const</span> <span class="nx">state</span> <span class="o">=</span> <span class="nx">store</span><span class="p">.</span><span class="nx">getState</span><span class="p">();</span>
+            <span class="c1">//view 그리기 (클릭할 때 store의 dispatch를 통해서 reducer로 state 값 변경)</span>
+            <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="dl">'</span><span class="s1">#red</span><span class="dl">'</span><span class="p">).</span><span class="nx">innerHTML</span><span class="o">=</span><span class="s2">`
+            &lt;div class="container" id="component_red" style="background-color:</span><span class="p">${</span><span class="nx">state</span><span class="p">.</span><span class="nx">color</span><span class="p">}</span><span class="s2">"&gt;
+                &lt;h1&gt;red&lt;/h1&gt;
+                &lt;input type="button" value="fire" onclick="
+                store.dispatch({type: 'CHANGE_COLOR', color:'red'});"&gt;
+            &lt;/div&gt;
+            `</span><span class="p">;</span>
+        <span class="si">}</span>
+        red();
+        //렌더링으로 변경될 함수 등록
+        store.subscribe(red);
+
+        function blue()<span class="si">{</span>
+            <span class="c1">//store에 있는 상태값 가져오기</span>
+            <span class="kd">const</span> <span class="nx">state</span> <span class="o">=</span> <span class="nx">store</span><span class="p">.</span><span class="nx">getState</span><span class="p">();</span>
+            <span class="c1">//view 그리기 (클릭할 때 store의 dispatch를 통해서 reducer로 state 값 변경)</span>
+            <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="dl">'</span><span class="s1">#blue</span><span class="dl">'</span><span class="p">).</span><span class="nx">innerHTML</span><span class="o">=</span><span class="s2">`
+            &lt;div class="container" id="component_blue" style="background-color:</span><span class="p">${</span><span class="nx">state</span><span class="p">.</span><span class="nx">color</span><span class="p">}</span><span class="s2">"&gt;
+                &lt;h1&gt;blue&lt;/h1&gt;
+                &lt;input type="button" value="fire" onclick="
+                store.dispatch({type: 'CHANGE_COLOR', color:'blue'});"&gt;
+            &lt;/div&gt;
+            `</span><span class="p">;</span>
+        <span class="si">}</span>
+        blue();
+        //렌더링으로 변경될 함수 등록
+        store.subscribe(blue);
+
+        function green()<span class="si">{</span>
+            <span class="c1">//store에 있는 상태값 가져오기</span>
+            <span class="kd">const</span> <span class="nx">state</span> <span class="o">=</span> <span class="nx">store</span><span class="p">.</span><span class="nx">getState</span><span class="p">();</span>
+            <span class="c1">//view 그리기 (클릭할 때 store의 dispatch를 통해서 reducer로 state 값 변경)</span>
+            <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="dl">'</span><span class="s1">#green</span><span class="dl">'</span><span class="p">).</span><span class="nx">innerHTML</span><span class="o">=</span><span class="s2">`
+            &lt;div class="container" id="component_green" style="background-color:</span><span class="p">${</span><span class="nx">state</span><span class="p">.</span><span class="nx">color</span><span class="p">}</span><span class="s2">"&gt;
+                &lt;h1&gt;green&lt;/h1&gt;
+                &lt;input type="button" value="fire" onclick="
+                store.dispatch({type: 'CHANGE_COLOR', color:'green'});"&gt;
+            &lt;/div&gt;
+            `</span><span class="p">;</span>
+        <span class="si">}</span>
+        green();
+        //렌더링으로 변경될 함수 등록
+        store.subscribe(green);
+    <span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p><img src="/assets/img/2020-10-20_16h41_48.png" alt="/assets/img/2020-10-20_16h41_48.png" /></p>
+
+<h2 id="redux-dev-tools-활용">Redux Dev Tools 활용</h2>
+
+<ul>
+  <li>필자는 크롬 버전으로 설치하였다.</li>
+</ul>
+
+<p><a href="https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd">https://chrome.google.com/webstore/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd</a></p>
+
+<ul>
+  <li>크롬이 아닌 타 브라우저를 사용하는 분들은 아래의 URL을 참고하기 바란다.</li>
+</ul>
+
+<p><a href="https://github.com/zalmoxisus/redux-devtools-extension">https://github.com/zalmoxisus/redux-devtools-extension</a></p>
+
+<ul>
+  <li>설치한 이후에 사용하고 싶다면 store를 생성한 쪽에 아래와 같이 + 뒤에 있는 소스를 넣어주도록 한다.</li>
+  <li>로컬에서 html 파일을 그대로 실행하여 브라우저에 띄웠을 때는 인식이 되지 않는 것 같으니 간단하게 VS code 플러그인 중 <code class="language-plaintext highlighter-rouge">live server</code> 를 사용하여 서버를 띄워서 활용하기 바란다.</li>
+  <li>상태값이 변경될 때마다 히스토리를 볼 수 있고 그 기록을 import나 export도 할 수 있는 것 같다.</li>
+</ul>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Redux Dev Tools를 사용하기 위한 세팅</span>
+<span class="kd">const</span> <span class="nx">store</span> <span class="o">=</span> <span class="nx">createStore</span><span class="p">(</span>
+   <span class="nx">reducer</span><span class="p">,</span> <span class="cm">/* preloadedState, */</span>
+<span class="o">+</span>  <span class="nb">window</span><span class="p">.</span><span class="nx">__REDUX_DEVTOOLS_EXTENSION__</span> <span class="o">&amp;&amp;</span> <span class="nb">window</span><span class="p">.</span><span class="nx">__REDUX_DEVTOOLS_EXTENSION__</span><span class="p">()</span>
+ <span class="p">);</span>
+
+<span class="c1">//필자의 경우 위의 예제를 활용해서 이와같이 바꾸었다.</span>
+<span class="kd">var</span> <span class="nx">store</span> <span class="o">=</span> <span class="nx">Redux</span><span class="p">.</span><span class="nx">createStore</span><span class="p">(</span><span class="nx">reducer</span><span class="p">,</span> <span class="nb">window</span><span class="p">.</span><span class="nx">__REDUX_DEVTOOLS_EXTENSION__</span> <span class="o">&amp;&amp;</span> <span class="nb">window</span><span class="p">.</span><span class="nx">__REDUX_DEVTOOLS_EXTENSION__</span><span class="p">());</span>
+</code></pre></div></div>
+
+<p><img src="/assets/img/2020-10-20_17h07_00.png" alt="/assets/img/2020-10-20_17h07_00.png" /></p>
+
+<h2 id="logging">Logging</h2>
+
+<p><code class="language-plaintext highlighter-rouge">console.log(action.type, action, state, newState);</code> 와 같이 로그를 찍어주면 action의 type과 액션, 기존 상태값, 새로운 상태값을 볼 수 있다.</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">reducer</span><span class="p">(</span><span class="nx">state</span><span class="p">,</span> <span class="nx">action</span><span class="p">){</span>
+      <span class="k">if</span><span class="p">(</span><span class="nx">state</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">){</span>
+          <span class="k">return</span> <span class="p">{</span><span class="na">color</span><span class="p">:</span><span class="dl">'</span><span class="s1">yellow</span><span class="dl">'</span><span class="p">}</span>
+      <span class="p">}</span>
+
+      <span class="kd">var</span> <span class="nx">newState</span><span class="p">;</span>
+      <span class="k">if</span><span class="p">(</span><span class="nx">action</span><span class="p">.</span><span class="nx">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">CHANGE_COLOR</span><span class="dl">'</span><span class="p">){</span>
+          <span class="nx">newState</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">assign</span><span class="p">({},</span> <span class="nx">state</span><span class="p">,</span> <span class="p">{</span><span class="na">color</span><span class="p">:</span><span class="nx">action</span><span class="p">.</span><span class="nx">color</span><span class="p">});</span>
+      <span class="p">}</span>
+      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">action</span><span class="p">.</span><span class="nx">type</span><span class="p">,</span> <span class="nx">action</span><span class="p">,</span> <span class="nx">state</span><span class="p">,</span> <span class="nx">newState</span><span class="p">);</span>
+      <span class="k">return</span> <span class="nx">newState</span><span class="p">;</span>
+  <span class="p">}</span>
+</code></pre></div></div>
+
+<p><img src="/assets/img/2020-10-20_17h08_52.png" alt="/assets/img/2020-10-20_17h08_52.png" /></p>
+
+<h2 id="생활-코딩-redux-예제2---create-delete-read-적용">생활 코딩 redux 예제2 - Create, Delete, Read 적용</h2>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="err">!</span><span class="na">DOCTYPE</span> <span class="na">html</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="p">=</span><span class="s">"en"</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="p">=</span><span class="s">"UTF-8"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="p">=</span><span class="s">"viewport"</span> <span class="na">content</span><span class="p">=</span><span class="s">"width=device-width, initial-scale=1.0"</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="p">=</span><span class="s">"https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.5/redux.min.js"</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="p">=</span><span class="s">"subject"</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="p">=</span><span class="s">"TOC"</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="p">=</span><span class="s">"control"</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="p">=</span><span class="s">"article"</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+        //header 영역
+        function subject()<span class="si">{</span>
+            <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="dl">'</span><span class="s1">#subject</span><span class="dl">'</span><span class="p">).</span><span class="nx">innerHTML</span> <span class="o">=</span> <span class="s2">`
+            &lt;header&gt;
+                &lt;h1&gt;WEB&lt;/h1&gt;
+                Hello, WEB
+            &lt;/header&gt;
+            `</span><span class="p">;</span>
+        <span class="si">}</span>
+        //TOC 영역
+        function TOC()<span class="si">{</span>
+            <span class="c1">//store 값 가져오기</span>
+            <span class="kd">const</span> <span class="nx">state</span> <span class="o">=</span> <span class="nx">store</span><span class="p">.</span><span class="nx">getState</span><span class="p">();</span>
+            <span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="kd">let</span> <span class="nx">liTags</span> <span class="o">=</span> <span class="dl">''</span><span class="p">;</span>
+            <span class="c1">//반복문을 통해 contents 갯수만큼 li 태그 생성</span>
+            <span class="k">while</span><span class="p">(</span><span class="nx">i</span><span class="o">&lt;</span><span class="nx">state</span><span class="p">.</span><span class="nx">contents</span><span class="p">.</span><span class="nx">length</span><span class="p">){</span>
+                <span class="c1">// a태그 클릭시 SELECT action 호출 (id값 하나만 넘겨주면 됨)</span>
+                <span class="nx">liTags</span> <span class="o">+=</span> <span class="s2">`
+                    &lt;li&gt;
+                        &lt;a onclick="event.preventDefault();
+                        const action = {type:'SELECT', id:</span><span class="p">${</span><span class="nx">state</span><span class="p">.</span><span class="nx">contents</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">id</span><span class="p">}</span><span class="s2">}
+                        store.dispatch(action)"
+                            href="</span><span class="p">${</span><span class="nx">state</span><span class="p">.</span><span class="nx">contents</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">id</span><span class="p">}</span><span class="s2">"&gt;
+                            </span><span class="p">${</span><span class="nx">state</span><span class="p">.</span><span class="nx">contents</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">title</span><span class="p">}</span><span class="s2">
+                        &lt;/a&gt;
+                    &lt;/li&gt;
+                `</span><span class="p">;</span>
+                <span class="nx">i</span><span class="o">=</span> <span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="dl">'</span><span class="s1">#TOC</span><span class="dl">'</span><span class="p">).</span><span class="nx">innerHTML</span> <span class="o">=</span> <span class="s2">`
+            &lt;nav&gt;
+                &lt;ol&gt;
+                    </span><span class="p">${</span><span class="nx">liTags</span><span class="p">}</span><span class="s2">
+                &lt;/ol&gt;
+            &lt;/nav&gt;
+            `</span><span class="p">;</span>
+        <span class="si">}</span>
+        //control 영역
+        function control()<span class="si">{</span>
+            <span class="c1">//create, delete, update 버튼 및 a태그 그리기</span>
+            <span class="c1">//create와 update는 하단에 입력 form 노출하도록 CHANGE_MODE action type, mode 각각 세팅</span>
+            <span class="c1">//delete는 DELETE action type 세팅</span>
+            <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="dl">'</span><span class="s1">#control</span><span class="dl">'</span><span class="p">).</span><span class="nx">innerHTML</span><span class="o">=</span><span class="s2">`
+            &lt;ul&gt;
+                &lt;li&gt;&lt;a onclick="event.preventDefault();
+                    store.dispatch({type:'CHANGE_MODE',
+                    mode:'create'
+                })
+                    " href="/create"&gt;create&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;input type="button" onclick="
+                    store.dispatch({
+                        type : 'DELETE'
+                    })" value="delete"&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a onclick="event.preventDefault();
+                store.dispatch({type:'CHANGE_MODE',
+                mode:'update'
+                })
+                " href="/update"&gt;update&lt;/a&gt;&lt;/li&gt;
+            &lt;/ul&gt;
+            `</span><span class="p">;</span>
+        <span class="si">}</span>
+        //article 영역
+        function article()<span class="si">{</span>
+            <span class="c1">//store 객체 가져오기</span>
+            <span class="kd">const</span> <span class="nx">state</span> <span class="o">=</span> <span class="nx">store</span><span class="p">.</span><span class="nx">getState</span><span class="p">();</span>
+            <span class="c1">//create mode일 경우</span>
+            <span class="k">if</span><span class="p">(</span><span class="nx">state</span><span class="p">.</span><span class="nx">mode</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">create</span><span class="dl">'</span><span class="p">){</span>
+                <span class="c1">//하단에 입력 폼 생성 submit 버튼을 통해 CREATE type action 호출</span>
+                <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="dl">'</span><span class="s1">#article</span><span class="dl">'</span><span class="p">).</span><span class="nx">innerHTML</span><span class="o">=</span><span class="s2">`
+                &lt;article&gt;
+                    &lt;form onsubmit="event.preventDefault();
+                        const _title = this.title.value;
+                        const _desc = this.desc.value;
+                        store.dispatch({
+                            type: 'CREATE',
+                            title: _title,
+                            desc: _desc
+                        })
+                    "&gt;
+                        &lt;p&gt;
+                            &lt;input type="text" name="title"
+                            placeholder="title"&gt;&lt;br&gt;
+                            &lt;textarea name="desc"
+                            placeholder="description"&gt;&lt;/textarea&gt;
+                        &lt;/p&gt;
+                        &lt;p&gt;
+                            &lt;input type="submit" value="글 생성"&gt;&lt;/input&gt;
+                        &lt;/p&gt;
+                    &lt;/form&gt;
+                &lt;/article&gt;
+                `</span><span class="p">;</span>
+            <span class="c1">//read mode 일 경우</span>
+            <span class="p">}</span><span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="nx">state</span><span class="p">.</span><span class="nx">mode</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">read</span><span class="dl">'</span><span class="p">){</span>
+                <span class="c1">//반복문 돌면서 클릭한 컨텐츠의 제목과 내용을 보여주도록 함.</span>
+                <span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="kd">let</span> <span class="nx">aTitle</span><span class="p">,</span> <span class="nx">aDesc</span>
+                <span class="k">while</span><span class="p">(</span><span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">state</span><span class="p">.</span><span class="nx">contents</span><span class="p">.</span><span class="nx">length</span><span class="p">){</span>
+                    <span class="k">if</span><span class="p">(</span><span class="nx">state</span><span class="p">.</span><span class="nx">contents</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">id</span> <span class="o">===</span> <span class="nx">state</span><span class="p">.</span><span class="nx">selected_id</span><span class="p">){</span>
+                        <span class="nx">aTitle</span> <span class="o">=</span> <span class="nx">state</span><span class="p">.</span><span class="nx">contents</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">title</span><span class="p">;</span>
+                        <span class="nx">aDesc</span> <span class="o">=</span> <span class="nx">state</span><span class="p">.</span><span class="nx">contents</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">desc</span><span class="p">;</span>
+                        <span class="k">break</span><span class="p">;</span>
+                    <span class="p">}</span>
+                    <span class="nx">i</span><span class="o">=</span><span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+                <span class="si">}</span>
+                document.querySelector('#article').innerHTML=`
+                <span class="p">&lt;</span><span class="nt">article</span><span class="p">&gt;</span>
+                    <span class="p">&lt;</span><span class="nt">h2</span><span class="p">&gt;</span>$<span class="si">{</span><span class="nx">aTitle</span><span class="si">}</span><span class="p">&lt;/</span><span class="nt">h2</span><span class="p">&gt;</span>
+                        $<span class="si">{</span><span class="nx">aDesc</span><span class="si">}</span>
+                <span class="p">&lt;/</span><span class="nt">article</span><span class="p">&gt;</span>
+                `;
+            //welcome mode일 경우 article 영역에 welcome 출력
+            }else if(state.mode === 'welcome')<span class="si">{</span>
+                <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="dl">'</span><span class="s1">#article</span><span class="dl">'</span><span class="p">).</span><span class="nx">innerHTML</span><span class="o">=</span><span class="s2">`
+                &lt;article&gt;
+                    &lt;h2&gt;Welcome&lt;/h2&gt;
+                    Hello Redux!!
+                &lt;/article&gt;
+                `</span><span class="p">;</span>
+            <span class="c1">//update mode일 경우</span>
+            <span class="si">}</span>if(state.mode === 'update')<span class="si">{</span>
+                <span class="c1">//하단에 수정폼 출력</span>
+                <span class="c1">//onsubmit을 통해 UPDATE type action 호출</span>
+                <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="dl">'</span><span class="s1">#article</span><span class="dl">'</span><span class="p">).</span><span class="nx">innerHTML</span><span class="o">=</span><span class="s2">`
+                &lt;article&gt;
+                    &lt;form onsubmit="event.preventDefault();
+                        const _title = this.title.value;
+                        const _desc = this.desc.value;
+                        store.dispatch({
+                            type: 'UPDATE',
+                            title: _title,
+                            desc: _desc
+                        })
+                    "&gt;
+                        &lt;p&gt;
+                            &lt;input type="text" name="title"
+                            placeholder="title"&gt;&lt;br&gt;
+                            &lt;textarea name="desc"
+                            placeholder="description"&gt;&lt;/textarea&gt;
+                        &lt;/p&gt;
+                        &lt;p&gt;
+                            &lt;input type="submit" value="글 수정"&gt;&lt;/input&gt;
+                        &lt;/p&gt;
+                    &lt;/form&gt;
+                &lt;/article&gt;
+                `</span><span class="p">;</span>
+            <span class="si">}</span>
+        }
+        
+        //reducer
+        function reducer(state, action)<span class="si">{</span>
+            
+            <span class="c1">//초기 state가 undefined일 경우</span>
+            <span class="k">if</span><span class="p">(</span><span class="nx">state</span> <span class="o">===</span> <span class="kc">undefined</span><span class="p">){</span>
+                <span class="k">return</span> <span class="p">{</span>
+                    <span class="na">max_id</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span>
+                    <span class="na">mode</span><span class="p">:</span><span class="dl">"</span><span class="s2">create</span><span class="dl">"</span><span class="p">,</span>
+                    <span class="na">selected_id</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="na">contents</span> <span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span><span class="na">id</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="na">title</span><span class="p">:</span><span class="dl">'</span><span class="s1">HTML</span><span class="dl">'</span><span class="p">,</span><span class="na">desc</span><span class="p">:</span><span class="dl">'</span><span class="s1">HTML is ..</span><span class="dl">'</span><span class="p">},</span>
+                        <span class="p">{</span><span class="na">id</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="na">title</span><span class="p">:</span><span class="dl">'</span><span class="s1">CSS</span><span class="dl">'</span><span class="p">,</span><span class="na">desc</span><span class="p">:</span><span class="dl">'</span><span class="s1">CSS is ..</span><span class="dl">'</span><span class="p">},</span>
+                        <span class="p">{</span><span class="na">id</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="na">title</span><span class="p">:</span><span class="dl">'</span><span class="s1">REACT</span><span class="dl">'</span><span class="p">,</span><span class="na">desc</span><span class="p">:</span><span class="dl">'</span><span class="s1">REACT is ..</span><span class="dl">'</span><span class="p">},</span>
+                    <span class="p">]</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="kd">var</span> <span class="nx">newState</span><span class="p">;</span>
+            <span class="c1">//조회</span>
+            <span class="k">if</span><span class="p">(</span><span class="nx">action</span><span class="p">.</span><span class="nx">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">SELECT</span><span class="dl">'</span><span class="p">){</span>
+                <span class="nx">newState</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">assign</span><span class="p">({},</span> <span class="nx">state</span><span class="p">,</span> 
+                <span class="p">{</span><span class="na">selected_id</span><span class="p">:</span><span class="nx">action</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span>
+                    <span class="na">mode</span><span class="p">:</span> <span class="dl">'</span><span class="s1">read</span><span class="dl">'</span>
+                <span class="p">});</span>
+            <span class="c1">//추가</span>
+            <span class="p">}</span><span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="nx">action</span><span class="p">.</span><span class="nx">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">CREATE</span><span class="dl">'</span><span class="p">){</span>
+                <span class="kd">const</span> <span class="nx">newMaxId</span> <span class="o">=</span> <span class="nx">state</span><span class="p">.</span><span class="nx">max_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+                <span class="kd">const</span> <span class="nx">newContents</span> <span class="o">=</span> <span class="nx">state</span><span class="p">.</span><span class="nx">contents</span><span class="p">.</span><span class="nx">concat</span><span class="p">();</span>
+                <span class="nx">newContents</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span><span class="na">id</span><span class="p">:</span> <span class="nx">newMaxId</span><span class="p">,</span> <span class="na">title</span><span class="p">:</span> <span class="nx">action</span><span class="p">.</span><span class="nx">title</span><span class="p">,</span> <span class="na">desc</span><span class="p">:</span> <span class="nx">action</span><span class="p">.</span><span class="nx">desc</span><span class="p">})</span>
+                <span class="nx">newState</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">assign</span><span class="p">({},</span> <span class="nx">state</span><span class="p">,</span> <span class="p">{</span>
+                    <span class="na">max_id</span><span class="p">:</span><span class="nx">newMaxId</span><span class="p">,</span>
+                    <span class="na">contents</span><span class="p">:</span> <span class="nx">newContents</span><span class="p">,</span>
+                    <span class="na">mode</span><span class="p">:</span><span class="dl">'</span><span class="s1">read</span><span class="dl">'</span>
+                <span class="p">})</span>
+            <span class="c1">//삭제</span>
+            <span class="p">}</span><span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="nx">action</span><span class="p">.</span><span class="nx">type</span> <span class="o">===</span> <span class="dl">'</span><span class="s1">DELETE</span><span class="dl">'</span><span class="p">){</span>
+                <span class="kd">const</span> <span class="nx">newContents</span> <span class="o">=</span> <span class="p">[];</span>
+                <span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="k">while</span> <span class="p">(</span><span class="nx">i</span><span class="o">&lt;</span><span class="nx">state</span><span class="p">.</span><span class="nx">contents</span><span class="p">.</span><span class="nx">length</span><span class="p">){</span>
+                    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">content[i]</span><span class="dl">'</span><span class="o">+</span><span class="nx">state</span><span class="p">.</span><span class="nx">contents</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">id</span><span class="p">);</span>
+                    <span class="k">if</span><span class="p">(</span><span class="nx">state</span><span class="p">.</span><span class="nx">selected_id</span> <span class="o">!==</span> <span class="nx">state</span><span class="p">.</span><span class="nx">contents</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">id</span><span class="p">){</span>
+                        <span class="nx">newContents</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span>
+                            <span class="nx">state</span><span class="p">.</span><span class="nx">contents</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+                        <span class="p">);</span>
+                    <span class="p">}</span>
+                    <span class="nx">i</span> <span class="o">=</span> <span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+                <span class="si">}</span>
+
+                newState = Object.assign(<span class="si">{}</span>,state,<span class="si">{</span>
+                    <span class="nx">contents</span><span class="p">:</span><span class="nx">newContents</span><span class="p">,</span>
+                    <span class="nx">mode</span><span class="p">:</span><span class="dl">'</span><span class="s1">welcome</span><span class="dl">'</span>
+                <span class="si">}</span>)
+            //모드 변경 (추가, 수정폼 노출용)
+            }else if(action.type === 'CHANGE_MODE')<span class="si">{</span>
+                <span class="nx">newState</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">assign</span><span class="p">({},</span><span class="nx">state</span><span class="p">,{</span>
+                    <span class="na">mode</span><span class="p">:</span><span class="nx">action</span><span class="p">.</span><span class="nx">mode</span>
+                <span class="p">})</span>
+            <span class="c1">//수정</span>
+            <span class="si">}</span>else if(action.type === 'UPDATE')<span class="si">{</span>
+                <span class="kd">const</span> <span class="nx">newContents</span> <span class="o">=</span> <span class="p">[];</span>
+                <span class="kd">let</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+                <span class="k">while</span> <span class="p">(</span><span class="nx">i</span><span class="o">&lt;</span><span class="nx">state</span><span class="p">.</span><span class="nx">contents</span><span class="p">.</span><span class="nx">length</span><span class="p">){</span>
+                    <span class="k">if</span><span class="p">(</span><span class="nx">state</span><span class="p">.</span><span class="nx">selected_id</span> <span class="o">!==</span> <span class="nx">state</span><span class="p">.</span><span class="nx">contents</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">id</span><span class="p">){</span>
+                        <span class="nx">newContents</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span>
+                            <span class="nx">state</span><span class="p">.</span><span class="nx">contents</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
+                        <span class="p">);</span>
+                    <span class="p">}</span><span class="k">else</span><span class="p">{</span>
+                        <span class="nx">newContents</span><span class="p">.</span><span class="nx">push</span><span class="p">({</span>
+                            <span class="na">id</span><span class="p">:</span><span class="nx">state</span><span class="p">.</span><span class="nx">selected_id</span><span class="p">,</span>
+                            <span class="na">title</span><span class="p">:</span> <span class="nx">action</span><span class="p">.</span><span class="nx">title</span><span class="p">,</span>
+                            <span class="na">contents</span><span class="p">:</span> <span class="nx">action</span><span class="p">.</span><span class="nx">contents</span><span class="p">,</span>
+                            <span class="na">desc</span><span class="p">:</span> <span class="nx">action</span><span class="p">.</span><span class="nx">desc</span><span class="p">,</span>
+                        <span class="p">});</span>
+                    <span class="p">}</span>
+                    <span class="nx">i</span> <span class="o">=</span> <span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">;</span>
+
+                    <span class="nx">newState</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">assign</span><span class="p">({},</span><span class="nx">state</span><span class="p">,{</span>
+                        <span class="na">contents</span><span class="p">:</span><span class="nx">newContents</span><span class="p">,</span>
+                        <span class="na">mode</span><span class="p">:</span><span class="dl">'</span><span class="s1">welcome</span><span class="dl">'</span>
+                    <span class="p">})</span>
+                <span class="si">}</span>
+            }
+            console.log(state, action, newState);
+            return newState;
+        }
+
+        //store 생성
+        const store = Redux.createStore(reducer);
+        //상태값에 따라 렌더링 해줄 함수 추가
+        store.subscribe(article);
+        store.subscribe(TOC);
+        //초기에 화면 그리기
+        subject();
+        TOC();
+        control();
+        article();
+
+    <span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+    
+  
+   
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p><img src="/assets/img/2020-10-20_20h22_54.png" alt="/assets/img/2020-10-20_20h22_54.png" /></p>
+
+<p>여기까지 공부하고 나니 Redux에 대한 이해가 어느정도 되어서 다시 공식문서를 보았더니 공식문서가 복잡한 것이 아니라 Redux 템플릿을 적용해서 구조가 달랐고 사용 방법에 따라 예제도 다르다는 것을 알 수 있었다. 역시 처음에는 항상 헤매는 나이다 보니 이번에도 기초적인 것을 공부하고 나서야 깨닫는 하루였다.</p>
+:ET
