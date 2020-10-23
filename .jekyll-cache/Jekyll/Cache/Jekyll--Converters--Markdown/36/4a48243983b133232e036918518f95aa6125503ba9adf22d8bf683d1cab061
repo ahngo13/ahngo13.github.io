@@ -1,0 +1,402 @@
+I"z<h1 id="rest-api란">REST API란?</h1>
+
+<ul>
+  <li>Representational State Transfer라는 용어의 약자</li>
+  <li>웹과 같은 분산 하이퍼미디어 시스템을 위한 소프트웨어 아키텍처의 한 형식</li>
+</ul>
+
+<h2 id="rest-구성">REST 구성</h2>
+
+<ul>
+  <li>자원 (Resource) - URI</li>
+  <li>행위 (Verb) - http method</li>
+  <li>표현 (representations)</li>
+</ul>
+
+<h2 id="http-method의-역할">HTTP Method의 역할</h2>
+
+<ul>
+  <li>POST : 해당 URL을 요청하면 리소스를 생성 (Create)</li>
+  <li>GET : 해당 리소스를 조회, Document의 정보를 가져옴 (Read)</li>
+  <li>PUT : 해당 리소스를 수정 (Update)</li>
+  <li>DELETE : 해당 리소스 삭제 (Delete)</li>
+</ul>
+
+<h2 id="url-설계시-주의점">URL 설계시 주의점</h2>
+
+<ol>
+  <li>슬래시 (/) 구분자는 계층 관계를 나타냄, 리소스가 다르면 URI도 달라야 함</li>
+  <li>URI 마지막 문자로 슬래시를 포함하지 않음</li>
+  <li>하이픈은 가독성을 높히는데 사용</li>
+  <li>언더바(_)는 URI에 사용하지 않음</li>
+  <li>URI 경로는 소문자가 적합</li>
+  <li>URI에 파일 확장자 포함하지 않음 (Accept header 사용)</li>
+</ol>
+
+<h2 id="리소스-간-관계-표현">리소스 간 관계 표현</h2>
+
+<ul>
+  <li>has(소유의 관계를 표현할 때) 아래와 같이 표현</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>## /리소스명/리소스ID/관계가 있는 다른 리소스명
+GET : /users/{userid}/device
+
+## 관계명이 애매하거나 구체적일 필요가 있을 때
+GET : /users/{userid}/likes/device 
+</code></pre></div></div>
+
+<h2 id="자원을-표현하는-collection과-document">자원을 표현하는 Collection과 Document</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>http:// restapi.example.com/sports/soccer/players/13
+</code></pre></div></div>
+
+<p>컬렉션과 도큐먼트는 모두 리소스라고 표현 가능하므로 URI에 표현 됨. 단수 복수도 지켜주면 좋음</p>
+
+<h2 id="http-응답-상태-코드">HTTP 응답 상태 코드</h2>
+
+<h3 id="2xx">2XX</h3>
+
+<ul>
+  <li>200 : 클라이언트의 요청을 정상적으로 수행</li>
+  <li>201 : 클라이언트가 리소스 생성을 요청하고 그것을 성공적으로 생성함 (POST를 통한 리소스 생성)</li>
+</ul>
+
+<h3 id="4xx">4XX</h3>
+
+<ul>
+  <li>400 : 클라이언트의 요청이 부적절할 경우 사용</li>
+  <li>401 : 클라이언트가 인증되지 않은 상태에서 보호된 리소스를 요청했을 때 사용</li>
+  <li>403 : 유저 인증상태와 관계없이 응답하고 싶지 않은 리소스를 클라이언트가 요청했을 때 사용
+    <ul>
+      <li>400이나 404를 사용하는 것을 권고</li>
+    </ul>
+  </li>
+  <li>405 : 클라이언트가 요청한 리소스에서는 사용 불가능한 Method를 이용했을 경우 사용</li>
+</ul>
+
+<h3 id="3xx">3XX</h3>
+
+<ul>
+  <li>301 : 클라이언트가 요청한 리소스에 대한 URI가 변경 되었을 때 사용 (응답시 Location header에 변경된 URI를 적어줘야 함)</li>
+</ul>
+
+<h3 id="5xx">5XX</h3>
+
+<ul>
+  <li>500 : 서버에 문제가 있을 경우 사용</li>
+</ul>
+
+<h1 id="springboot로-rest-api-서버-만들어-보기">SpringBoot로 REST API 서버 만들어 보기</h1>
+
+<p>REST API 서버라고 해서 엄청 거창한 것을 만드는 것은 아니다. 간단하게 서버를 돌려놓고 Postman(API를 테스트하는 툴)을 사용하여 서버가 잘 돌아가는지만 확인하도록 하겠다. 추후에는 이를 기반으로 다른 부분까지 연동하여 확장해 나갈 계획이다. 오늘 만들 REST API 서버는 게시판 글 목록 조회, 특정 글 조회, 글 삭제, 글 추가, 글 수정 기능을 가졌다고 보면 된다. (데이터베이스 연동이 되지 않아 느낌만 가져가는 REST API 서버라서 우리가 원하는 완벽한 정도의 느낌은 아닐 것이지만 첫술에 배부르랴!)</p>
+
+<h3 id="rest-api-서버의-기능">REST API 서버의 기능</h3>
+
+<p>위에 정리된 REST API 서버 메소드 역할대로 나누어 보자면 아래와 같이 될 것이다. 대충 HTTP 메소드를 어떤 걸 어떻게 써야되는구나 생각하고 넘어가면 된다.</p>
+
+<ul>
+  <li>게시글 추가 : POST (게시글에 대한 정보를 넘겨줘야 겠구나)</li>
+  <li>게시글 목록 조회 : GET (따로 뭔가를 안 넘겨줘도 볼 수 있겠구나)</li>
+  <li>특정 게시글 조회 : GET (특정 게시글이니까 게시글 번호같은 고유 값을 넘겨줘야 겠구나)</li>
+  <li>특정 게시글 수정 : PUT (특정 게시글을 수정하는 것이니까 게시글 번호같은 고유값과 변경될 데이터들을 보내줘야 겠구나)</li>
+  <li>특정 게시글 삭제 : DELETE (특정 게시글을 삭제하는 것이니까 게시글 번호같은 고유값을 넘겨줘야 겠구나)</li>
+</ul>
+
+<h3 id="프로젝트-생성">프로젝트 생성</h3>
+
+<p>IDE를 인텔리제이를 사용하여 Maven 프로젝트로 생성하였고 <code class="language-plaintext highlighter-rouge">[localhost:8080](http://localhost:8080)</code> 서버 구동이 잘 되는지만 확인하고 진행하였다. 잘 모르겠다면 <a href="https://start.spring.io/">https://start.spring.io/</a> 여기에서 적당히 디펜던시만 추가해서 생성해도 된다. (필자는 SpringBoot DevTools, Lombok, Spring Web, Thymeleaf 이정도는 추가하고 프로젝트를 생성하는 편이다) dependency만 잘 추가해서 프로젝트를 생성했다면 서버를 띄웠을 때 콘솔창에 에러가 뜨는 경우는 없을 것이고 localhost:8080 으로 서버를 띄워서 접속했을 때 404 페이지가 뜨는 것을 볼 수 있을 것이다.</p>
+
+<p><a href="https://ahngo13.github.io/springboot-maven/">https://ahngo13.github.io/springboot-maven/</a> 앞부분만 조금 따라해서 Hello World를 찍어보는 것도 괜찮을 것 같다.</p>
+
+<p>혹시나 환경 설정에서 애먹으실 분들이 있을까 해서 pom.xml을 공유한다.</p>
+
+<p><code class="language-plaintext highlighter-rouge">pom.xml</code></p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span>
+<span class="nt">&lt;project</span> <span class="na">xmlns=</span><span class="s">"http://maven.apache.org/POM/4.0.0"</span> <span class="na">xmlns:xsi=</span><span class="s">"http://www.w3.org/2001/XMLSchema-instance"</span>
+	<span class="na">xsi:schemaLocation=</span><span class="s">"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"</span><span class="nt">&gt;</span>
+	<span class="nt">&lt;modelVersion&gt;</span>4.0.0<span class="nt">&lt;/modelVersion&gt;</span>
+	<span class="nt">&lt;parent&gt;</span>
+		<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+		<span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-parent<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;version&gt;</span>2.3.4.RELEASE<span class="nt">&lt;/version&gt;</span>
+		<span class="nt">&lt;relativePath/&gt;</span> <span class="c">&lt;!-- lookup parent from repository --&gt;</span>
+	<span class="nt">&lt;/parent&gt;</span>
+	<span class="nt">&lt;groupId&gt;</span>com.hamletshu.www<span class="nt">&lt;/groupId&gt;</span>
+	<span class="nt">&lt;artifactId&gt;</span>restapi<span class="nt">&lt;/artifactId&gt;</span>
+	<span class="nt">&lt;version&gt;</span>0.0.1-SNAPSHOT<span class="nt">&lt;/version&gt;</span>
+	<span class="nt">&lt;name&gt;</span>restapi<span class="nt">&lt;/name&gt;</span>
+	<span class="nt">&lt;description&gt;</span>REST API project for Spring Boot<span class="nt">&lt;/description&gt;</span>
+
+	<span class="nt">&lt;properties&gt;</span>
+		<span class="nt">&lt;java.version&gt;</span>11<span class="nt">&lt;/java.version&gt;</span>
+	<span class="nt">&lt;/properties&gt;</span>
+
+	<span class="nt">&lt;dependencies&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-thymeleaf<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-web<span class="nt">&lt;/artifactId&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-boot-devtools<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;scope&gt;</span>runtime<span class="nt">&lt;/scope&gt;</span>
+			<span class="nt">&lt;optional&gt;</span>true<span class="nt">&lt;/optional&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.projectlombok<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>lombok<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;optional&gt;</span>true<span class="nt">&lt;/optional&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+		<span class="nt">&lt;dependency&gt;</span>
+			<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+			<span class="nt">&lt;artifactId&gt;</span>spring-boot-starter-test<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;scope&gt;</span>test<span class="nt">&lt;/scope&gt;</span>
+			<span class="nt">&lt;exclusions&gt;</span>
+				<span class="nt">&lt;exclusion&gt;</span>
+					<span class="nt">&lt;groupId&gt;</span>org.junit.vintage<span class="nt">&lt;/groupId&gt;</span>
+					<span class="nt">&lt;artifactId&gt;</span>junit-vintage-engine<span class="nt">&lt;/artifactId&gt;</span>
+				<span class="nt">&lt;/exclusion&gt;</span>
+			<span class="nt">&lt;/exclusions&gt;</span>
+		<span class="nt">&lt;/dependency&gt;</span>
+	<span class="nt">&lt;/dependencies&gt;</span>
+
+	<span class="nt">&lt;build&gt;</span>
+		<span class="nt">&lt;plugins&gt;</span>
+			<span class="nt">&lt;plugin&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>spring-boot-maven-plugin<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;/plugin&gt;</span>
+		<span class="nt">&lt;/plugins&gt;</span>
+	<span class="nt">&lt;/build&gt;</span>
+
+<span class="nt">&lt;/project&gt;</span>
+</code></pre></div></div>
+
+<h3 id="패키지-구조-잡기">패키지 구조 잡기</h3>
+
+<p>패키지 구조를 잡는 것은 사람마다 다르겠지만 필자는 아래와 같이 패키지를 구성하였다.</p>
+
+<p><img src="/assets/img/2020-10-23_15h52_20.png" alt="/assets/img/2020-10-23_15h52_20.png" /></p>
+
+<p>최초에 생성된 프로젝트에서 <code class="language-plaintext highlighter-rouge">com.hamletshu.restapi.controller</code> 와  <code class="language-plaintext highlighter-rouge">com.hamletshu.restapi.entity</code></p>
+
+<p>가 추가한 것이고 controller들과 entity (vo, dto라고도 부르는 데이터 객체들을 관리하는 class)들을 관리하기 위해 나누어 놓았다. 솔직히 여기서 더 여러개의 컨트롤러나 엔티티를 만들어낼지는 모르겠지만 느낌 있어 보이게(?) 나누었다.</p>
+
+<h3 id="postcontrollerjava-파일-생성"><a href="http://postcontroller.java">PostController.java</a> 파일 생성</h3>
+
+<p>이번에 예제로 REST API 서버를 만드는 핵심로직이 여기에 거의 다 있다고 보면된다.</p>
+
+<p>저번에도 잠깐 말했었지만 어노테이션 중 RestController라는 것이 있다. 서버를 실행했을 때 해당 클래스를 컨트롤러로 인식시키기 위해서 사용하는 것으로 알고있다.</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">@RestController</code> : 전통적인 Controller에 <code class="language-plaintext highlighter-rouge">@ResponseBody</code>가 추가된 것이라고 한다. JSON 객체 형태로 데이터를 반환할 때 사용한다고 한다. (일반적으로 이걸 많이 쓰니깐 이런식으로 바꿔놓았겠지? 라고 생각한다.)</li>
+  <li><code class="language-plaintext highlighter-rouge">@Controller</code> : 전통적인 Controller로 View를 반환하기 위해 사용한다고 한다.</li>
+</ul>
+
+<p><code class="language-plaintext highlighter-rouge">PostController.java</code></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.hamletshu.restapi.controller</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.hamletshu.restapi.entity.Post</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.http.HttpStatus</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.http.MediaType</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.http.ResponseEntity</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.web.bind.annotation.*</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.ArrayList</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.Map</span><span class="o">;</span>
+
+<span class="c1">//RestController 어노테이션 추가 (controller 인식)</span>
+<span class="nd">@RestController</span>
+<span class="c1">// value : localhost:8080/posts로 접근할 경우 이 controller에 접근한다.</span>
+<span class="c1">// produces : 생산 가능한 미디어 타입을 지정해서 일치할 때만 요청을 매칭함. (매핑 제한용)</span>
+<span class="c1">// comsumes : 소비 가능한 미디어 타입을 지정해서 때만 요청을 매칭함. (매핑 제한용)</span>
+<span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"/posts"</span><span class="o">,</span> <span class="n">produces</span> <span class="o">=</span> <span class="nc">MediaType</span><span class="o">.</span><span class="na">APPLICATION_JSON_VALUE</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">PostController</span> <span class="o">{</span>
+
+    <span class="c1">//게시글 추가</span>
+		<span class="c1">//Post 요청이 들어왔을 때, value=""는 localhost:8080/posts를 의미함</span>
+    <span class="nd">@PostMapping</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">""</span><span class="o">,</span> <span class="n">consumes</span> <span class="o">=</span> <span class="nc">MediaType</span><span class="o">.</span><span class="na">APPLICATION_JSON_VALUE</span><span class="o">)</span>
+    <span class="c1">//ResponseEntity 상태코드 제어</span>
+    <span class="kd">public</span> <span class="nc">ResponseEntity</span><span class="o">&lt;</span><span class="nc">Void</span><span class="o">&gt;</span> <span class="nf">createPost</span><span class="o">(</span><span class="nd">@RequestBody</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">Object</span><span class="o">&gt;</span> <span class="n">requestBody</span><span class="o">){</span>
+        <span class="c1">//Postman으로 요청했을 때 딱히 뜨는 메시지가 없어서 확인차 로그를 찍어봄</span>
+				<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"createPost"</span><span class="o">);</span>
+        <span class="c1">//정상적으로 수행됐다고 상태 리턴 (200)</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nc">ResponseEntity</span><span class="o">&lt;&gt;(</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">OK</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="c1">//게시글 목록 조회</span>
+    <span class="c1">//Get 요청이 들어왔을 때, value=""는 localhost:8080/posts를 의미함</span>
+    <span class="nd">@GetMapping</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">""</span><span class="o">)</span>
+    <span class="c1">//RequestParam : 넘어온 파라미터 가지고 올때 사용 required = false를 사용하면 필수값 아님을 의미</span>
+    <span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Post</span><span class="o">&gt;</span> <span class="nf">getPostList</span><span class="o">(</span><span class="nd">@RequestParam</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"postId"</span><span class="o">,</span> <span class="n">required</span> <span class="o">=</span> <span class="kc">false</span><span class="o">)</span> <span class="nc">String</span> <span class="n">postId</span><span class="o">){</span>
+        <span class="c1">//게시글 데이터가 조회가 되려면 데이터가 있어야 하는데 없으므로 임의로 10개만 생성해 줌</span>
+        <span class="c1">//Post 객체로 ArrayList를 생성</span>
+				<span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Post</span><span class="o">&gt;</span> <span class="n">posts</span><span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+        <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="o">;</span> <span class="n">i</span><span class="o">++){</span>
+            <span class="c1">//Post 객체를 생성해서 데이터를 title과 contents에 postId만 붙여서 넣어줌 </span>
+            <span class="nc">Post</span> <span class="n">post</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Post</span><span class="o">();</span>
+            <span class="n">post</span><span class="o">.</span><span class="na">setPostId</span><span class="o">(</span><span class="nc">Integer</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">i</span><span class="o">));</span>
+            <span class="n">post</span><span class="o">.</span><span class="na">setTitle</span><span class="o">(</span><span class="s">"title"</span> <span class="o">+</span> <span class="n">i</span><span class="o">);</span>
+            <span class="n">post</span><span class="o">.</span><span class="na">setContents</span><span class="o">(</span><span class="s">"content"</span> <span class="o">+</span> <span class="n">i</span><span class="o">);</span>
+            <span class="c1">//ArraryList에 Post 객체를 넣어줌</span>
+            <span class="n">posts</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">post</span><span class="o">);</span>
+        <span class="o">}</span>
+
+        <span class="k">return</span> <span class="n">posts</span><span class="o">;</span>
+    <span class="o">}</span>
+    
+    <span class="c1">//특정 게시글 조회</span>
+    <span class="c1">//Get 요청이 들어왔을 때, value = "/{postId}"는 postId 게시글의 데이터를 조회하기 위해 설정 </span>
+    <span class="c1">//ex) localhost:8080/posts/1 </span>
+    <span class="nd">@GetMapping</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"/{postId}"</span><span class="o">)</span>
+    <span class="c1">//PathVariable은 URI에 넘어온 postId 값을 가져오기 위해 사용</span>
+    <span class="kd">public</span> <span class="nc">Post</span> <span class="nf">getPost</span><span class="o">(</span><span class="nd">@PathVariable</span> <span class="nc">String</span> <span class="n">postId</span><span class="o">){</span>
+        <span class="c1">// 데이터베이스 연동이 따로 되어있는 것이 없기 때문에 임시적으로 객체를 생성해서 넘겨줌</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nf">Post</span><span class="o">(</span><span class="n">postId</span><span class="o">,</span><span class="s">"title"</span><span class="o">+</span><span class="n">postId</span><span class="o">,</span><span class="s">"contents"</span><span class="o">+</span><span class="n">postId</span><span class="o">);</span>
+    <span class="o">}</span>
+    
+    <span class="c1">//Put 요청이 들어왔을 때, value = "/{postId}"는 postId 게시글의 데이터를 수정하기 위해 설정 </span>
+    <span class="nd">@PutMapping</span><span class="o">(</span><span class="n">value</span> <span class="o">=</span> <span class="s">"/{postId}"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">ResponseEntity</span><span class="o">&lt;</span><span class="nc">Void</span><span class="o">&gt;</span> <span class="nf">updatePost</span><span class="o">(</span>
+            <span class="c1">//PathVariable은 URI에 넘어온 postId 값을 가져오기 위해 사용</span>
+            <span class="nd">@PathVariable</span> <span class="nc">String</span> <span class="n">postId</span>
+    <span class="o">){</span>
+				<span class="c1">//Postman으로 요청했을 때 딱히 뜨는 메시지가 없어서 확인차 로그를 찍어봄</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"UpdatePost"</span><span class="o">);</span>
+        <span class="c1">//이 또한 데이터베이스가 연동되어 있지 않기 때문에 임시로 처리</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nc">ResponseEntity</span><span class="o">&lt;&gt;(</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">OK</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="c1">//Delete 요청이 들어왔을 때, value = "/{postId}"는 postId 게시글의 데이터를 삭제하기 위해 설정 </span>
+    <span class="nd">@DeleteMapping</span><span class="o">(</span><span class="s">"/{postId}"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">ResponseEntity</span><span class="o">&lt;</span><span class="nc">Void</span><span class="o">&gt;</span> <span class="nf">deletePost</span><span class="o">(</span>
+            <span class="nd">@PathVariable</span> <span class="nc">String</span> <span class="n">postId</span>
+    <span class="o">){</span>
+				<span class="c1">//Postman으로 요청했을 때 딱히 뜨는 메시지가 없어서 확인차 로그를 찍어봄</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"DeletePost"</span><span class="o">);</span>
+        <span class="c1">//이 또한 데이터베이스가 연동되어 있지 않기 때문에 임시로 처리</span>
+        <span class="k">return</span> <span class="k">new</span> <span class="nc">ResponseEntity</span><span class="o">&lt;&gt;(</span><span class="nc">HttpStatus</span><span class="o">.</span><span class="na">OK</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">Post.java</code></p>
+
+<p>Post 객체를 생성하였다. 객체안에는 postId (게시글 번호), title (제목), contents(내용)으로 구성하였다. 데이터를 가져오거나 가공할 필요성도 있다고 생각해서 생성자, getter와 setter도 추가하였다.</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.hamletshu.restapi.entity</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Post</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">postId</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">title</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">contents</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">Post</span><span class="o">(){}</span>
+
+    <span class="kd">public</span> <span class="nf">Post</span><span class="o">(</span><span class="nc">String</span> <span class="n">postId</span><span class="o">,</span> <span class="nc">String</span> <span class="n">title</span><span class="o">,</span> <span class="nc">String</span> <span class="n">contents</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">postId</span> <span class="o">=</span> <span class="n">postId</span><span class="o">;</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">title</span> <span class="o">=</span> <span class="n">title</span><span class="o">;</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">contents</span> <span class="o">=</span> <span class="n">contents</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getPostId</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">postId</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setPostId</span><span class="o">(</span><span class="nc">String</span> <span class="n">postId</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">postId</span> <span class="o">=</span> <span class="n">postId</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getTitle</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">title</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setTitle</span><span class="o">(</span><span class="nc">String</span> <span class="n">title</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">title</span> <span class="o">=</span> <span class="n">title</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getContents</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">contents</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setContents</span><span class="o">(</span><span class="nc">String</span> <span class="n">contents</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">contents</span> <span class="o">=</span> <span class="n">contents</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="postman으로-정상작동-하는지-테스트">Postman으로 정상작동 하는지 테스트</h3>
+
+<ul>
+  <li>게시글 추가</li>
+</ul>
+
+<p><a href="http://localhost:8080/posts"><code class="language-plaintext highlighter-rouge">http://localhost:8080/posts</code></a></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">//Post</span><span class="w"> </span><span class="err">객체에</span><span class="w"> </span><span class="err">맞게</span><span class="w"> </span><span class="err">JSON</span><span class="w"> </span><span class="err">데이터를</span><span class="w"> </span><span class="err">Body에</span><span class="w"> </span><span class="err">넣어서</span><span class="w"> </span><span class="err">요청</span><span class="w">
+</span><span class="p">{</span><span class="w">
+    </span><span class="nl">"postId"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"1"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"title"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"test1"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"contents"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">"contents1"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<ul>
+  <li>게시글 목록 조회</li>
+</ul>
+
+<p><a href="http://localhost:8080/posts"><code class="language-plaintext highlighter-rouge">http://localhost:8080/posts</code></a></p>
+
+<p><img src="/assets/img/2020-10-23_16h54_31.png" alt="/assets/img/2020-10-23_16h54_31.png" /></p>
+
+<ul>
+  <li>특정 게시글 조회</li>
+</ul>
+
+<p><a href="http://localhost:8080/posts/1"><code class="language-plaintext highlighter-rouge">http://localhost:8080/posts/1</code></a></p>
+
+<p><img src="/assets/img/2020-10-23_16h58_05.png" alt="/assets/img/2020-10-23_16h58_05.png" /></p>
+
+<ul>
+  <li>특정 게시글 수정</li>
+</ul>
+
+<p><a href="http://localhost:8080/posts/1"><code class="language-plaintext highlighter-rouge">http://localhost:8080/posts/1</code></a></p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//Post 객체에 맞게 JSON 데이터를 Body에 넣어서 요청</span>
+<span class="o">{</span>
+    <span class="s">"title"</span> <span class="o">:</span> <span class="s">"testUpdate"</span><span class="o">,</span>
+    <span class="s">"contents"</span> <span class="o">:</span> <span class="s">"contentUpdate"</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><img src="/assets/img/2020-10-23_17h06_01.png" alt="/assets/img/2020-10-23_17h06_01.png" /></p>
+
+<ul>
+  <li>특정 게시글 삭제</li>
+</ul>
+
+<p><a href="http://localhost:8080/posts/1"><code class="language-plaintext highlighter-rouge">http://localhost:8080/posts/1</code></a></p>
+
+<p><img src="/assets/img/2020-10-23_17h07_36.png" alt="/assets/img/2020-10-23_17h07_36.png" /></p>
+
+<p>REST API라고 만들긴 했는데 실질적으로 데이터 관리가 이루어지지 않다보니까 껍데기에 불과한 REST API 서버를 만든 것을 알 수 있었다. 다음번에는 데이터베이스를 연동해서 조금이나마 진짜 같은 REST API 서버를 구성해보도록 하겠다.</p>
+
+<h3 id="참고-사이트">참고 사이트</h3>
+
+<p><a href="https://meetup.toast.com/posts/92">https://meetup.toast.com/posts/92</a></p>
+
+<p><a href="https://m.blog.naver.com/writer0713/221422059349">https://m.blog.naver.com/writer0713/221422059349</a></p>
+
+<p><a href="https://devfunny.tistory.com/321">https://devfunny.tistory.com/321</a></p>
+
+<p><a href="https://m.post.naver.com/viewer/postView.nhn?volumeNo=27835820&amp;memberNo=2490752">https://m.post.naver.com/viewer/postView.nhn?volumeNo=27835820&amp;memberNo=2490752</a></p>
+:ET
