@@ -1,0 +1,2 @@
+I"0<p>JUnit이라는 것에 대해서 조금 자세히 공부하려다 보니 이전 글인 <a href="https://ahngo13.github.io/springboot-rest-api2/">SpringBoot REST API 서버 만들기 - (2) MySQL 및 Spring Data JPA</a> 연동 글에서 단위테스트에 대해서 너무 소홀하게 작성한 것을 깨닫고 다시 이렇게 조금 더 자세하게 적어보려고 한다. 기존 프로젝트 내용도 조금은 수정해서 테스트 케이스를 추가할 듯 하니 ‘이런식으로 쓰는구나!’ 정도 느낌만 받아가면 될 듯하다.</p>
+:ET
