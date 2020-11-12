@@ -1,15 +1,15 @@
-title: Developer SiU Ahn 기술 블로그
+title: 생각많은 꼬발자 안시우의 기술 블로그
 description: > # this means to ignore newlines until "baseurl:"
-  I am a web developer focusing on DevOps development. Always hungry to keep learning.
+  개발 공부하면서 정리해놓은 기술 블로그입니다. 꼬발자(개발+꼬발)이다 보니 시간을 날리는 경우도 허다해서 그런 부분들까지 정리하려고 노력중입니다.
 permalink: ':title/'
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 site-twitter: #if your site has a twitter account, enter it here
 
 # Author Settings
-author: SiU Ahn # add your name
+author: 안시우 # add your name
 author-img: david-freeman.jpg # add your photo
-about-author: I am a web developer focusing on DevOps development. Always hungry to keep learning. # add description
+about-author: 개발 공부하면서 정리해놓은 기술 블로그입니다. 꼬발자(개발+꼬발)이다 보니 시간을 날리는 경우도 허다해서 그런 부분들까지 정리하려고 노력중입니다.
 social-twitter: # add your Twitter handle
 social-facebook: # add your Facebook handle
 social-github: ahngo13 # add your Github handle
@@ -28,6 +28,7 @@ plugins:
   - jekyll-sitemap
   - jekyll-paginate
   - jemoji
+  - jekyll-feed
 
 paginate: 8
 paginate_path: "/page/:num"
