@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 152 76% 92%;
+    --accent-foreground: 152 70% 20%;
+    --primary: 152 69% 31%;
+    --primary-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .prose-blog {
+    @apply prose prose-slate max-w-none;
+    @apply prose-headings:font-semibold prose-headings:tracking-tight;
+    @apply prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl;
+    @apply prose-a:text-emerald-700 prose-a:no-underline hover:prose-a:underline;
+    @apply prose-code:rounded prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:text-sm prose-code:font-normal;
+    @apply prose-pre:bg-slate-50 prose-pre:border prose-pre:border-border prose-pre:rounded-lg;
+    line-height: 1.75;
+  }
+
+  .prose-blog pre code {
+    background: transparent;
+    padding: 0;
+  }
+
+  .prose-blog [data-rehype-pretty-code-figure] pre {
+    @apply overflow-x-auto py-4;
+  }
+}
