@@ -11,6 +11,37 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   authors: [{ name: siteConfig.author, url: siteConfig.github }],
+  keywords: [
+    "안시우",
+    "Aiden Ahn",
+    "앱 개발",
+    "indie app",
+    "android",
+    "Play Store",
+    "release notes",
+    "개발 블로그",
+    "indie developer",
+    "app release",
+  ],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  alternates: {
+    canonical: "/",
+    types: {
+      "application/rss+xml": [
+        { url: "/feed.xml", title: `${siteConfig.name} RSS Feed` },
+      ],
+    },
+  },
   openGraph: {
     type: "website",
     locale: "ko_KR",
@@ -18,11 +49,24 @@ export const metadata: Metadata = {
     title: siteConfig.name,
     description: siteConfig.description,
     siteName: siteConfig.name,
+    // NOTE: og-default.png is a placeholder the user should create manually
+    // (1200x630 PNG with site name/branding). Until then, per-post
+    // `coverImage` will be used as the OG image on post detail pages.
+    images: [
+      {
+        url: "/og-default.png",
+        width: 1200,
+        height: 630,
+        alt: siteConfig.name,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: siteConfig.name,
     description: siteConfig.description,
+    images: ["/og-default.png"],
+    creator: "@ahngo13",
   },
 };
 
@@ -43,7 +87,7 @@ export default function RootLayout({
               <Link href="/" className="hover:text-foreground">Home</Link>
               <Link href="/about" className="hover:text-foreground">About</Link>
               <a
-                href={siteConfig.sisterSite.url}
+                href={siteConfig.sisterSite.appsBaseUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-emerald-700"
@@ -63,7 +107,7 @@ export default function RootLayout({
               <a href={siteConfig.github} target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
                 GitHub
               </a>
-              <a href={siteConfig.sisterSite.url} target="_blank" rel="noopener noreferrer" className="hover:text-emerald-700">
+              <a href={siteConfig.sisterSite.appsBaseUrl} target="_blank" rel="noopener noreferrer" className="hover:text-emerald-700">
                 앱 공식 페이지 →
               </a>
             </div>

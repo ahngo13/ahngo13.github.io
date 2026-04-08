@@ -21,7 +21,7 @@ export default function AboutPage() {
         <p>
           이 블로그는 출시 소식, 개발 노트, 앱을 만들며 배운 것들을 기록하는
           공간입니다. 앱의 공식 스펙시트와 다운로드 링크는{" "}
-          <a href={siteConfig.sisterSite.url} target="_blank" rel="noopener noreferrer">
+          <a href={siteConfig.sisterSite.appsBaseUrl} target="_blank" rel="noopener noreferrer">
             {siteConfig.sisterSite.name}
           </a>
           에서 확인할 수 있습니다.
@@ -37,8 +37,8 @@ export default function AboutPage() {
           </li>
           <li>
             앱 카탈로그:{" "}
-            <a href={siteConfig.sisterSite.url} target="_blank" rel="noopener noreferrer">
-              {siteConfig.sisterSite.url}
+            <a href={siteConfig.sisterSite.appsBaseUrl} target="_blank" rel="noopener noreferrer">
+              {siteConfig.sisterSite.appsBaseUrl}
             </a>
           </li>
         </ul>

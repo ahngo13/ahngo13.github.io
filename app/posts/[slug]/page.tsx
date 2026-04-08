@@ -1,7 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getAllPosts, getPostBySlug, getPostSlugs } from "@/lib/posts";
+import {
+  estimateWordCount,
+  getAllPosts,
+  getPostBySlug,
+  getPostSlugs,
+  getPrevNextPosts,
+  getRelatedPosts,
+} from "@/lib/posts";
 import { Badge } from "@/components/ui/badge";
 import { formatDate, readingTime } from "@/lib/utils";
 import { siteConfig, appUrl } from "@/lib/site";
@@ -19,22 +26,36 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const post = getAllPosts().find((p) => p.slug === slug);
   if (!post) return {};
 
+  const postUrl = `${siteConfig.url}/posts/${post.slug}/`;
+  const ogImages = post.coverImage
+    ? [{ url: post.coverImage, alt: post.title }]
+    : [{ url: "/og-default.png", width: 1200, height: 630, alt: post.title }];
+
   return {
     title: post.title,
     description: post.summary ?? undefined,
+    keywords: post.tags,
+    alternates: {
+      canonical: postUrl,
+    },
     openGraph: {
+      type: "article",
       title: post.title,
       description: post.summary ?? undefined,
-      type: "article",
+      url: postUrl,
       publishedTime: post.date,
+      modifiedTime: post.date,
+      authors: [siteConfig.author],
       tags: post.tags,
-      images: post.coverImage ? [{ url: post.coverImage }] : undefined,
+      images: ogImages,
+      siteName: siteConfig.name,
+      locale: "ko_KR",
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.summary ?? undefined,
-      images: post.coverImage ? [post.coverImage] : undefined,
+      images: post.coverImage ? [post.coverImage] : ["/og-default.png"],
     },
   };
 }
@@ -45,7 +66,13 @@ export default async function PostPage({ params }: PageProps) {
   if (!post) notFound();
 
   const minutes = readingTime(post.rawContent);
+  const wordCount = estimateWordCount(post.rawContent);
   const relatedAppUrl = post.appSlug ? appUrl(post.appSlug) : null;
+  const related = getRelatedPosts(post.slug, 3);
+  const { prev, next } = getPrevNextPosts(post.slug);
+
+  const postUrl = `${siteConfig.url}/posts/${post.slug}/`;
+  const imageForSchema = post.coverImage ?? `${siteConfig.url}/og-default.png`;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -63,13 +90,31 @@ export default async function PostPage({ params }: PageProps) {
       "@type": "Organization",
       name: siteConfig.name,
       url: siteConfig.url,
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteConfig.url}/og-default.png`,
+      },
     },
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `${siteConfig.url}/posts/${post.slug}/`,
+      "@id": postUrl,
     },
-    image: post.coverImage,
+    image: imageForSchema,
     keywords: post.tags.join(", "),
+    wordCount,
+    inLanguage: "ko-KR",
+    articleSection: post.type === "release" ? "App Release" : "Development Notes",
+    url: postUrl,
+    ...(post.appSlug
+      ? {
+          about: {
+            "@type": "SoftwareApplication",
+            name: post.appSlug,
+            operatingSystem: "Android",
+            url: appUrl(post.appSlug),
+          },
+        }
+      : {}),
   };
 
   return (
@@ -129,10 +174,62 @@ export default async function PostPage({ params }: PageProps) {
         </aside>
       )}
 
-      <div className="mt-12 pt-6 border-t border-border">
-        <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
+      {related.length > 0 && (
+        <section className="mt-14 pt-6 border-t border-border">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+            관련 글
+          </h2>
+          <ul className="space-y-4">
+            {related.map((r) => (
+              <li key={r.slug}>
+                <Link href={`/posts/${r.slug}/`} className="group block">
+                  <p className="font-medium group-hover:text-emerald-700 transition-colors">
+                    {r.title}
+                  </p>
+                  {r.summary && (
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                      {r.summary}
+                    </p>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {(prev || next) && (
+        <nav
+          aria-label="포스트 네비게이션"
+          className="mt-10 pt-6 border-t border-border grid grid-cols-2 gap-4"
+        >
+          {next && (
+            <Link href={`/posts/${next.slug}/`} className="group">
+              <p className="text-xs text-muted-foreground">← 이전 글</p>
+              <p className="text-sm font-medium mt-1 group-hover:text-emerald-700 transition-colors line-clamp-2">
+                {next.title}
+              </p>
+            </Link>
+          )}
+          {prev && (
+            <Link
+              href={`/posts/${prev.slug}/`}
+              className={`group text-right ${next ? "" : "col-start-2"}`}
+            >
+              <p className="text-xs text-muted-foreground">다음 글 →</p>
+              <p className="text-sm font-medium mt-1 group-hover:text-emerald-700 transition-colors line-clamp-2">
+                {prev.title}
+              </p>
+            </Link>
+          )}
+        </nav>
+      )}
+
+      <div className="mt-12 pt-6 border-t border-border flex items-center justify-between text-sm text-muted-foreground">
+        <Link href="/" className="hover:text-foreground">
           ← 모든 글 보기
         </Link>
+        <span className="text-xs">{wordCount} words</span>
       </div>
     </article>
   );

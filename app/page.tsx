@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getAllPosts } from "@/lib/posts";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
 import { siteConfig } from "@/lib/site";
@@ -65,7 +65,7 @@ export default function HomePage() {
         <p className="text-sm text-muted-foreground">
           앱의 공식 스펙시트·다운로드 링크는{" "}
           <a
-            href={siteConfig.sisterSite.url}
+            href={siteConfig.sisterSite.appsBaseUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="font-medium text-emerald-700 hover:underline"
@@ -74,7 +74,7 @@ export default function HomePage() {
           </a>
           에서 확인할 수 있습니다.{" "}
           <a
-            href={siteConfig.sisterSite.url}
+            href={siteConfig.sisterSite.appsBaseUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="font-medium text-emerald-700 hover:underline"
