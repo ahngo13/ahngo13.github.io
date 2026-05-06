@@ -6,6 +6,7 @@ appSlug: "promgrammer"
 type: "update"
 tags: ["Promgrammer", "AI이미지", "프롬프트빌더", "앱업데이트"]
 summary: "AI 이미지 프롬프트 빌더 Promgrammer에 인앱 업데이트 기능이 추가되었습니다."
+platform: "android"
 ---
 
 ## 안녕하세요, Promgrammer 개발자입니다!

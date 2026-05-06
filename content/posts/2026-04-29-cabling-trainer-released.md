@@ -6,6 +6,7 @@ appSlug: "cabling-trainer"
 type: "release"
 tags: ["케이블링트레이너", "네트워크관리사", "실기시험", "앱출시", "IT자격증"]
 summary: "T568A/B 색상 순서를 손으로 기억하도록 돕는 네트워크관리사 2급 실기 전문 학습 앱을 출시했습니다."
+platform: "android"
 ---
 
 ## 안녕하세요!

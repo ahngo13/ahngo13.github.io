@@ -6,6 +6,7 @@ appSlug: "dhlottery"
 type: "release"
 tags: ["동행복권", "로또", "당첨조회", "QR스캔", "번호생성", "통계분석"]
 summary: "로또 당첨 확인, 번호 생성, 통계 분석, 구매이력 관리를 하나로 모은 올인원 로또 앱을 출시했습니다."
+platform: "android"
 ---
 
 ## 안녕하세요!

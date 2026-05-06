@@ -6,6 +6,7 @@ appSlug: "wid"
 type: "release"
 tags: ["What I Did", "일기앱", "기록앱", "생산성앱", "할일관리"]
 summary: "할 일 목록의 압박감은 이제 그만. 오늘 한 일을 기록하며 성취감을 느껴보세요."
+platform: "android"
 ---
 
 ## 안녕하세요!

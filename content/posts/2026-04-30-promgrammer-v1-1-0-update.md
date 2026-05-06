@@ -6,6 +6,7 @@ appSlug: "promgrammer"
 type: "update"
 tags: ["Promgrammer", "AI이미지", "프롬프트빌더", "앱업데이트"]
 summary: "웹 링크를 앱에서 바로 열고, 로그인도 더 안정적으로! Promgrammer가 한층 편리해졌습니다."
+platform: "android"
 ---
 
 ## 안녕하세요, Promgrammer 개발자입니다!

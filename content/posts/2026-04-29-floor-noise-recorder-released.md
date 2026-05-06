@@ -6,6 +6,7 @@ appSlug: "floor-noise-recorder"
 type: "release"
 tags: ["층간소음", "데시벨측정", "소음기록", "안드로이드앱"]
 summary: "실시간 데시벨 측정, 자동 녹음, 소음 이벤트 감지부터 시간대별 통계까지. 층간소음을 체계적으로 기록하고 분석하는 앱을 소개합니다."
+platform: "android"
 ---
 
 ## 안녕하세요!

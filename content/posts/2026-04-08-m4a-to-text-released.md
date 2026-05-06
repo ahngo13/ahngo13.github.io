@@ -6,6 +6,7 @@ appSlug: "m4a-to-text"
 type: "release"
 tags: ["음성인식", "번역앱", "AI", "OpenAI Whisper", "DeepL"]
 summary: "OpenAI Whisper와 DeepL 기술로 M4A 음성 파일을 텍스트로 변환하고 10개 언어로 번역하는 앱을 출시했습니다."
+platform: "android"
 ---
 
 ## 안녕하세요!

@@ -11,6 +11,8 @@ import rehypeStringify from "rehype-stringify";
 
 export const POSTS_DIR = path.join(process.cwd(), "content", "posts");
 
+export type AppPlatform = "android" | "ios";
+
 export interface PostFrontmatter {
   title: string;
   slug: string;
@@ -20,6 +22,11 @@ export interface PostFrontmatter {
   tags: string[];
   coverImage?: string;
   summary?: string;
+  /**
+   * "android" | "ios". 자동화에서 새 글은 frontmatter에 항상 박힘.
+   * 기존 글은 backfill로 채워졌고, 누락 시 안전하게 "android" 로 fallback.
+   */
+  platform?: AppPlatform;
 }
 
 export interface Post extends PostFrontmatter {
@@ -34,6 +41,12 @@ function parseFile(filename: string): Post {
 
   const slug = (data.slug as string) || filename.replace(/\.mdx?$/, "");
 
+  const rawPlatform = (data.platform as string | undefined)?.toLowerCase();
+  const platform: AppPlatform | undefined =
+    rawPlatform === "ios" || rawPlatform === "android"
+      ? (rawPlatform as AppPlatform)
+      : undefined;
+
   return {
     title: (data.title as string) ?? slug,
     slug,
@@ -43,6 +56,7 @@ function parseFile(filename: string): Post {
     tags: Array.isArray(data.tags) ? (data.tags as string[]) : [],
     coverImage: data.coverImage as string | undefined,
     summary: data.summary as string | undefined,
+    platform,
     content: "",
     rawContent: content,
   };
@@ -93,6 +107,18 @@ export function getAllTags(): string[] {
 
 export function getPostsByTag(tag: string): Post[] {
   return getAllPosts().filter((p) => p.tags.includes(tag));
+}
+
+/**
+ * platform 필드 누락 시 기본값 "android" 로 보고 분류.
+ * 자동화 시작 후엔 거의 다 Play Store 출시였기 때문에 안전한 기본.
+ */
+export function getEffectivePlatform(post: Post): AppPlatform {
+  return post.platform ?? "android";
+}
+
+export function getPostsByPlatform(platform: AppPlatform): Post[] {
+  return getAllPosts().filter((p) => getEffectivePlatform(p) === platform);
 }
 
 /**

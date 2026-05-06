@@ -6,6 +6,7 @@ appSlug: "attendance"
 type: "release"
 tags: ["모임관리", "출석체크", "모임출석부", "안드로이드앱", "모임앱"]
 summary: "모임장이 직접 만든 출석 관리 앱. 모임원 추가부터 출석체크, 기록 확인까지 한 번에!"
+platform: "android"
 ---
 
 ## 안녕하세요! 모임 출석체크 앱을 소개합니다

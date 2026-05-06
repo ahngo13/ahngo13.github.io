@@ -85,6 +85,12 @@ export default function RootLayout({
             </Link>
             <nav className="flex items-center gap-5 text-sm text-muted-foreground">
               <Link href="/" className="hover:text-foreground">Home</Link>
+              <Link href="/platform/android" className="hover:text-foreground">
+                🤖 안드로이드
+              </Link>
+              <Link href="/platform/ios" className="hover:text-foreground">
+                🍎 iOS
+              </Link>
               <Link href="/about" className="hover:text-foreground">About</Link>
               <a
                 href={siteConfig.sisterSite.appsBaseUrl}

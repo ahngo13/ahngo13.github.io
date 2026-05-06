@@ -1,5 +1,10 @@
 import type { MetadataRoute } from "next";
-import { getAllPosts, getAllTags } from "@/lib/posts";
+import {
+  getAllPosts,
+  getAllTags,
+  getEffectivePlatform,
+  type AppPlatform,
+} from "@/lib/posts";
 import { siteConfig } from "@/lib/site";
 
 export const dynamic = "force-static";
@@ -36,6 +41,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const posts = getAllPosts();
 
+  // platform 인덱스 페이지 (안드로이드/iOS) — 각 platform 의 최근 글 날짜를 lastModified 로.
+  const platformRoutes: MetadataRoute.Sitemap = (
+    ["android", "ios"] as AppPlatform[]
+  ).map((p) => {
+    const latest = posts
+      .filter((post) => getEffectivePlatform(post) === p)
+      .reduce<Date>((acc, post) => {
+        const d = new Date(post.date);
+        return d > acc ? d : acc;
+      }, new Date(0));
+    return {
+      url: `${base}/platform/${p}/`,
+      lastModified: latest.getTime() > 0 ? latest : now,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    };
+  });
+
   const postRoutes: MetadataRoute.Sitemap = posts.map((post) => {
     const postDate = new Date(post.date);
     return {
@@ -64,5 +87,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     };
   });
 
-  return [...staticRoutes, ...postRoutes, ...tagRoutes];
+  return [...staticRoutes, ...platformRoutes, ...postRoutes, ...tagRoutes];
 }

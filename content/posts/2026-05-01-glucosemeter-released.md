@@ -6,6 +6,7 @@ appSlug: "glucosemeter"
 type: "release"
 tags: ["혈당관리", "당뇨", "헬스케어앱"]
 summary: "측정 시점별 자동 분류, 추이 그래프, eA1C 추정까지. 회원가입 없이 기기에서만 안전하게."
+platform: "android"
 ---
 
 ## 안녕하세요 👋

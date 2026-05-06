@@ -6,6 +6,7 @@ appSlug: "seotda-rank-trainer"
 type: "update"
 tags: ["섯다", "화투", "업데이트", "족보암기", "카드게임"]
 summary: "광고 안정화, 앱 경량화, 시작 속도 향상으로 학습 경험이 한층 쾌적해졌습니다."
+platform: "android"
 ---
 
 ## 안녕하세요, 섯다 랭크 트레이너 개발자입니다 👋

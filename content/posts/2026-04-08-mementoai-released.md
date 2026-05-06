@@ -6,6 +6,7 @@ appSlug: "mementoai"
 type: "release"
 tags: ["Memento AI", "플래시카드", "AI 학습앱", "암기앱", "스와이프학습"]
 summary: "텍스트를 붙여넣으면 AI가 자동으로 플래시카드를 생성해주는 스와이프 학습 앱을 출시했습니다."
+platform: "android"
 ---
 
 ## 안녕하세요! Memento AI를 소개합니다

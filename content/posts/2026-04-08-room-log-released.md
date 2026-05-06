@@ -6,6 +6,7 @@ appSlug: "room-log"
 type: "release"
 tags: ["방찾기기록", "부동산앱", "원룸", "자취방", "매물비교"]
 summary: "여러 매물을 보고 헷갈렸던 경험, 이제 체크리스트로 간편하게 기록하고 비교하세요."
+platform: "android"
 ---
 
 ## 안녕하세요!

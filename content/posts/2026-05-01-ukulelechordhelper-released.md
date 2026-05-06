@@ -6,6 +6,7 @@ appSlug: "ukulelechordhelper"
 type: "release"
 tags: ["우쿨렐레", "코드학습", "음악앱", "안드로이드", "악기입문"]
 summary: "35종 코드 사전·퀴즈·실제 사운드까지, 오프라인 우쿨렐레 학습 앱 정식 출시"
+platform: "android"
 ---
 
 ## 안녕하세요, 반갑습니다! 👋

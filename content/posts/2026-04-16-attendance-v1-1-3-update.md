@@ -6,6 +6,7 @@ appSlug: "attendance"
 type: "update"
 tags: ["모임출석체크", "앱업데이트", "버그수정", "출석관리앱"]
 summary: "네비게이션 구조를 개편하고 통계/설정 페이지를 추가했습니다. Google·이메일 로그인도 새롭게 지원합니다!"
+platform: "android"
 ---
 
 ## 안녕하세요, 모임 출석체크 개발자입니다!

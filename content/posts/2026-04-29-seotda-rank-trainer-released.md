@@ -6,6 +6,7 @@ appSlug: "seotda-rank-trainer"
 type: "release"
 tags: ["섯다", "화투", "족보암기", "안드로이드앱", "카드게임"]
 summary: "화투 게임 '섯다'의 복잡한 족보를 짧은 퀴즈 반복으로 빠르게 암기할 수 있는 학습 앱을 만들었습니다."
+platform: "android"
 ---
 
 ## 안녕하세요!

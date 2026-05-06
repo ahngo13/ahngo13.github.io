@@ -1,9 +1,14 @@
 import Link from "next/link";
-import { getAllPosts } from "@/lib/posts";
+import { getAllPosts, getEffectivePlatform } from "@/lib/posts";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
 import { siteConfig } from "@/lib/site";
+
+const PLATFORM_BADGE = {
+  android: { label: "안드로이드", emoji: "🤖" },
+  ios: { label: "iOS", emoji: "🍎" },
+} as const;
 
 export default function HomePage() {
   const posts = getAllPosts().slice(0, 10);
@@ -28,35 +33,42 @@ export default function HomePage() {
           <p className="text-muted-foreground">아직 글이 없습니다.</p>
         ) : (
           <div className="space-y-5">
-            {posts.map((post) => (
-              <Link key={post.slug} href={`/posts/${post.slug}`} className="block">
-                <Card>
-                  <CardHeader>
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mb-1">
-                      <time dateTime={post.date}>{formatDate(post.date)}</time>
-                      {post.tags.length > 0 && (
-                        <>
-                          <span>·</span>
-                          <div className="flex flex-wrap gap-1.5">
-                            {post.tags.map((tag) => (
-                              <Badge key={tag} variant="secondary">
-                                {tag}
-                              </Badge>
-                            ))}
-                          </div>
-                        </>
+            {posts.map((post) => {
+              const pMeta = PLATFORM_BADGE[getEffectivePlatform(post)];
+              return (
+                <Link key={post.slug} href={`/posts/${post.slug}`} className="block">
+                  <Card>
+                    <CardHeader>
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mb-1">
+                        <time dateTime={post.date}>{formatDate(post.date)}</time>
+                        <span>·</span>
+                        <Badge variant="outline" className="font-normal">
+                          {pMeta.emoji} {pMeta.label}
+                        </Badge>
+                        {post.tags.length > 0 && (
+                          <>
+                            <span>·</span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {post.tags.map((tag) => (
+                                <Badge key={tag} variant="secondary">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </div>
+                      <CardTitle>{post.title}</CardTitle>
+                      {post.summary && (
+                        <CardDescription className="pt-1 text-base text-muted-foreground">
+                          {post.summary}
+                        </CardDescription>
                       )}
-                    </div>
-                    <CardTitle>{post.title}</CardTitle>
-                    {post.summary && (
-                      <CardDescription className="pt-1 text-base text-muted-foreground">
-                        {post.summary}
-                      </CardDescription>
-                    )}
-                  </CardHeader>
-                </Card>
-              </Link>
-            ))}
+                    </CardHeader>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
         )}
       </section>

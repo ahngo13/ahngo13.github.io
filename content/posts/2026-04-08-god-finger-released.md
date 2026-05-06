@@ -6,6 +6,7 @@ appSlug: "god-finger"
 type: "release"
 tags: ["God Finger", "추첨앱", "팀나누기", "순서정하기", "앱출시"]
 summary: "친구들과 벌칙 대상, 팀 나누기, 순서 정하기 고민되셨죠? 손가락만 올리면 모든 게 공정해지는 God Finger를 소개합니다."
+platform: "android"
 ---
 
 ## 안녕하세요! God Finger를 소개합니다

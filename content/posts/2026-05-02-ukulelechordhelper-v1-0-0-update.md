@@ -6,6 +6,7 @@ appSlug: "ukulelechordhelper"
 type: "update"
 tags: ["우쿨렐레", "코드도우미", "앱업데이트", "우쿨렐레코드", "음악앱"]
 summary: "설정 화면에 '개발자의 다른 앱' 메뉴가 새로 추가된 v1.0.0 업데이트 소식을 전합니다."
+platform: "android"
 ---
 
 ## 안녕하세요, 우쿨렐레 코드 도우미 개발자입니다 👋

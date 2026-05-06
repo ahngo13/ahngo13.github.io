@@ -6,6 +6,7 @@ appSlug: "poker-rank-trainer"
 type: "release"
 tags: ["포커", "포커족보", "홀덤", "포커학습앱", "카드게임"]
 summary: "포커 핸드 랭킹을 퀴즈 형식으로 빠르게 암기하고, 실전 판단력까지 키울 수 있는 학습 앱"
+platform: "android"
 ---
 
 ## 안녕하세요!

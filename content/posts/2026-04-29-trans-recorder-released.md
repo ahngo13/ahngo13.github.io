@@ -6,6 +6,7 @@ appSlug: "trans-recorder"
 type: "release"
 tags: ["번역앱", "번역기록", "언어학습", "DeepL", "안드로이드"]
 summary: "번역할 때마다 다시 찾던 불편함을 해결! 번역 결과를 자동 저장하고 언제든 다시 꺼내 쓸 수 있는 번역 앱"
+platform: "android"
 ---
 
 ## 안녕하세요!
